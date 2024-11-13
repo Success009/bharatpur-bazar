@@ -1,0 +1,369 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Order Management</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f8f9fa; }
+        header { background-color: #343a40; color: white; padding: 20px; text-align: center; font-size: 2em; }
+        .order-section { padding: 20px; }
+        .order { background-color: white; border: 1px solid #343a40; border-radius: 10px; padding: 20px; margin-bottom: 20px; position: relative; }
+        .order button { color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px; width: auto; display: inline-block; font-size: 1em; }
+        .order .process-button { background-color: #007bff; }
+        .order .process-button:hover { background-color: #0056b3; }
+        .order .complete-button { background-color: #28a745; display: none; }
+        .order .complete-button:hover { background-color: #218838; }
+        .order .cancel-button { background-color: #dc3545; }
+        .order .cancel-button:hover { background-color: #c82333; }
+        .order .out-of-ingredient-button { background-color: #ffc107; color: #343a40; }
+        .order .out-of-ingredient-button:hover { background-color: #e0a800; }
+        .order .message-button { background-color: #6c757d; }
+        .order .message-button:hover { background-color: #5a6268; }
+        .order .order-details { display: flex; flex-direction: column; }
+        .order-buttons { display: flex; flex-wrap: wrap; gap: 5px; }
+        .timestamp { position: absolute; top: 10px; right: 10px; font-size: 0.9em; color: #6c757d; }
+        .messages-section { padding: 10px; border-top: 1px solid #e0e0e0; margin-top: 10px; background-color: #ffffff; border-radius: 8px; max-height: 150px; overflow-y: auto; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); position: relative; }
+        .messages-section p { padding: 8px 12px; margin: 5px 0; border-radius: 15px; background-color: #f1f1f1; border: 1px solid #dcdcdc; max-width: 90%; word-wrap: break-word; }
+        .messages-section p:nth-child(even) { background-color: #e9ecef; }
+    </style>
+</head>
+<body>
+    <header>
+        Staff Order Management
+    </header>
+      <button style="background-color: #17a2b8;color: white;border: none;padding: 10px 20px;border-radius: 5px;cursor: pointer;font-size: 1em;margin: 5px;transition: background-color 0.3s ease;" onclick="window.location.href='StaffMenu.html'">Go Edit Menu</button>
+    <div class="order-section" id="orderSection">
+        <!-- Orders will be dynamically generated here -->
+    </div>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAHOiriisWOpuVLAdcYun_mCkOhbYfB5y4",
+            authDomain: "deep-freehold-389006.firebaseapp.com",
+            databaseURL: "https://deep-freehold-389006-default-rtdb.firebaseio.com",
+            projectId: "deep-freehold-389006",
+            storageBucket: "deep-freehold-389006.appspot.com",
+            messagingSenderId: "76562961838",
+            appId: "1:76562961838:web:4d18b2f79d7eb9fd88243f",
+            measurementId: "G-VZC36FJC24"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const ordersRef = firebase.database().ref('orders');
+        const menuRef = firebase.database().ref('menu');
+        const notificationsRef = firebase.database().ref('notifications');
+        function calculateTotalProfit(orderItems) {
+            let totalProfit = 0;
+            return Promise.all(orderItems.map(item => fetchMenuItemDetails(item.name)))
+                .then(menuItems => {
+                    menuItems.forEach((menuItem, index) => {
+                        const profitPerUnit = menuItem.profit / menuItem.startingValue;
+                        totalProfit += profitPerUnit * orderItems[index].quantity;
+                    });
+                    return totalProfit;
+                });
+        }
+        function fetchOrders() {
+            ordersRef.on('value', (snapshot) => {
+                const orderSection = document.getElementById('orderSection');
+                orderSection.innerHTML = '';
+
+                snapshot.forEach((childSnapshot) => {
+                    const order = childSnapshot.val();
+                    const orderId = childSnapshot.key;
+                    const orderItems = order.items;
+                    let totalItemPrice = 0;
+                    let totalItemProfit = 0; // Profit from all items
+
+                    Promise.all(orderItems.map(item => fetchMenuItemDetails(item.name)))
+                        .then(menuItems => {
+                            const orderItemsHTML = orderItems.map((item, index) => {
+                                const menuItem = menuItems[index];
+                                const price = menuItem.price || 0;
+                                const profit = menuItem.profit || 0;
+                                const startingValue = menuItem.startingValue || 1;
+
+                                // Calculate price and profit per unit
+                                const pricePerUnit = price / startingValue;
+                                const profitPerUnit = profit / startingValue;
+
+                                // Calculate total price and profit for the item based on quantity
+                                const itemTotalPrice = pricePerUnit * item.quantity;
+                                const itemTotalProfit = profitPerUnit * item.quantity;
+
+                                totalItemPrice += itemTotalPrice;
+                                totalItemProfit += itemTotalProfit;
+
+                                return `<li>${item.name} - Rs ${(pricePerUnit).toFixed(2)} x ${item.quantity} (Profit: Rs ${(profitPerUnit).toFixed(2)} x ${item.quantity})</li>`;
+                            }).join('');
+
+                            // Delivery charge calculation
+                            const deliveryCharge = Math.max(100 - totalItemProfit, 0);
+
+                            // Total profit including delivery charge
+                            const totalProfit = totalItemProfit + deliveryCharge;
+
+                            // Final total customer price
+                            const finalPrice = totalItemPrice + totalProfit;
+
+                            const orderHTML = `
+                                <div class="order" id="${orderId}">
+                                    <div class="order-details">
+                                        <h4>Location: ${order.location}</h4>
+                                        <h5>UserName: ${order.username}</h5>
+                                        <h5>Phone Number: ${order.phone}</h5>
+                                        <h5>Device ID: ${order.device}</h5>
+                                        <p>Order:</p>
+                                        <ul>${orderItemsHTML}</ul>
+                                        <p>Total Item Price: Rs ${totalItemPrice.toFixed(2)}</p>
+                                        <p>Delivery Charge: Rs ${deliveryCharge.toFixed(2)}</p>
+                                        <p>Total Profit: Rs ${totalProfit.toFixed(2)}</p> <!-- Display total profit correctly -->
+                                        <p><strong>Total Customer Price: Rs ${finalPrice.toFixed(2)}</strong></p>
+                                        <div class="timestamp">Ordered at: ${new Date(order.timestamp).toLocaleString()}</div>
+                                    </div>
+                                    <div class="order-buttons">
+                                        <button class="process-button" onclick="processOrder('${orderId}')">Accept Order</button>
+                                        <button class="complete-button" style="display: none;" onclick="completeOrder('${orderId}')">Order Completed</button>
+                                        <button class="cancel-button" onclick="cancelOrder('${orderId}')">Cancel Order</button>
+                                        <button class="out-of-ingredient-button" onclick="outOfIngredient('${orderId}')">Out of Stock</button>
+                                        <button class="message-button" onclick="messageOrder('${orderId}')">Send Message</button>
+                                    </div>
+                                    <div class="messages-section" id="messages-${orderId}">
+                                        <!-- Messages will be displayed here -->
+                                    </div>
+                                </div>
+                            `;
+
+                            orderSection.insertAdjacentHTML('afterbegin', orderHTML);
+                            if (order.accepted) {
+                                const orderElement = document.getElementById(orderId);
+                                orderElement.querySelector('.process-button').style.display = 'none';
+                                orderElement.querySelector('.complete-button').style.display = 'inline-block';
+                                orderElement.querySelector('.out-of-ingredient-button').remove();
+                            }
+                            fetchAndDisplayMessages(order.device, orderId);
+                        })
+                });
+                setInterval(updateTimeSinceOrder, 1000);
+            });
+        }
+        function fetchMenuItemDetails(itemName) {
+            return new Promise((resolve, reject) => {
+                menuRef.once('value', (snapshot) => {
+                    let menuItem = null;
+                    snapshot.forEach(childSnapshot => {
+                        const menuEntry = childSnapshot.val();
+                        if (menuEntry.name === itemName) {
+                            menuItem = { 
+                                price: menuEntry.price || 0, 
+                                startingValue: menuEntry.startingValue || 1,
+                                profit: menuEntry.profit || 0 // Include profit in the menu item details
+                            };
+                        }
+                    });
+                    resolve(menuItem || { price: 0, startingValue: 1, profit: 0 });
+                }, (error) => {
+                    reject(error);
+                });
+            });
+        }
+        function fetchAndDisplayMessages(deviceId, orderId) {
+            const messagesRef = firebase.database().ref('messages');
+            messagesRef.orderByChild('device').equalTo(deviceId).on('value', (snapshot) => {
+                const messagesSection = document.getElementById(`messages-${orderId}`);
+                messagesSection.innerHTML = '';
+
+                snapshot.forEach((childSnapshot) => {
+                    const messageData = childSnapshot.val();
+                    if (messageData.device === deviceId) {
+                        const messageHTML = `<p>Message: ${messageData.message}</p>`;
+                        messagesSection.insertAdjacentHTML('beforeend', messageHTML);
+                    }
+                });
+            });
+        }
+        function fetchMenuItemPrice(itemName) {
+            return new Promise((resolve, reject) => {
+                menuRef.once('value', (snapshot) => {
+                    let price = null;
+                    snapshot.forEach(childSnapshot => {
+                        const menuItem = childSnapshot.val();
+                        if (menuItem.name === itemName) {
+                            price = menuItem.price;
+                        }
+                    });
+                    resolve(price);
+                }, (error) => {
+                    reject(error);
+                });
+            });
+        }
+        function logNotification(device, action, customMessage) {
+            if (device) {
+                let message = '';
+                switch (action) {
+                    case 'process':
+                        message = `We have received your order. Your order is on the way. You may get call by one of our delivery person.`;
+                        break;
+                    case 'complete':
+                        message = ` Your order has been completed. Thanks for using Bharatpur Bazar`;
+                        break;
+                    case 'cancel':
+                        message = `Your order has been cancelled by the staff. Please contact our staff for the reason.`;
+                        break;
+                    case 'outOfIngredient':
+                        message = `Sorry your order cannot be proceeded. We're out of stock.`;
+                        break;
+                    case 'custom':
+                        message = customMessage;
+                        break;
+                    default:
+                        console.error('Invalid action.');
+                        return;
+                }
+
+                const newNotificationRef = notificationsRef.push();
+                newNotificationRef.set({
+                    device: device,
+                    message: message
+                }).then(() => {
+                    console.log('Notification logged successfully.');
+                })
+            } else {
+                console.error('Device is undefined.');
+            }
+        }
+        function updateTimeSinceOrder() {
+            const orders = document.querySelectorAll('.order');
+            orders.forEach(order => {
+                const timestamp = new Date(order.querySelector('.timestamp').textContent.replace('Ordered at: ', '')).getTime();
+                const now = Date.now();
+                const diff = Math.floor((now - timestamp) / 1000);
+
+                const days = Math.floor(diff / (24 * 3600));
+                const hours = Math.floor((diff % (24 * 3600)) / 3600);
+                const minutes = Math.floor((diff % 3600) / 60);
+                const seconds = diff % 60;
+
+                order.querySelector('.timestamp').textContent = `Ordered at: ${new Date(timestamp).toLocaleString()} (${days}d ${hours}h ${minutes}m ${seconds}s ago)`;
+            });
+        }
+        function processOrder(orderId) {
+            if (confirm('Are you accepting this order?')) {
+                ordersRef.child(orderId).once('value').then(snapshot => {
+                    const order = snapshot.val();
+                    if (order && order.device) {
+                        ordersRef.child(orderId).update({ accepted: true })
+                            .then(() => {
+                                const orderElement = document.getElementById(orderId);
+                                logNotification(order.device, 'process');
+                            })
+                    } else {
+                        console.error('Order or device is undefined.');
+                    }
+                })
+            }
+        }
+        function outOfIngredient(orderId) {
+            if (confirm('Is it really not available or are you being lazy?')) {
+                ordersRef.child(orderId).once('value').then(snapshot => {
+                    const order = snapshot.val();
+                    if (order && order.device) {
+                        alert('Notification sent: Out of ingredient.');
+                        logNotification(order.device, 'outOfIngredient');
+                    } else {
+                        console.error('Order or device is undefined.');
+                    }
+                })
+            }
+        }
+        function completeOrder(orderId) {
+            if (confirm('Are you sure the order is completed?')) {
+                ordersRef.child(orderId).once('value').then(snapshot => {
+                    const order = snapshot.val();
+                    if (order && order.device) {
+                        fetch('https://api.ipify.org?format=json')
+                            .then(response => response.json())
+                            .then(data => {
+                                const userIp = data.ip;
+                                const totalOrdersRef = firebase.database().ref('totalorders');
+                                totalOrdersRef.child(orderId).set({
+                                    ...order,
+                                    ip: userIp
+                                })
+                                .then(() => {
+                                    alert('Order has been Completed.');
+                                    ordersRef.child(orderId).remove()
+                                        .then(() => {
+                                            const orderElement = document.getElementById(orderId);
+                                            if (orderElement) {
+                                                orderElement.remove();
+                                            }
+                                            logNotification(order.device, 'complete');
+                                        })
+                                        .catch(error => {
+                                            console.error('Error removing order from Firebase:', error);
+                                        });
+                                })
+                            })
+                    } else {
+                        console.error('Order or device is undefined.');
+                    }
+                })
+            }
+        }
+        function cancelOrder(orderId) {
+            if (confirm('Are you sure you want to cancel this order?')) {
+                ordersRef.child(orderId).once('value').then(snapshot => {
+                    const order = snapshot.val();
+                    if (order && order.device) {
+                        alert('Order has been cancelled.');
+                        ordersRef.child(orderId).remove()
+                            .then(() => {
+                                const orderElement = document.getElementById(orderId);
+                                if (orderElement) {
+                                    orderElement.remove();
+                                }
+                                logNotification(order.device, 'cancel');
+                            })
+                    } else {
+                        console.error('Order or device is undefined.');
+                    }
+                })
+            }
+        }
+        function outOfIngredient(orderId) {
+            if (confirm('Is it really not available or are you being lazy?')) {
+                ordersRef.child(orderId).once('value').then(snapshot => {
+                    const order = snapshot.val();
+                    if (order && order.device) {
+                        alert('Notification sent: Out of ingredient.');
+                        logNotification(order.device, 'outOfIngredient');
+                    } else {
+                        console.error('Order or device is undefined.');
+                    }
+                })
+            }
+        }
+        function messageOrder(orderId) {
+            const customMessage = prompt('Enter your custom message:');
+            if (customMessage !== null && customMessage.trim() !== '') {
+                ordersRef.child(orderId).once('value').then(snapshot => {
+                    const order = snapshot.val();
+                    if (order && order.device) {
+                        alert('Message sent.');
+                        logNotification(order.device, 'custom', customMessage);
+                    } else {
+                        console.error('Order or device is undefined.');
+                    }
+                }).catch(error => {
+                    console.error('Error fetching order:', error);
+                });
+            } else {
+                alert('Message cannot be empty.');
+            }
+        }
+        window.onload = fetchOrders;
+    </script>
+</body>
+</html>
