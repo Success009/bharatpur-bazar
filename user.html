@@ -94,17 +94,6 @@
             flex: 1; 
             text-align: center; 
         }
-        .cart-item button { 
-            width: 70px; 
-            background-color: #dc3545; 
-            border: none; 
-            color: white; 
-            padding: 5px 10px; 
-            border-radius: 5px; 
-        }
-        .cart-item button:hover { 
-            background-color: #c82333; 
-        }
         .order-actions { 
             text-align: left; 
             margin-top: 10px; 
@@ -160,7 +149,11 @@
             background-color: #0056b3; 
         }
         .location-input { 
-            margin-bottom: 10px; 
+            padding: 5px 10px; 
+            font-weight: bold;
+        }
+        .storedAddress { 
+            margin-left: 10px;
         }
         .icon-container {
             position: fixed;
@@ -192,45 +185,128 @@
             background: none;
             border: none;
         }
+        .cart-icon {
+            width: 50px;
+            height: 50px;
+            background-color: #343a40;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            margin-bottom: 10px;
+            font-size: 1.5em;
+            position: relative; /* Added for notification dot */
+        }
+        .cart-icon::before { /* Notification dot style */
+            content: "";
+            position: absolute;
+            top: 32px;
+            right: 0px;
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            border-radius: 50%;
+            display: none; /* Initially hidden */
+        }
+        .cart-icon#cartNotification::before { /* Show dot when id is set */
+            display: block;
+        }
+
+        .cart-window, .notification-window, .order-history-window {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            max-height: 550px;
+            background-color: #f9f9f9;
+            border: 2px solid #343a40;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 1001;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .window-header {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 24px;
+            height: 24px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .close-button:hover {
+            background-color: #d32f2f;
+            transform: scale(1.1);
+        }
+        
+        .cart-window h2, .notification-window h3, .order-history-window h3 {
+            color: #343a40;
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #eaeaea;
+            padding-bottom: 10px;
+        }
+        
+        #cartItems {
+            background-color: white;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .cart-item {
+            background-color: white;
+            margin-bottom: 8px;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 3px solid #28a745;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+        }
+        
+        .cart-item:hover {
+            transform: translateX(3px);
+        }
         .total-price-container {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: #343a40;
+            top: 20px;
+            left: 20px;
+            background-color: #008a02;
             color: white;
             padding: 10px;
             border-radius: 5px;
             z-index: 1000;
         }
         .notification-window {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 300px;
-            height: 400px;
-            background-color: white;
-            border: 1px solid #343a40;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-            display: none;
-            z-index: 1001;
+            height: 450px;
             overflow: hidden;
         }
+        
         .order-history-window {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 300px;
-            max-height: 400px;
-            background-color: white;
-            border: 1px solid #343a40;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-            overflow-y: auto;
-            display: none;
-            z-index: 1001;
+            max-height: 450px;
         }
         .notification-window h3 { 
             margin: 10px; 
@@ -243,23 +319,28 @@
             justify-content: flex-start; 
         }
         .notification-bubble.staff { 
-            background-color: #e0e0e0; 
-            color: black; 
+            background-color: #f0f0f0; 
+            color: #333; 
             position: relative; 
             margin-left: auto; 
             align-self: flex-end; 
-            padding: 10px; 
-            border-radius: 10px; 
-            max-width: 80%; 
+            padding: 12px; 
+            border-radius: 18px 18px 0 18px; 
+            max-width: 80%;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            margin-bottom: 12px;
         }
+        
         .notification-bubble.user { 
             background-color: #007bff; 
             color: white; 
             position: relative; 
             align-self: flex-start; 
-            padding: 10px; 
-            border-radius: 10px; 
-            max-width: 80%; 
+            padding: 12px; 
+            border-radius: 18px 18px 18px 0; 
+            max-width: 80%;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            margin-bottom: 12px;
         }
         .notification-bubble.staff::after { 
             content: ''; 
@@ -298,22 +379,37 @@
         .notification-history {
             height: calc(100% - 100px);
             overflow-y: auto;
-            padding: 10px;
+            padding: 15px;
+            background-color: #f5f8fa;
+            border-radius: 10px;
+            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.1);
         }
+        
         .notification-input-container input { 
-            width: calc(100% - 60px); 
-            padding: 10px; 
+            width: calc(100% - 70px); 
+            padding: 12px; 
             border: 1px solid #343a40; 
-            border-radius: 5px; 
+            border-radius: 8px; 
+            transition: border-color 0.3s;
+            font-size: 14px;
         }
+        
+        .notification-input-container input:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+        
         .notification-input-container button { 
-            width: 50px; 
+            width: 60px; 
             background-color: #007bff; 
             color: white; 
             border: none; 
-            padding: 10px; 
-            border-radius: 5px; 
+            padding: 12px; 
+            border-radius: 8px; 
             cursor: pointer; 
+            transition: background-color 0.3s;
+            font-weight: bold;
         }
         .notification-input-container button:hover { 
             background-color: #0056b3; 
@@ -324,17 +420,36 @@
         }
         .order-history-item { 
             border-bottom: 1px solid #e0e0e0; 
-            padding: 10px; 
+            padding: 15px;
+            background-color: white;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            transition: transform 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
+        
+        .order-history-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
         .order-history-item:last-child { 
             border-bottom: none; 
         }
+        
         .order-history-item .order-date { 
             font-size: 0.9em; 
-            color: #6c757d; 
+            color: #6c757d;
+            font-weight: 500;
+            border-left: 3px solid #28a745;
+            padding-left: 8px;
         }
+        
         .order-history-item .order-details { 
-            margin-top: 5px; 
+            margin-top: 10px;
+            padding: 8px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
         }
         .order-history-item .order-details p { 
             margin: 0; 
@@ -405,6 +520,34 @@
             font-style: italic;
             font-weight: bold;
         }
+        .quantity-control {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #343a40;
+            border-radius: 5px;
+            overflow: hidden;
+            width: 100%;
+        }
+        .quantity-control button {
+            background-color: #343a40;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 40px;
+            height: 35px;
+            border-radius: 0;
+        }
+        .quantity-control button:hover {
+            background-color: #495057;
+        }
+        .quantity-display {
+            flex: 1;
+            text-align: center;
+            padding: 5px;
+        }
     </style>
 </head>
     <body>
@@ -414,21 +557,10 @@
             <input type="text" id="searchInput" class="search-bar" placeholder="Search for items...">
         </div>
         <div class="menu-section" id="menuSection"></div>
-        <div class="spacer" id="spacer"></div>
-        <div class="order-section">
-            <h2>Cart</h2>
-            <div class="location-input">
-                <span id="storedAddress">Address: </span><br>
-                <button class="change-button" onclick="changeAddress()">Change Address/Phone No</button>
-            </div>
-            <div class="cart-items" id="cartItems"></div>
-            <div class="order-actions">
-                <button onclick="preOrder()">Send Order</button>
-            </div>
-        </div>
         <div class="icon-container">
             <img src="chat.png" alt="Chat" class="chat-icon" onclick="toggleNotificationWindow()">
             <div class="order-history-icon" onclick="toggleOrderHistoryWindow()">🗒️</div>
+            <div class="cart-icon" id="cartIcon" onclick="toggleCartWindow()">🛒</div>
         </div>
         <div class="total-price-container">
             <span id="totalPrice">Total: Rs <span>0.00</span></span>
@@ -448,8 +580,10 @@
             </div>
         </div>
         <div class="notification-window" id="notificationWindow">
-            <h3>Chat</h3>
-            <!-- Notification history will be scrollable -->
+            <div class="window-header">
+                <h3>Chat</h3>
+                <button class="close-button" onclick="toggleNotificationWindow()">✕</button>
+            </div>
             <div id="notificationHistory" class="notification-history"></div>
             <div class="notification-input-container">
                 <input type="text" id="notificationInput" placeholder="Type a message...">
@@ -457,8 +591,28 @@
             </div>
         </div>
         <div class="order-history-window" id="orderHistoryWindow">
-            <h3>Order History</h3>
+            <div class="window-header">
+                <h3>Order History</h3>
+                <button class="close-button" onclick="toggleOrderHistoryWindow()">✕</button>
+            </div>
+            <div class="location-input">
+                <span id="storedAddress">Address: </span><br>
+                <button class="change-button" onclick="changeAddress()">Change Address/Phone No</button>
+            </div>
             <div id="orderHistory"></div>
+        </div>
+        <div class="cart-window" id="cartWindow">
+            <div class="window-header">
+                <h2>Cart</h2>
+                <button class="close-button" onclick="toggleCartWindow()">✕</button>
+            </div>
+            <div class="cart-items" id="cartItems"></div>
+            <div id="deliveryChargeInfo" style="margin: 15px 0; padding: 12px; background-color: #f0f8ff; border-radius: 8px; border-left: 3px solid #17a2b8; font-weight: 500; display: flex; justify-content: space-between;">
+                <span>Delivery Charge:</span> <span>Rs <span>0.00</span></span>
+            </div>
+            <div class="order-actions">
+                <button onclick="placeOrder()" style="width: 100%; background-color: #28a745; font-size: 1.1em; padding: 12px; border-radius: 8px; transition: all 0.3s;">Place Order</button>
+            </div>
         </div>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
@@ -495,6 +649,54 @@
                 });
             }, 1000);
         }
+        function toggleCartWindow() {
+            const cartWindow = document.getElementById('cartWindow');
+            const notificationWindow = document.getElementById('notificationWindow');
+            const orderHistoryWindow = document.getElementById('orderHistoryWindow');
+
+            if (cartWindow.style.display === 'none' || !cartWindow.style.display) {
+                cartWindow.style.display = 'block';
+                // Remove notification dot when cart window is opened
+                if (document.getElementById('cartNotification')) {
+                    document.getElementById('cartNotification').id = 'cartIcon';
+                }
+                
+                if (notificationWindow.style.display === 'block') {
+                    notificationWindow.style.display = 'none';
+                }
+                if (orderHistoryWindow.style.display === 'block') {
+                    orderHistoryWindow.style.display = 'none';
+                }
+            } else {
+                cartWindow.style.display = 'none';
+            }
+        }
+        document.addEventListener('click', function (event) {
+            const notificationWindow = document.getElementById('notificationWindow');
+            const orderHistoryWindow = document.getElementById('orderHistoryWindow');
+            const cartWindow = document.getElementById('cartWindow');
+            const chatIcon = document.querySelector('.chat-icon');
+            const orderHistoryIcon = document.querySelector('.order-history-icon');
+            const cartIcon = document.querySelector('.cart-icon');
+
+            if (notificationWindow.style.display === 'block' &&
+                !notificationWindow.contains(event.target) &&
+                !chatIcon.contains(event.target)) {
+                notificationWindow.style.display = 'none';
+            }
+
+            if (orderHistoryWindow.style.display === 'block' &&
+                !orderHistoryWindow.contains(event.target) &&
+                !orderHistoryIcon.contains(event.target)) {
+                orderHistoryWindow.style.display = 'none';
+            }
+
+            if (cartWindow.style.display === 'block' &&
+                !cartWindow.contains(event.target) &&
+                !cartIcon.contains(event.target)) {
+                cartWindow.style.display = 'none';
+            }
+        });
         function toggleNotificationWindow() {
             const notificationWindow = document.getElementById('notificationWindow');
             const orderHistoryWindow = document.getElementById('orderHistoryWindow');
@@ -507,6 +709,7 @@
                 notificationWindow.style.display = 'none';
             }
         }
+
         function showNotification(message, type) {
             const notificationHistory = document.getElementById('notificationHistory');
             const historyItem = document.createElement('div');
@@ -528,7 +731,6 @@
                 }
             }
         }
-
         function displayPaymentMessage() {
             const notificationHistory = document.getElementById('notificationHistory');
             const orderHistory = JSON.parse(localStorage.getItem('orderHistory')) || [];
@@ -609,7 +811,8 @@
                 localStorage.setItem('orderHistory', JSON.stringify(orderHistory));
             }
 
-            orderHistory.forEach(order => {
+            // Reverse the order history to show newest first
+            orderHistory.slice().reverse().forEach(order => {
                 const orderDate = new Date(order.timestamp).toLocaleString();
                 let orderDetails = `<div class="order-history-item">
                     <div class="order-date">Order placed on ${orderDate}</div>
@@ -674,13 +877,17 @@
                                             <img src="${url}" alt="${menuItem.name}" class="menu-item-image" style="width:100%; height:auto;">
                                             <h3>${menuItem.name}</h3>
                                             <p>Rs ${menuItem.totalPrice.toFixed(2)} per ${menuItem.startingValue !== 1 ? menuItem.startingValue + ' ' : ''}${menuItem.displayUnit}</p>
-                                            <button onclick="addToCart('${menuItem.name}', ${menuItem.totalPrice}, '${menuItem.displayUnit}', ${menuItem.startingValue}, ${menuItem.profit})">Add Cart</button>
+                                            <div<div class="item-controls" id="controls-${menuItemId}">
+                                                <button onclick="addToCart('${menuItem.name}', ${menuItem.totalPrice}, '${menuItem.displayUnit}', ${menuItem.startingValue}, ${menuItem.profit})">Add Cart</button>
+                                            </div>
                                         `).catch(() => {
                                             document.getElementById(menuItemId).innerHTML = `
                                                 ${rarityLabel}
                                                 <h3>${menuItem.name}</h3>
                                                 <p>Rs ${menuItem.totalPrice.toFixed(2)} per ${menuItem.startingValue !== 1 ? menuItem.startingValue + ' ' : ''}${menuItem.displayUnit}</p>
-                                                <button onclick="addToCart('${menuItem.name}', ${menuItem.totalPrice}, '${menuItem.displayUnit}', ${menuItem.startingValue}, ${menuItem.profit})">Add Cart</button>
+                                                <div class="item-controls" id="controls-${menuItemId}">
+                                                    <button onclick="addToCart('${menuItem.name}', ${menuItem.totalPrice}, '${menuItem.displayUnit}', ${menuItem.startingValue}, ${menuItem.profit})">Add Cart</button>
+                                                </div>
                                             `;
                                         });
                                     const borderColor = (menuItem.rarity === 'Premium' || menuItem.rarity === 'Limited Edition') ? 'gold' : '#343a40';
@@ -689,7 +896,9 @@
                                             ${rarityLabel}
                                             <h3>${menuItem.name}</h3>
                                             <p>Rs ${menuItem.totalPrice.toFixed(2)} per ${menuItem.startingValue !== 1 ? menuItem.startingValue + ' ' : ''}${menuItem.displayUnit}</p>
-                                            <button onclick="addToCart('${menuItem.name}', ${menuItem.totalPrice}, '${menuItem.displayUnit}', ${menuItem.startingValue}, ${menuItem.profit})">Add Cart</button>
+                                            <div class="item-controls" id="controls-${menuItemId}">
+                                                <button onclick="addToCart('${menuItem.name}', ${menuItem.totalPrice}, '${menuItem.displayUnit}', ${menuItem.startingValue}, ${menuItem.profit})">Add Cart</button>
+                                            </div>
                                         </div>
                                     `;
                                 }).join('')}
@@ -711,14 +920,22 @@
             });
             const profitPerUnit = profit / startingValue;
             const pricePerUnit = price / startingValue;
-            if (localStorage.getItem('messageDisplayed') !== 'true') {
-                const firstTimeMessage = document.createElement('p');
-                firstTimeMessage.id = 'firstTimeMessage';
-                firstTimeMessage.className = 'first-time-message';
-                firstTimeMessage.innerText = 'Click on the add cart button of item again to add more of the item to the cart';
-                document.querySelector('.order-section').insertBefore(firstTimeMessage, cartItems);
-                localStorage.setItem('messageDisplayed', 'true');
+
+            // Convert item name to a valid ID format
+            const itemId = `menu-item-${item.replace(/\s+/g, '-')}`;
+            const controlsContainer = document.getElementById(`controls-${itemId}`);
+
+            // Replace the "Add Cart" button with quantity controls
+            if (controlsContainer && controlsContainer.querySelector('button')) {
+                controlsContainer.innerHTML = `
+                    <div class="quantity-control">
+                        <button onclick="decreaseQuantity('${item}', ${price}, '${unit}', ${startingValue}, ${profit})">-</button>
+                        <div class="quantity-display">1</div>
+                        <button onclick="increaseQuantity('${item}', ${price}, '${unit}', ${startingValue}, ${profit})">+</button>
+                    </div>
+                `;
             }
+
             if (existingCartItem) {
                 const quantitySpan = existingCartItem.querySelector('.item-quantity');
                 let newQuantity = Math.max(parseFloat(quantitySpan.dataset.quantity) + startingValue, 0.001);
@@ -727,7 +944,14 @@
                 const itemPriceElement = existingCartItem.querySelector('.item-price');
                 itemPriceElement.innerText = `Rs ${(pricePerUnit * newQuantity).toFixed(2)}`;
 
-                if (newQuantity > 1) document.getElementById('firstTimeMessage')?.remove();
+                // Update the displayed quantity
+                if (controlsContainer) {
+                    const quantityDisplay = controlsContainer.querySelector('.quantity-display');
+                    if (quantityDisplay) {
+                        const displayQuantity = Math.round(newQuantity / startingValue);
+                        quantityDisplay.innerText = displayQuantity;
+                    }
+                }
             } else {
                 const cartItem = document.createElement('div');
                 cartItem.className = 'cart-item';
@@ -736,7 +960,6 @@
                     <span class="item-name">${item}</span>
                     <span class="item-quantity" data-quantity="${quantity}" data-unit="${unit}">${quantity.toFixed(3).replace(/\.?0+$/, '')} ${unit || 'x'}</span>
                     <span class="item-price">Rs ${(pricePerUnit * quantity).toFixed(2)}</span>
-                    <button onclick="removeFromCart(this, ${pricePerUnit}, '${unit}', ${startingValue}, ${profitPerUnit})">Cancel</button>
                 `;
                 cartItems.appendChild(cartItem);
             }
@@ -744,7 +967,22 @@
             totalPrice += pricePerUnit * startingValue;
             totalProfit += profitPerUnit * startingValue;
             document.getElementById('totalPrice').lastElementChild.innerText = `Rs ${totalPrice.toFixed(2)}`;
+            
+            // Calculate and update delivery charge
+            updateDeliveryCharge();
+
+            // Show notification dot only if it's not already showing
+            if (document.getElementById('cartIcon')) {
+                document.getElementById('cartIcon').id = 'cartNotification';
+            }
+
             adjustSpacerHeight();
+        }
+        
+        function updateDeliveryCharge() {
+            let deliveryCharge = 100 - totalProfit;
+            deliveryCharge = Math.max(deliveryCharge, 0);
+            document.getElementById('deliveryChargeInfo').lastElementChild.innerText = deliveryCharge.toFixed(2);
         }
         function removeFromCart(button, pricePerUnit, unit = '', startingValue, profitPerUnit) {
             const cartItem = button.parentElement;
@@ -772,6 +1010,119 @@
             totalPrice -= pricePerUnit * startingValue;
             totalProfit -= profitPerUnit * startingValue;
             document.getElementById('totalPrice').lastElementChild.innerText = `Rs ${totalPrice.toFixed(2)}`;
+            
+            // Update delivery charge after removal
+            updateDeliveryCharge();
+            adjustSpacerHeight();
+        }
+
+        function increaseQuantity(item, price, unit, startingValue, profit) {
+            // Find the cart item
+            const cartItems = document.getElementById('cartItems');
+            const existingCartItem = Array.from(cartItems.children).find(cartItem => {
+                const itemName = cartItem.querySelector('.item-name').innerText.trim();
+                const itemUnit = cartItem.querySelector('.item-quantity').dataset.unit || '';
+                return itemName === item.trim() && itemUnit === unit;
+            });
+
+            // Increase the quantity
+            if (existingCartItem) {
+                const quantitySpan = existingCartItem.querySelector('.item-quantity');
+                let newQuantity = Math.max(parseFloat(quantitySpan.dataset.quantity) + startingValue, 0.001);
+                quantitySpan.dataset.quantity = newQuantity;
+                quantitySpan.innerText = unit ? `${newQuantity.toFixed(3).replace(/\.?0+$/, '')} ${unit}` : `${newQuantity.toFixed(3).replace(/\.?0+$/, '')}x`;
+
+                const itemPriceElement = existingCartItem.querySelector('.item-price');
+                const pricePerUnit = price / startingValue;
+                itemPriceElement.innerText = `Rs ${(pricePerUnit * newQuantity).toFixed(2)}`;
+
+                // Update the displayed quantity
+                const itemId = `menu-item-${item.replace(/\s+/g, '-')}`;
+                const controlsContainer = document.getElementById(`controls-${itemId}`);
+                if (controlsContainer) {
+                    const quantityDisplay = controlsContainer.querySelector('.quantity-display');
+                    if (quantityDisplay) {
+                        const displayQuantity = Math.round(newQuantity / startingValue);
+                        quantityDisplay.innerText = displayQuantity;
+                    }
+                }
+
+                // Update total price
+                totalPrice += pricePerUnit * startingValue;
+                totalProfit += (profit / startingValue) * startingValue;
+                document.getElementById('totalPrice').lastElementChild.innerText = `Rs ${totalPrice.toFixed(2)}`;
+            }
+
+            adjustSpacerHeight();
+        }
+
+        function decreaseQuantity(item, price, unit, startingValue, profit) {
+            // Find the cart item
+            const cartItems = document.getElementById('cartItems');
+            const existingCartItem = Array.from(cartItems.children).find(cartItem => {
+                const itemName = cartItem.querySelector('.item-name').innerText.trim();
+                const itemUnit = cartItem.querySelector('.item-quantity').dataset.unit || '';
+                return itemName === item.trim() && itemUnit === unit;
+            });
+
+            // Convert item name to a valid ID format
+            const itemId = `menu-item-${item.replace(/\s+/g, '-')}`;
+            const controlsContainer = document.getElementById(`controls-${itemId}`);
+
+            if (existingCartItem) {
+                const quantitySpan = existingCartItem.querySelector('.item-quantity');
+                let currentQuantity = parseFloat(quantitySpan.dataset.quantity);
+                let newQuantity = currentQuantity - startingValue;
+                const pricePerUnit = price / startingValue;
+                const profitPerUnit = profit / startingValue;
+
+                if (newQuantity <= 0) {
+                    // Remove from cart if quantity is zero or less
+                    existingCartItem.remove();
+
+                    // Restore the "Add Cart" button
+                    if (controlsContainer) {
+                        controlsContainer.innerHTML = `
+                            <button onclick="addToCart('${item}', ${price}, '${unit}', ${startingValue}, ${profit})">Add Cart</button>
+                        `;
+                    }
+                } else {
+                    // Update the quantity
+                    newQuantity = Math.round(newQuantity * 1000) / 1000;
+                    if (newQuantity < 0.001) newQuantity = 0.001;
+
+                    let formattedQuantity = newQuantity % 1 === 0 ? newQuantity.toFixed(0) : newQuantity.toFixed(3).replace(/\.?0+$/, '');
+                    quantitySpan.dataset.quantity = newQuantity;
+
+                    if (unit) {
+                        quantitySpan.innerText = `${formattedQuantity} ${unit}`;
+                    } else {
+                        quantitySpan.innerText = `x${formattedQuantity}`;
+                    }
+
+                    const itemPriceElement = existingCartItem.querySelector('.item-price');
+                    const totalPriceForItem = pricePerUnit * newQuantity;
+                    itemPriceElement.innerText = `Rs ${totalPriceForItem.toFixed(2)}`;
+
+                    // Update the displayed quantity
+                    if (controlsContainer) {
+                        const quantityDisplay = controlsContainer.querySelector('.quantity-display');
+                        if (quantityDisplay) {
+                            const displayQuantity = Math.round(newQuantity / startingValue);
+                            quantityDisplay.innerText = displayQuantity;
+                        }
+                    }
+                }
+
+                // Update total price
+                totalPrice -= pricePerUnit * startingValue;
+                totalProfit -= profitPerUnit * startingValue;
+                document.getElementById('totalPrice').lastElementChild.innerText = `Rs ${totalPrice.toFixed(2)}`;
+                
+                // Update delivery charge
+                updateDeliveryCharge();
+            }
+
             adjustSpacerHeight();
         }
         function getDeviceId() {
@@ -782,42 +1133,6 @@
             }
             return deviceId;
         }
-        function preOrder() {
-            const cartItems = document.querySelectorAll('.cart-item');
-            const orderSummary = document.getElementById('orderSummary');
-            const totalPriceElement = document.getElementById('totalPrice').lastElementChild.innerText;
-            let deliveryCharge = 100;
-            if (cartItems.length === 0) {
-                alert("No items in the cart. Please add items to the cart before placing an order.");
-                return;
-            }
-            const totalPrice = parseFloat(totalPriceElement);
-            deliveryCharge -= totalProfit;
-            deliveryCharge = Math.max(deliveryCharge, 0);
-            const finalPrice = totalPrice + deliveryCharge;
-            orderSummary.innerHTML = '';
-            cartItems.forEach(cartItem => {
-                const itemName = cartItem.querySelector('.item-name').innerText;
-                const quantity = cartItem.querySelector('.item-quantity').innerText;
-                const price = cartItem.querySelector('.item-price').innerText;
-                orderSummary.innerHTML += `
-                    <p>${itemName} - ${quantity} - ${price}</p>
-                `;
-            });
-            orderSummary.innerHTML += `
-                <p>+ Rs ${deliveryCharge.toFixed(2)} Delivery charge</p>
-                <p><strong>Total Price: Rs ${finalPrice.toFixed(2)}</strong></p>
-            `;
-            document.getElementById('preOrderModal').style.display = 'block';
-        }
-        document.getElementById('confirmOrderButton').addEventListener('click', function () {
-            document.getElementById('preOrderModal').style.display = 'none';
-            placeOrder();
-        });
-        document.getElementById('cancelOrderButton').addEventListener('click', function () {
-            document.getElementById('preOrderModal').style.display = 'none';
-        });
-        document.querySelector('.order-actions button').onclick = preOrder;
         function placeOrder() {
             const cartItems = document.querySelectorAll('.cart-item');
             const ordersRef = firebase.database().ref('orders');
@@ -837,7 +1152,8 @@
             const now = new Date();
             const timestamp = now.toISOString();
             const deviceId = getDeviceId();
-            let totalPrice = parseFloat(document.getElementById('totalPrice').lastElementChild.innerText);
+            let totalPrice = parseFloat(document.getElementById('totalPrice').lastElementChild.innerText.replace('Rs ', ''));
+            if (isNaN(totalPrice)) totalPrice = 0;
             let deliveryCharge = 100 - totalProfit;
             deliveryCharge = Math.max(deliveryCharge, 0);
             const finalPrice = totalPrice + deliveryCharge;
@@ -859,30 +1175,78 @@
                     deliveryCharge: deliveryCharge
                 });
                 localStorage.setItem('orderHistory', JSON.stringify(newOrderHistory));
+                
+                // Reset quantity controls to Add Cart buttons
+                resetQuantityControlsToAddCart(orderItems);
+                
                 document.getElementById('cartItems').innerHTML = '';
                 adjustSpacerHeight();
                 alert('Your order has been placed successfully!');
                 displayOrderHistory();
                 resetOrderVariables();
+                document.getElementById('cartIcon').id = 'cartIcon'; //remove notification dot after order
             })
         }
+        function resetQuantityControlsToAddCart(orderItems) {
+            // Reset all quantity controls to "Add Cart" buttons for ordered items
+            orderItems.forEach(item => {
+                const itemId = `menu-item-${item.name.replace(/\s+/g, '-')}`;
+                const controlsContainer = document.getElementById(`controls-${itemId}`);
+                
+                if (controlsContainer) {
+                    // Find the matching menu item from the database to get all parameters
+                    menuRef.orderByChild('name').equalTo(item.name).once('value', snapshot => {
+                        snapshot.forEach(childSnapshot => {
+                            const menuItem = childSnapshot.val();
+                            const profit = menuItem.profit || 0;
+                            const price = menuItem.price + profit;
+                            const unit = menuItem.unit || '';
+                            const startingValue = menuItem.startingValue || 1;
+                            
+                            // Reset to Add Cart button
+                            controlsContainer.innerHTML = `
+                                <button onclick="addToCart('${item.name}', ${price}, '${unit}', ${startingValue}, ${profit})">Add Cart</button>
+                            `;
+                        });
+                    });
+                }
+            });
+        }
+        
         function resetOrderVariables() {
             totalProfit = 0;
             deliveryCharge = 100;
             totalPrice = 0;
             document.getElementById('totalPrice').lastElementChild.innerText = '0.00';
+            document.getElementById('deliveryChargeInfo').lastElementChild.innerText = '100.00';
         }
         function adjustSpacerHeight() {
-            const orderSectionHeight = document.querySelector('.order-section').offsetHeight;
-            document.getElementById('spacer').style.height = orderSectionHeight + 'px';
+            const spacer = document.getElementById('spacer');
+            
+            // Exit if spacer element doesn't exist
+            if (!spacer) return;
+
+            // Only try to adjust height if order-section exists
+            const orderSection = document.querySelector('.order-section');
+            if (orderSection) {
+                const orderSectionHeight = orderSection.offsetHeight;
+                spacer.style.height = orderSectionHeight + 'px';
+            }
+
             const cartItems = document.querySelectorAll('.cart-item');
-            totalPrice = 0;
+            let calculatedTotalPrice = 0;
             cartItems.forEach(cartItem => {
                 const itemPriceElement = cartItem.querySelector('.item-price');
-                const itemPrice = parseFloat(itemPriceElement.innerText.replace('Rs ', ''));
-                totalPrice += itemPrice;
+                if (itemPriceElement) {
+                    const itemPrice = parseFloat(itemPriceElement.innerText.replace('Rs ', ''));
+                    calculatedTotalPrice += itemPrice;
+                }
             });
-            document.querySelector('.total-price-container #totalPrice span').innerText = totalPrice.toFixed(2);
+
+            const totalPriceElement = document.querySelector('.total-price-container #totalPrice span');
+            if (totalPriceElement) {
+                totalPriceElement.innerText = calculatedTotalPrice.toFixed(2);
+            }
         }
         function displayStoredAddress() {
             const storedAddress = localStorage.getItem('address') || 'Address not set';
