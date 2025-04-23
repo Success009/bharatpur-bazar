@@ -635,8 +635,7 @@
           overflow-y: auto;
           max-height: 90vh;
         }
-
-        /* Light mode for login overlay */
+        
         .login-overlay.light-mode {
           background: #fff;
           color: #333;
@@ -754,7 +753,6 @@
           color: var(--text, #e94560);
         }
 
-        /* Order Confirmation Popup Styles */
         .order-confirmation {
           position: fixed;
           top: 0;
@@ -898,7 +896,6 @@
             font-size: 3em;
           }
         }
-        /* Payment Modal Styles */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -1029,7 +1026,6 @@
             color: #666;
         }
 
-        /* QR Code Modal Styles */
         .qr-content {
             padding: 20px;
             text-align: center;
@@ -1104,6 +1100,29 @@
         .cancel-btn:hover {
             background-color: #e0e0e0;
         }
+        #tabContainer {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px auto;
+            flex-wrap: wrap;
+        }
+
+        #tabContainer button {
+            padding: 10px 15px;
+            border: 1px solid #343a40;
+            border-radius: 6px;
+            background-color: white;
+            color: #343a40;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        #tabContainer button.active {
+            background-color: #343a40;
+            color: white;
+        }
     </style>
 </head>
     <body>
@@ -1112,6 +1131,7 @@
         <div class="search-container">
             <input type="text" id="searchInput" class="search-bar" placeholder="Search for items...">
         </div>
+        <div id="tabContainer"></div>
         <div class="menu-section" id="menuSection"></div>
         <div class="icon-container">
             <img src="chat.png" alt="Chat" class="chat-icon" onclick="toggleNotificationWindow()">
@@ -1508,57 +1528,61 @@
             const orderHistoryWindow = document.getElementById('orderHistoryWindow');
             orderHistoryWindow.scrollTop = orderHistoryWindow.scrollHeight;
         }
+        
+        let currentTab = 'all';
+        function createTypeTabs(types) {
+            const tabContainer = document.getElementById('tabContainer');
+            tabContainer.innerHTML = '';
+
+            ['all', ...types].forEach(type => {
+                const tab = document.createElement('button');
+                tab.textContent = type.charAt(0).toUpperCase() + type.slice(1);
+                tab.className = (type === currentTab) ? 'active' : '';
+                tab.onclick = () => {
+                    currentTab = type;
+                    fetchMenuItems();
+                };
+                tabContainer.appendChild(tab);
+            });
+        }
+
         function fetchMenuItems() {
             menuRef.once('value', (snapshot) => {
                 const menuSection = document.getElementById('menuSection');
                 menuSection.innerHTML = '';
                 const categories = {};
+                const typesSet = new Set();
+
                 snapshot.forEach((childSnapshot) => {
                     const menuItem = childSnapshot.val();
-                    const { category, price, profit = 0, unit = 'Item', startingValue = 1, rarity = 'Basic' } = menuItem;
-                    const totalPrice = price + profit;
-                    const displayUnit = unit || 'Item';
+                    const { type = 'other', category, price, profit = 0, unit = 'Item', startingValue = 1, rarity = 'Basic' } = menuItem;
+                    typesSet.add(type);
 
-                    if (!categories[category]) categories[category] = [];
-                    categories[category].push({ ...menuItem, totalPrice, displayUnit });
+                    if (currentTab === 'all' || currentTab === type) {
+                        const totalPrice = price + profit;
+                        const displayUnit = unit || 'Item';
+                        if (!categories[category]) categories[category] = [];
+                        categories[category].push({ ...menuItem, totalPrice, displayUnit });
+                    }
                 });
+
+                createTypeTabs(Array.from(typesSet));
+
                 Object.keys(categories).sort().forEach(category => {
                     categories[category].sort((a, b) => {
                         const rarityOrder = { 'Premium': 2, 'Limited Edition': 1, 'Basic': 0 };
                         return rarityOrder[b.rarity] !== rarityOrder[a.rarity] ? rarityOrder[b.rarity] - rarityOrder[a.rarity] : b.totalPrice - a.totalPrice;
                     });
+
                     menuSection.innerHTML += `
                         <div class="menu-category">
                             <h2>${category}</h2>
                             <div class="menu-items">
                                 ${categories[category].map(menuItem => {
-                                    let rarityLabel = (menuItem.rarity === 'Premium' || menuItem.rarity === 'Limited Edition') ? `<div style="color: gold; font-weight: bold; font-style: italic;">${menuItem.rarity}</div>` : '';
                                     const menuItemId = `menu-item-${menuItem.name.replace(/\s+/g, '-')}`;
-                                    const imageName = `${menuItem.name.replace(/\s+/g, '')}.jpg`;
-                                    const storageRef = storage.ref().child(`images/${imageName}`);
-                                    storageRef.getDownloadURL()
-                                        .then(url => document.getElementById(menuItemId).innerHTML = `
-                                            ${rarityLabel}
-                                            <img src="${url}" alt="${menuItem.name}" class="menu-item-image" style="width:100%; height:auto;">
-                                            <h3>${menuItem.name}</h3>
-                                            <p>Rs ${menuItem.totalPrice.toFixed(2)} per ${menuItem.startingValue !== 1 ? menuItem.startingValue + ' ' : ''}${menuItem.displayUnit}</p>
-                                            <div<div class="item-controls" id="controls-${menuItemId}">
-                                                <button onclick="addToCart('${menuItem.name}', ${menuItem.totalPrice}, '${menuItem.displayUnit}', ${menuItem.startingValue}, ${menuItem.profit})">Add Cart</button>
-                                            </div>
-                                        `).catch(() => {
-                                            document.getElementById(menuItemId).innerHTML = `
-                                                ${rarityLabel}
-                                                <h3>${menuItem.name}</h3>
-                                                <p>Rs ${menuItem.totalPrice.toFixed(2)} per ${menuItem.startingValue !== 1 ? menuItem.startingValue + ' ' : ''}${menuItem.displayUnit}</p>
-                                                <div class="item-controls" id="controls-${menuItemId}">
-                                                    <button onclick="addToCart('${menuItem.name}', ${menuItem.totalPrice}, '${menuItem.displayUnit}', ${menuItem.startingValue}, ${menuItem.profit})">Add Cart</button>
-                                                </div>
-                                            `;
-                                        });
                                     const borderColor = (menuItem.rarity === 'Premium' || menuItem.rarity === 'Limited Edition') ? 'gold' : '#343a40';
                                     return `
                                         <div class="menu-item" id="${menuItemId}" style="border-color: ${borderColor};">
-                                            ${rarityLabel}
                                             <h3>${menuItem.name}</h3>
                                             <p>Rs ${menuItem.totalPrice.toFixed(2)} per ${menuItem.startingValue !== 1 ? menuItem.startingValue + ' ' : ''}${menuItem.displayUnit}</p>
                                             <div class="item-controls" id="controls-${menuItemId}">
@@ -1571,6 +1595,7 @@
                         </div>
                     `;
                 });
+
                 adjustSpacerHeight();
             });
         }
@@ -1858,7 +1883,7 @@ document.getElementById('paymentOverlay').classList.remove('active');
 document.getElementById('qrCodeOverlay').classList.add('active');
             const phone = localStorage.getItem('phone');
             document.querySelector('.qr-note').textContent = 
-                'Note: Please add the following number in the remark so we can verify your Payment\n' + 'Number:' + phone;
+                'Note: Please include the number ' + phone + 'in the remark so we can verify your Payment\n';
         }
 
 
@@ -2039,7 +2064,7 @@ document.getElementById('qrCodeOverlay').classList.remove('active');
             totalProfit = 0;
             deliveryCharge = 100;
             totalPrice = 0;
-document.getElementById('totalPrice').lastElementChild.innerText = '0.00';
+            document.getElementById('totalPrice').lastElementChild.innerText = '0.00';
             document.getElementById('deliveryChargeInfo').lastElementChild.innerText = '100.00';
         }
         function adjustSpacerHeight() {
