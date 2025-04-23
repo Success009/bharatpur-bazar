@@ -327,6 +327,27 @@
             border-left: 4px solid var(--warning);
         }
 
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            background-color: var(--light);
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .tab-btn.active {
+            background-color: var(--primary);
+            color: white;
+        }
+
         .confirmation-dialog {
             display: none;
             position: fixed;
@@ -361,12 +382,12 @@
             .menu-items {
                 grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             }
-            
+
             .category-header {
                 flex-direction: column;
                 gap: 10px;
             }
-            
+
             .modal-content {
                 width: 95%;
                 padding: 15px;
@@ -388,6 +409,12 @@
             <button class="btn btn-success" onclick="openAddItemModal()" style="margin-left:10px;">
                 <i class="fas fa-plus"></i> Add Item
             </button>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('all')">All Items</button>
+            <button class="tab-btn" onclick="switchTab('grocery')">Grocery Items</button>
+            <button class="tab-btn" onclick="switchTab('hotel')">Hotel Items</button>
         </div>
 
         <div id="menuSection">
@@ -442,6 +469,13 @@
                     <option value="Amount">Amount</option>
                     <option value="KG">KG</option>
                     <option value="Liter">Liter</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="itemType">Item Type</label>
+                <select id="itemType" class="form-control">
+                    <option value="Hotel">Hotel</option>
+                    <option value="Grocery">Grocery</option>
                 </select>
             </div>
             <div class="form-actions">
@@ -505,14 +539,14 @@
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
-            
+
             let icon = '<i class="fas fa-check-circle"></i>';
             if (type === 'error') icon = '<i class="fas fa-exclamation-circle"></i>';
             if (type === 'warning') icon = '<i class="fas fa-exclamation-triangle"></i>';
-            
+
             toast.innerHTML = `${icon} <span>${message}</span>`;
             document.body.appendChild(toast);
-            
+
             setTimeout(() => {
                 document.body.removeChild(toast);
             }, 3000);
@@ -571,13 +605,13 @@
             const itemCategorySelect = document.getElementById('itemCategory');
             itemCategorySelect.innerHTML = '';
             const categories = new Set();
-            
+
             menuRef.once('value', (snapshot) => {
                 snapshot.forEach((childSnapshot) => {
                     const menuItem = childSnapshot.val();
                     categories.add(menuItem.category);
                 });
-                
+
                 const sortedCategories = Array.from(categories).sort();
                 sortedCategories.forEach((category) => {
                     const option = document.createElement('option');
@@ -585,7 +619,7 @@
                     option.textContent = category;
                     itemCategorySelect.appendChild(option);
                 });
-                
+
                 const customOption = document.createElement('option');
                 customOption.value = 'Custom';
                 customOption.textContent = '+ Add New Category';
@@ -612,8 +646,9 @@
             const startingValue = parseFloat(document.getElementById('startingValue').value) || 1;
             const itemCategory = itemCategorySelect.value === 'Custom' ? customCategory : itemCategorySelect.value;
             const itemRarity = document.getElementById('itemRarity').value;
-            
-            if (itemName && itemPrice && itemCategory) {
+            const itemType = document.getElementById('itemType').value;
+
+            if (itemName && itemPrice && itemCategory && itemType) {
                 const newItemRef = menuRef.push();
                 const menuItem = {
                     name: itemName,
@@ -621,13 +656,14 @@
                     profit: itemProfit,
                     category: itemCategory,
                     startingValue: startingValue,
-                    rarity: itemRarity
+                    rarity: itemRarity,
+                    type: itemType
                 };
-                
+
                 if (itemUnit !== 'Amount') {
                     menuItem.unit = itemUnit;
                 }
-                
+
                 newItemRef.set(menuItem)
                     .then(() => {
                         showToast('Item added successfully');
@@ -656,7 +692,7 @@
         function updateCategoryName() {
             const currentCategory = document.getElementById('currentCategoryName').value;
             const newCategoryName = document.getElementById('newCategoryName').value;
-            
+
             if (newCategoryName && newCategoryName !== currentCategory) {
                 menuRef.once('value', (snapshot) => {
                     let updates = {};
@@ -666,7 +702,7 @@
                             updates[`${childSnapshot.key}/category`] = newCategoryName;
                         }
                     });
-                    
+
                     menuRef.update(updates)
                         .then(() => {
                             showToast('Category updated successfully');
@@ -684,20 +720,36 @@
             }
         }
 
+        let currentTab = 'all';
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            fetchMenuItems();
+        }
+
         function fetchMenuItems() {
             menuRef.once('value', (snapshot) => {
                 const menuSection = document.getElementById('menuSection');
                 menuSection.innerHTML = '';
                 const categories = {};
-                
+
                 snapshot.forEach((childSnapshot) => {
                     const menuItem = childSnapshot.val();
                     const menuItemId = childSnapshot.key;
-                    
+
+                    // Skip items that don't match the current tab (except for 'all')
+                    if (currentTab !== 'all' && menuItem.type && menuItem.type.toLowerCase() !== currentTab) {
+                        return;
+                    }
+
                     if (!categories[menuItem.category]) {
                         categories[menuItem.category] = [];
                     }
-                    
+
                     let priceDisplay = `Rs ${menuItem.price.toFixed(2)}`;
                     if (menuItem.unit) {
                         const displayValue = menuItem.startingValue && menuItem.startingValue !== 1
@@ -705,15 +757,16 @@
                             : `${menuItem.unit}`;
                         priceDisplay += ` per ${displayValue}`;
                     }
-                    
+
                     let rarityClass = menuItem.rarity ? menuItem.rarity.replace(' Edition', '') : 'Basic';
-                    
+
                     categories[menuItem.category].push(`
                         <div class="menu-item">
                             <span class="item-rarity rarity-${rarityClass}">${menuItem.rarity || 'Basic'}</span>
                             <h3 class="item--name">${menuItem.name}</h3>
                             <p class="item-price">${priceDisplay}</p>
                             ${menuItem.profit !== undefined ? `<p class="item-profit">Profit: Rs ${menuItem.profit.toFixed(2)}</p>` : ''}
+                            <p>Type: ${menuItem.type}</p>
                             <div class="item-actions">
                                 <button class="btn btn-danger" onclick="openDeleteConfirmation('${menuItemId}')">
                                     <i class="fas fa-trash"></i>
@@ -722,9 +775,9 @@
                         </div>
                     `);
                 });
-                
+
                 const sortedCategories = Object.keys(categories).sort();
-                
+
                 sortedCategories.forEach((category, index) => {
                     const delay = index * 100;
                     const menuItemHTML = `
