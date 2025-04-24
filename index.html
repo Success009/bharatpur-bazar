@@ -54,9 +54,9 @@
             transition: transform .3s, box-shadow .3s;
         }
 
-        .menu-item:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 10px rgba(0, 0, 0, .1);
+        .menu-item:active {
+            transform: scale(0.98);
+            transition: transform 0.2s;
         }
 
         .menu-item button {
@@ -99,6 +99,28 @@
             justify-content: space-between;
             align-items: center;
             padding: 10px 0;
+            animation: slideIn 0.3s ease; /*Added animation for mobile*/
+        }
+
+        @media (hover: hover) {
+            .cart-item:hover {
+                transform: translateX(3px);
+            }
+        }
+        @media (hover: none) {
+            .cart-item {
+                animation: slideIn 0.3s ease;
+            }
+            @keyframes slideIn {
+                from {
+                    opacity: 0;
+                    transform: translateX(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
         }
 
         .cart-item .item-name {
@@ -116,7 +138,7 @@
             margin-top: 10px;
         }
 
-        .order-actions button, 
+        .order-actions button,
         .modal-actions button {
             background-color: #28a745;
             color: white;
@@ -127,7 +149,7 @@
             margin: 5px;
         }
 
-        .order-actions button:hover, 
+        .order-actions button:hover,
         .modal-actions button:hover {
             background-color: #218838;
         }
@@ -195,7 +217,7 @@
             z-index: 1000;
         }
 
-        .order-history-icon, 
+        .order-history-icon,
         .cart-icon {
             width: 50px;
             height: 50px;
@@ -220,14 +242,26 @@
         }
 
         .cart-icon {
-            font-size: 1.5em;
-            position: relative;
+            width: 65px;
+            height: 65px;
+            font-size: 2em;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            background-color: #343a40;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         .cart-icon::before {
             content: "";
             position: absolute;
-            top: 32px;
+            top: 0px;
             right: 0;
             width: 10px;
             height: 10px;
@@ -240,8 +274,8 @@
             display: block;
         }
 
-        .cart-window, 
-        .notification-window, 
+        .cart-window,
+        .notification-window,
         .order-history-window {
             position: fixed;
             top: 50%;
@@ -288,8 +322,8 @@
             transform: scale(1.1);
         }
 
-        .cart-window h2, 
-        .notification-window h3, 
+        .cart-window h2,
+        .notification-window h3,
         .order-history-window h3 {
             color: #343a40;
             text-align: center;
@@ -316,8 +350,18 @@
             transition: transform .2s;
         }
 
-        .cart-item:hover {
-            transform: translateX(3px);
+        .cart-item {
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         .total-price-container {
@@ -375,7 +419,7 @@
             border-radius: 18px 18px 18px 0;
         }
 
-        .notification-bubble.staff::after, 
+        .notification-bubble.staff::after,
         .notification-bubble.user::after {
             content: '';
             position: absolute;
@@ -457,11 +501,22 @@
             border-radius: 8px;
             transition: transform .2s;
             box-shadow: 0 2px 5px rgba(0, 0, 0, .05);
+            animation: fadeInUp 0.3s ease; /*Added animation for mobile*/
         }
 
-        .order-history-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, .1);
+        .order-history-item {
+            animation: fadeInUp 0.3s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .order-history-item:last-child {
@@ -544,12 +599,6 @@
             background-color: #c82333;
         }
 
-        .first-time-message {
-            color: red;
-            font-style: italic;
-            font-weight: bold;
-        }
-
         .quantity-control {
             display: flex;
             justify-content: space-between;
@@ -581,321 +630,328 @@
             text-align: center;
             padding: 5px;
         }
+
         .deliveryC {
-            margin: 15px 0; 
-            padding: 12px; 
-            background-color: #f0f8ff; 
-            border-radius: 8px; 
-            border-left: 3px solid #17a2b8; 
-            font-weight: 500; 
-            display: flex; 
+            margin: 15px 0;
+            padding: 12px;
+            background-color: #f0f8ff;
+            border-radius: 8px;
+            border-left: 3px solid #17a2b8;
+            font-weight: 500;
+            display: flex;
             justify-content: space-between;
         }
+
         .order-but {
-            width: 100%; 
-            background-color: #28a745; 
-            font-size: 1.1em; 
-            padding: 12px; 
-            border-radius: 8px; 
+            width: 100%;
+            background-color: #28a745;
+            font-size: 1.1em;
+            padding: 12px;
+            border-radius: 8px;
             transition: all 0.3s;
         }
+
+
         /* Login Overlay CSS - Add this to your CSS file */
         .login-container {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background-color: rgba(0, 0, 0, 0.7);
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          z-index: 1000;
-          opacity: 0;
-          visibility: hidden;
-          transition: opacity 0.3s ease, visibility 0.3s ease;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
         }
 
         .login-container.active {
-          opacity: 1;
-          visibility: visible;
+            opacity: 1;
+            visibility: visible;
         }
 
         .login-overlay {
-          background: var(--card, #16213e);
-          padding: 30px;
-          border-radius: 20px;
-          box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
-          text-align: center;
-          max-width: 400px;
-          width: 100%;
-          transform: translateY(20px);
-          opacity: 0;
-          transition: transform 0.5s ease, opacity 0.5s ease;
-          overflow-y: auto;
-          max-height: 90vh;
+            background: var(--card, #16213e);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: transform 0.5s ease, opacity 0.5s ease;
+            overflow-y: auto;
+            max-height: 90vh;
         }
-        
+
         .login-overlay.light-mode {
-          background: #fff;
-          color: #333;
+            background: #fff;
+            color: #333;
         }
 
         .login-overlay.light-mode h1 {
-          color: #3498db;
+            color: #3498db;
         }
 
         .login-overlay.light-mode input {
-          background: #e8f0fe;
-          color: #333;
-          border-color: #e8f0fe;
+            background: #e8f0fe;
+            color: #333;
+            border-color: #e8f0fe;
         }
 
         .login-overlay.light-mode button {
-          background: #3498db;
+            background: #3498db;
         }
 
         .login-overlay.light-mode button:hover {
-          background: #2980b9;
+            background: #2980b9;
         }
 
         .login-overlay.light-mode button.cancel-btn {
-          background: #ccc;
-          color: #333;
+            background: #ccc;
+            color: #333;
         }
 
         .login-overlay.light-mode button.cancel-btn:hover {
-          background: #bbb;
+            background: #bbb;
         }
 
         .login-overlay.light-mode .terms-link {
-          color: #3498db;
+            color: #3498db;
         }
 
         .login-container.active .login-overlay {
-          transform: translateY(0);
-          opacity: 1;
+            transform: translateY(0);
+            opacity: 1;
         }
 
         .login-overlay h1 {
-          font-size: 1.8em;
-          margin-bottom: 20px;
-          color: var(--text, #e94560);
-          font-weight: 600;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            color: var(--text, #e94560);
+            font-weight: 600;
         }
 
         .login-overlay p {
-          margin-bottom: 20px;
-          font-size: 1em;
-          opacity: 0.8;
+            margin-bottom: 20px;
+            font-size: 1em;
+            opacity: 0.8;
         }
 
         .login-overlay label {
-          display: block;
-          margin-bottom: 5px;
-          font-weight: 400;
-          font-size: 0.9em;
-          text-align: left;
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 400;
+            font-size: 0.9em;
+            text-align: left;
         }
 
         .login-overlay input {
-          width: calc(100% - 24px);
-          padding: 10px;
-          margin: 8px auto;
-          border-radius: 8px;
-          border: 2px solid var(--input, #0f3460);
-          background: var(--input, #0f3460);
-          color: var(--input-text, #fff);
-          font-size: 0.9em;
-          transition: 0.3s;
+            width: calc(100% - 24px);
+            padding: 10px;
+            margin: 8px auto;
+            border-radius: 8px;
+            border: 2px solid var(--input, #0f3460);
+            background: var(--input, #0f3460);
+            color: var(--input-text, #fff);
+            font-size: 0.9em;
+            transition: 0.3s;
         }
 
         .login-overlay input:focus {
-          outline: none;
-          border-color: var(--text, #e94560);
-          box-shadow: 0 0 10px rgba(233, 69, 96, 0.2);
+            outline: none;
+            border-color: var(--text, #e94560);
+            box-shadow: 0 0 10px rgba(233, 69, 96, 0.2);
         }
 
         .login-buttons {
-          display: flex;
-          gap: 10px;
-          margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
         }
 
         .login-overlay button {
-          background: var(--button, #e94560);
-          color: white;
-          border: none;
-          padding: 12px 20px;
-          border-radius: 8px;
-          cursor: pointer;
-          font-size: 1em;
-          font-weight: 600;
-          transition: 0.3s;
-          flex: 1;
+            background: var(--button, #e94560);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: 0.3s;
+            flex: 1;
         }
 
         .login-overlay button:hover {
-          background: var(--button-hover, #cf3651);
-          transform: translateY(-2px);
-          box-shadow: 0 5px 15px rgba(233, 69, 96, 0.3);
+            background: var(--button-hover, #cf3651);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(233, 69, 96, 0.3);
         }
 
         .login-overlay button.cancel-btn {
-          background: #333;
+            background: #333;
         }
 
         .login-overlay button.cancel-btn:hover {
-          background: #444;
+            background: #444;
         }
 
         .terms-link {
-          color: var(--text, #e94560);
+            color: var(--text, #e94560);
         }
 
         .order-confirmation {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background-color: rgba(0, 0, 0, 0.7);
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          z-index: 1000;
-          opacity: 0;
-          visibility: hidden;
-          transition: opacity 0.3s ease, visibility 0.3s ease;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
         }
 
         .order-confirmation.active {
-          opacity: 1;
-          visibility: visible;
+            opacity: 1;
+            visibility: visible;
         }
 
         .confirmation-overlay {
-          background: white;
-          padding: 30px;
-          border-radius: 20px;
-          box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
-          text-align: center;
-          max-width: 400px;
-          width: 100%;
-          transform: translateY(20px);
-          opacity: 0;
-          transition: transform 0.5s ease, opacity 0.5s ease;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: transform 0.5s ease, opacity 0.5s ease;
         }
 
         .order-confirmation.active .confirmation-overlay {
-          transform: translateY(0);
-          opacity: 1;
+            transform: translateY(0);
+            opacity: 1;
         }
 
         .success-icon {
-          font-size: 4em;
-          color: #4CAF50;
-          margin-bottom: 20px;
+            font-size: 4em;
+            color: #4CAF50;
+            margin-bottom: 20px;
         }
 
         .confirmation-overlay h2 {
-          font-size: 1.8em;
-          margin-bottom: 15px;
-          color: #333;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            color: #333;
         }
 
         .confirmation-overlay p {
-          margin-bottom: 10px;
-          font-size: 1em;
-          color: #666;
+            margin-bottom: 10px;
+            font-size: 1em;
+            color: #666;
         }
 
         .confirmation-details {
-          margin-bottom: 25px;
+            margin-bottom: 25px;
         }
 
         .confirmation-overlay button {
-          background: #4CAF50;
-          color: white;
-          border: none;
-          padding: 12px 25px;
-          border-radius: 8px;
-          cursor: pointer;
-          font-size: 1em;
-          font-weight: 600;
-          transition: 0.3s;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: 0.3s;
         }
 
         .confirmation-overlay button:hover {
-          background: #45a049;
-          transform: translateY(-2px);
-          box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
         }
+
         .login-overlay select {
-          width: calc(100% - 24px);
-          padding: 10px;
-          margin: 8px auto;
-          border-radius: 8px;
-          border: 2px solid var(--input, #0f3460);
-          background: var(--input, #0f3460);
-          color: var(--input-text, #fff);
-          font-size: 0.9em;
-          transition: 0.3s;
-          -webkit-appearance: none;
-          -moz-appearance: none;
-          appearance: none;
-          background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
-          background-repeat: no-repeat;
-          background-position: right 10px center;
-          cursor: pointer;
+            width: calc(100% - 24px);
+            padding: 10px;
+            margin: 8px auto;
+            border-radius: 8px;
+            border: 2px solid var(--input, #0f3460);
+            background: var(--input, #0f3460);
+            color: var(--input-text, #fff);
+            font-size: 0.9em;
+            transition: 0.3s;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            cursor: pointer;
         }
 
         .login-overlay select:focus {
-          outline: none;
-          border-color: var(--text, #e94560);
-          box-shadow: 0 0 10px rgba(233, 69, 96, 0.2);
-        }
-
-        .login-overlay.light-mode select {
-          background-color: #e8f0fe;
-          color: #333;
-          border-color: #e8f0fe;
-          background-image: url("data:image/svg+xml;utf8,<svg fill='%23333333' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+            outline: none;
+            border-color: var(--text, #e94560);
+            box-shadow: 0 0 10px rgba(233, 69, 96, 0.2);
         }
 
         .login-overlay select option {
-          padding: 10px;
+            padding: 10px;
         }
 
         @media (max-height: 700px) {
-          .login-container, .order-confirmation {
-            align-items: flex-start;
-            padding-top: 50px;
-          }
 
-          .login-overlay {
-            max-height: 80vh;
-          }
+            .login-container,
+            .order-confirmation {
+                align-items: flex-start;
+                padding-top: 50px;
+            }
+
+            .login-overlay {
+                max-height: 80vh;
+            }
         }
 
         @media (max-width: 480px) {
-          .login-overlay, .confirmation-overlay {
-            padding: 20px;
-          }
 
-          .login-overlay h1, .confirmation-overlay h2 {
-            font-size: 1.5em;
-          }
+            .login-overlay,
+            .confirmation-overlay {
+                padding: 20px;
+            }
 
-          .login-overlay p, .login-overlay input, .login-overlay button,
-          .confirmation-overlay p, .confirmation-overlay button {
-            font-size: 0.9em;
-          }
+            .login-overlay h1,
+            .confirmation-overlay h2 {
+                font-size: 1.5em;
+            }
 
-          .success-icon {
-            font-size: 3em;
-          }
+            .login-overlay p,
+            .login-overlay input,
+            .login-overlay button,
+            .confirmation-overlay p,
+            .confirmation-overlay button {
+                font-size: 0.9em;
+            }
+
+            .success-icon {
+                font-size: 3em;
+            }
         }
+
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -930,8 +986,31 @@
         }
 
         .modal-overlay.active .payment-modal {
-            transform: translateY(0);
-            opacity: 1;
+            animation: modalSlideUp 0.3s ease forwards;
+        }
+
+        @keyframes modalSlideUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @media (hover: hover) {
+            .btn:hover {
+                transform: translateY(-2px);
+            }
+        }
+
+        @media (hover: none) {
+            .btn:active {
+                transform: scale(0.95);
+                transition: transform 0.2s;
+            }
         }
 
         .payment-header {
@@ -1058,7 +1137,7 @@
             border-radius: 8px;
             margin: 0 auto 10px;
             background: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
         .qr-note {
@@ -1100,6 +1179,7 @@
         .cancel-btn:hover {
             background-color: #e0e0e0;
         }
+
         #tabContainer {
             display: flex;
             justify-content: center;
@@ -1123,75 +1203,86 @@
             background-color: #343a40;
             color: white;
         }
+
+        @media (max-width: 768px) {
+            .order-history-item {
+                animation: fadeInUp 0.3s ease;
+            }
+
+            .cart-item {
+                animation: slideIn 0.3s ease;
+            }
+        }
     </style>
 </head>
-    <body>
-        <header>Welcome to</header>
-        <img src="logoForceSmall.jpg" alt="Restaurant Logo" class="logo">
-        <div class="search-container">
-            <input type="text" id="searchInput" class="search-bar" placeholder="Search for items...">
-        </div>
-        <div id="tabContainer"></div>
-        <div class="menu-section" id="menuSection"></div>
-        <div class="icon-container">
-            <img src="chat.png" alt="Chat" class="chat-icon" onclick="toggleNotificationWindow()">
-            <div class="order-history-icon" onclick="toggleOrderHistoryWindow()">🗒️</div>
-            <div class="cart-icon" id="cartIcon" onclick="toggleCartWindow()">🛒</div>
-        </div>
-        <div class="total-price-container">
-            <span id="totalPrice">Total: Rs <span>0.00</span></span>
-        </div>
-        <div class="notification" id="notification">
-            <span id="notificationMessage"></span>
-            <button onclick="dismissNotification()">Dismiss</button>
-        </div>
-        <div id="preOrderModal" class="modal">
-            <div class="modal-content">
-                <h2>Order Summary</h2>
-                <div id="orderSummary"></div>
-                <div class="modal-actions">
-                    <button id="confirmOrderButton">Continue</button>
-                    <button id="cancelOrderButton">Cancel</button>
-                </div>
+
+<body>
+    <header>Welcome to</header>
+    <img src="logoForceSmall.jpg" alt="Restaurant Logo" class="logo">
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-bar" placeholder="Search for items...">
+    </div>
+    <div id="tabContainer"></div>
+    <div class="menu-section" id="menuSection"></div>
+    <div class="icon-container">
+        <img src="chat.png" alt="Chat" class="chat-icon" onclick="toggleNotificationWindow()">
+        <div class="order-history-icon" onclick="toggleOrderHistoryWindow()">🗒️</div>
+        <div class="cart-icon" id="cartIcon" onclick="toggleCartWindow()">🛒</div>
+    </div>
+    <div class="total-price-container">
+        <span id="totalPrice">Total: Rs <span>0.00</span></span>
+    </div>
+    <div class="notification" id="notification">
+        <span id="notificationMessage"></span>
+        <button onclick="dismissNotification()">Dismiss</button>
+    </div>
+    <div id="preOrderModal" class="modal">
+        <div class="modal-content">
+            <h2>Order Summary</h2>
+            <div id="orderSummary"></div>
+            <div class="modal-actions">
+                <button id="confirmOrderButton">Continue</button>
+                <button id="cancelOrderButton">Cancel</button>
             </div>
         </div>
-        <div class="notification-window" id="notificationWindow">
-            <div class="window-header">
-                <h3>Chat</h3>
-                <button class="close-button" onclick="toggleNotificationWindow()">✕</button>
-            </div>
-            <div id="notificationHistory" class="notification-history"></div>
-            <div class="notification-input-container">
-                <input type="text" id="notificationInput" placeholder="Type a message...">
-                <button onclick="sendMessage()">Send</button>
-            </div>
+    </div>
+    <div class="notification-window" id="notificationWindow">
+        <div class="window-header">
+            <h3>Chat</h3>
+            <button class="close-button" onclick="toggleNotificationWindow()">✕</button>
         </div>
-        <div class="order-history-window" id="orderHistoryWindow">
-            <div class="window-header">
-                <h3>Order History</h3>
-                <button class="close-button" onclick="toggleOrderHistoryWindow()">✕</button>
-            </div>
-            <div class="location-input">
-                <span id="storedAddress">Address: </span><br>
-                <button class="change-button" onclick="changeAddress()">Change Address/Phone No</button>
-            </div>
-            <div id="orderHistory"></div>
+        <div id="notificationHistory" class="notification-history"></div>
+        <div class="notification-input-container">
+            <input type="text" id="notificationInput" placeholder="Type a message...">
+            <button onclick="sendMessage()">Send</button>
         </div>
-        <div class="cart-window" id="cartWindow">
-            <div class="window-header">
-                <h2>Cart</h2>
-                <button class="close-button" onclick="toggleCartWindow()">✕</button>
-            </div>
-            <div class="cart-items" id="cartItems"></div>
-            <div id="deliveryChargeInfo" class="deliveryC">
-                <span>Delivery Charge:</span> <span>Rs <span>0.00</span></span>
-            </div>
-            <div class="order-actions">
-                <button onclick="placeOrder()" class="order-but">Place Order</button>
-            </div>
+    </div>
+    <div class="order-history-window" id="orderHistoryWindow">
+        <div class="window-header">
+            <h3>Order History</h3>
+            <button class="close-button" onclick="toggleOrderHistoryWindow()">✕</button>
         </div>
-        <div id="loginContainer" class="login-container">
-          <div class="login-overlay light-mode">
+        <div class="location-input">
+            <span id="storedAddress">Address: </span><br>
+            <button class="change-button" onclick="changeAddress()">Change Address/Phone No</button>
+        </div>
+        <div id="orderHistory"></div>
+    </div>
+    <div class="cart-window" id="cartWindow">
+        <div class="window-header">
+            <h2>Cart</h2>
+            <button class="close-button" onclick="toggleCartWindow()">✕</button>
+        </div>
+        <div class="cart-items" id="cartItems"></div>
+        <div id="deliveryChargeInfo" class="deliveryC">
+            <span>Delivery Charge:</span> <span>Rs <span>0.00</span></span>
+        </div>
+        <div class="order-actions">
+            <button onclick="placeOrder()" class="order-but">Place Order</button>
+        </div>
+    </div>
+    <div id="loginContainer" class="login-container">
+        <div class="login-overlay light-mode">
             <h1>Please register first</h1>
             <h1> To place your order</h1>
             <p>Please enter your details to proceed:</p>
@@ -1200,131 +1291,134 @@
             <label for="loginPhone">Enter your phone number:</label>
             <input type="tel" id="loginPhone" value="9" placeholder="Enter your phone number" required>
             <label for="loginPart2">Bharatpur-(ward)</label>
-              <select id="bharatpurWard" name="bharatpurWard" required>
-                  <option value="">-- Select a Ward --</option>
-                  <option value="1">Bharatpur 1</option>
-                  <option value="2">Bharatpur 2</option>
-                  <option value="3">Bharatpur 3</option>
-                  <option value="4">Bharatpur 4</option>
-                  <option value="5">Bharatpur 5</option>
-                  <option value="6">Bharatpur 6</option>
-                  <option value="7">Bharatpur 7</option>
-                  <option value="8">Bharatpur 8</option>
-                  <option value="9">Bharatpur 9</option>
-                  <option value="10">Bharatpur 10</option>
-                  <option value="11">Bharatpur 11</option>
-                  <option value="12">Bharatpur 12</option>
-                  <option value="13">Bharatpur 13</option>
-                  <option value="14">Bharatpur 14</option>
-                  <option value="15">Bharatpur 15</option>
-                  <option value="16">Bharatpur 16</option>
-                  <option value="17">Bharatpur 17</option>
-                  <option value="18">Bharatpur 18</option>
-                  <option value="19">Bharatpur 19</option>
-                  <option value="20">Bharatpur 20</option>
-                  <option value="21">Bharatpur 21</option>
-                  <option value="22">Bharatpur 22</option>
-                  <option value="23">Bharatpur 23</option>
-                  <option value="24">Bharatpur 24</option>
-                  <option value="25">Bharatpur 25</option>
-                  <option value="26">Bharatpur 26</option>
-                  <option value="27">Bharatpur 27</option>
-                  <option value="28">Bharatpur 28</option>
-                  <option value="29">Bharatpur 29</option>
-              </select>
+            <select id="bharatpurWard" name="bharatpurWard" required>
+                <option value="">-- Select a Ward --</option>
+                <option value="1">Bharatpur 1</option>
+                <option value="2">Bharatpur 2</option>
+                <option value="3">Bharatpur 3</option>
+                <option value="4">Bharatpur 4</option>
+                <option value="5">Bharatpur 5</option>
+                <option value="6">Bharatpur 6</option>
+                <option value="7">Bharatpur 7</option>
+                <option value="8">Bharatpur 8</option>
+                <option value="9">Bharatpur 9</option>
+                <option value="10">Bharatpur 10</option>
+                <option value="11">Bharatpur 11</option>
+                <option value="12">Bharatpur 12</option>
+                <option value="13">Bharatpur 13</option>
+                <option value="14">Bharatpur 14</option>
+                <option value="15">Bharatpur 15</option>
+                <option value="16">Bharatpur 16</option>
+                <option value="17">Bharatpur 17</option>
+                <option value="18">Bharatpur 18</option>
+                <option value="19">Bharatpur 19</option>
+                <option value="20">Bharatpur 20</option>
+                <option value="21">Bharatpur 21</option>
+                <option value="22">Bharatpur 22</option>
+                <option value="23">Bharatpur 23</option>
+                <option value="24">Bharatpur 24</option>
+                <option value="25">Bharatpur 25</option>
+                <option value="26">Bharatpur 26</option>
+                <option value="27">Bharatpur 27</option>
+                <option value="28">Bharatpur 28</option>
+                <option value="29">Bharatpur 29</option>
+            </select>
             <label for="loginPart3">Chowk</label>
             <input type="text" id="loginPart3" placeholder="e.g., Hakim Chowk" required>
-            <label>By clicking the submit button, you agree to our <a href="Terms-And-Service/" target="_blank" class="terms-link">Terms and Service</a></label>
+            <label>By clicking the submit button, you agree to our <a href="Terms-And-Service/" target="_blank"
+                    class="terms-link">Terms and Service</a></label>
             <div class="login-buttons">
-              <button id="registerOrderBtn">Register & Order</button>
-              <button id="cancelLoginBtn" class="cancel-btn">Cancel</button>
+                <button id="registerOrderBtn">Register & Order</button>
+                <button id="cancelLoginBtn" class="cancel-btn">Cancel</button>
             </div>
-          </div>
         </div>
-        <div id="orderConfirmation" class="order-confirmation">
-          <div class="confirmation-overlay">
+    </div>
+    <div id="orderConfirmation" class="order-confirmation">
+        <div class="confirmation-overlay">
             <div class="success-icon">
-              <i class="fas fa-check-circle"></i>
+                <i class="fas fa-check-circle"></i>
             </div>
             <h2>Order Placed Successfully!</h2>
             <p>Your order has been received and is being processed.</p>
             <p class="confirmation-details">Delivery will be made to your registered address.</p>
             <button id="confirmationCloseBtn">Continue Shopping</button>
-          </div>
         </div>
-        <div id="paymentOverlay" class="modal-overlay">
-            <div class="payment-modal">
-                <div class="payment-header">
-                    <h2>Select Payment Method</h2>
-                    <button id="closePaymentBtn" class="close-btn">&times;</button>
+    </div>
+    <div id="paymentOverlay" class="modal-overlay">
+        <div class="payment-modal">
+            <div class="payment-header">
+                <h2>Select Payment Method</h2>
+                <button id="closePaymentBtn" class="close-btn">&times;</button>
+            </div>
+
+            <div class="payment-options">
+                <div class="payment-summary">
+                    <div class="payment-amount">
+                        <span>Total Amount:</span>
+                        <span id="paymentAmount" class="amount">Rs 0.00</span>
+                    </div>
+                    <div class="payment-details">
+                        <span>Order: <span id="paymentOrderAmount">Rs 0.00</span></span>
+                        <span>Delivery: <span id="paymentDeliveryAmount">Rs 0.00</span></span>
+                    </div>
                 </div>
 
-                <div class="payment-options">
-                    <div class="payment-summary">
-                        <div class="payment-amount">
-                            <span>Total Amount:</span>
-                            <span id="paymentAmount" class="amount">Rs 0.00</span>
-                        </div>
-                        <div class="payment-details">
-                            <span>Order: <span id="paymentOrderAmount">Rs 0.00</span></span>
-                            <span>Delivery: <span id="paymentDeliveryAmount">Rs 0.00</span></span>
-                        </div>
+                <div id="codOption" class="payment-option" data-method="cod">
+                    <div class="option-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="6" width="20" height="12" rx="2" />
+                            <circle cx="12" cy="12" r="2" />
+                            <path d="M6 12h.01M18 12h.01" />
+                        </svg>
                     </div>
-
-                    <div id="codOption" class="payment-option" data-method="cod">
-                        <div class="option-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="2" y="6" width="20" height="12" rx="2" />
-                                <circle cx="12" cy="12" r="2" />
-                                <path d="M6 12h.01M18 12h.01" />
-                            </svg>
-                        </div>
-                        <div class="option-details">
-                            <h3>Cash on Delivery</h3>
-                            <p>Pay when you receive your order</p>
-                        </div>
+                    <div class="option-details">
+                        <h3>Cash on Delivery</h3>
+                        <p>Pay when you receive your order</p>
                     </div>
+                </div>
 
-                    <div id="onlineOption" class="payment-option" data-method="online">
-                        <div class="option-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="2" y="5" width="20" height="14" rx="2" />
-                                <line x1="2" y1="10" x2="22" y2="10" />
-                            </svg>
-                        </div>
-                        <div class="option-details">
-                            <h3>Online Payment</h3>
-                            <p>Pay now using QR code</p>
-                        </div>
+                <div id="onlineOption" class="payment-option" data-method="online">
+                    <div class="option-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="5" width="20" height="14" rx="2" />
+                            <line x1="2" y1="10" x2="22" y2="10" />
+                        </svg>
+                    </div>
+                    <div class="option-details">
+                        <h3>Online Payment</h3>
+                        <p>Pay now using QR code</p>
                     </div>
                 </div>
             </div>
         </div>
-        <div id="qrCodeOverlay" class="modal-overlay">
-            <div class="payment-modal qr-modal">
-                <div class="payment-header">
-                    <h2>Pay Online (eSewa)</h2>
-                    <button id="closeQRBtn" class="close-btn">&times;</button>
+    </div>
+    <div id="qrCodeOverlay" class="modal-overlay">
+        <div class="payment-modal qr-modal">
+            <div class="payment-header">
+                <h2>Pay Online (eSewa)</h2>
+                <button id="closeQRBtn" class="close-btn">&times;</button>
+            </div>
+
+            <div class="qr-content">
+                <div class="qr-instructions">
+                    <p>Please scan the QR code below to make a payment</p>
+                    <p class="amount-text">Amount: <span id="qrPaymentAmount"></span></p>
                 </div>
 
-                <div class="qr-content">
-                    <div class="qr-instructions">
-                        <p>Please scan the QR code below to make a payment</p>
-                        <p class="amount-text">Amount: <span id="qrPaymentAmount"></span></p>
-                    </div>
+                <div class="qr-image-container">
+                    <img src="qr-code.png" alt="Payment QR Code" class="qr-image">
+                    <p class="qr-note">:)</p>
+                </div>
 
-                    <div class="qr-image-container">
-                        <img src="qr-code.png" alt="Payment QR Code" class="qr-image">
-                        <p class="qr-note">:)</p>
-                    </div>
-
-                    <div class="qr-actions">
-                        <button id="confirmPaymentBtn" class="payment-btn confirm-btn">I've Paid</button>
-                        <button id="cancelPaymentBtn" class="payment-btn cancel-btn">Cancel</button>
-                    </div>
+                <div class="qr-actions">
+                    <button id="confirmPaymentBtn" class="payment-btn confirm-btn">I've Paid</button>
+                    <button id="cancelPaymentBtn" class="payment-btn cancel-btn">Cancel</button>
                 </div>
             </div>
         </div>
+    </div>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
@@ -1369,7 +1463,7 @@
                 if (document.getElementById('cartNotification')) {
                     document.getElementById('cartNotification').id = 'cartIcon';
                 }
-                
+
                 if (notificationWindow.style.display === 'block') {
                     notificationWindow.style.display = 'none';
                 }
@@ -1528,7 +1622,7 @@
             const orderHistoryWindow = document.getElementById('orderHistoryWindow');
             orderHistoryWindow.scrollTop = orderHistoryWindow.scrollHeight;
         }
-        
+
         let currentTab = 'all';
         function createTypeTabs(types) {
             const tabContainer = document.getElementById('tabContainer');
@@ -1540,13 +1634,28 @@
                 tab.className = (type === currentTab) ? 'active' : '';
                 tab.onclick = () => {
                     currentTab = type;
-                    fetchMenuItems();
+                    fetchMenuItems(true);
                 };
                 tabContainer.appendChild(tab);
             });
         }
 
-        function fetchMenuItems() {
+        function fetchMenuItems(preserveControls = false) {
+            const cartItemsState = {};
+            if (preserveControls) {
+                document.querySelectorAll('.menu-item').forEach(item => {
+                    const itemId = item.id;
+                    const quantityControl = item.querySelector('.quantity-control');
+                    if (quantityControl) {
+                        const quantityDisplay = quantityControl.querySelector('.quantity-display');
+                        cartItemsState[itemId] = {
+                            hasQuantityControl: true,
+                            quantity: quantityDisplay ? quantityDisplay.innerText : '1'
+                        };
+                    }
+                });
+            }
+
             menuRef.once('value', (snapshot) => {
                 const menuSection = document.getElementById('menuSection');
                 menuSection.innerHTML = '';
@@ -1555,14 +1664,14 @@
 
                 snapshot.forEach((childSnapshot) => {
                     const menuItem = childSnapshot.val();
-                    const { type = 'other', category, price, profit = 0, unit = 'Item', startingValue = 1, rarity = 'Basic' } = menuItem;
+                    const {type = 'other', category, price, profit = 0, unit = 'Item', startingValue = 1, rarity = 'Basic'} = menuItem;
                     typesSet.add(type);
 
                     if (currentTab === 'all' || currentTab === type) {
                         const totalPrice = price + profit;
                         const displayUnit = unit || 'Item';
                         if (!categories[category]) categories[category] = [];
-                        categories[category].push({ ...menuItem, totalPrice, displayUnit });
+                        categories[category].push({...menuItem, totalPrice, displayUnit});
                     }
                 });
 
@@ -1570,7 +1679,7 @@
 
                 Object.keys(categories).sort().forEach(category => {
                     categories[category].sort((a, b) => {
-                        const rarityOrder = { 'Premium': 2, 'Limited Edition': 1, 'Basic': 0 };
+                        const rarityOrder = {'Premium': 2, 'Limited Edition': 1, 'Basic': 0};
                         return rarityOrder[b.rarity] !== rarityOrder[a.rarity] ? rarityOrder[b.rarity] - rarityOrder[a.rarity] : b.totalPrice - a.totalPrice;
                     });
 
@@ -1579,18 +1688,27 @@
                             <h2>${category}</h2>
                             <div class="menu-items">
                                 ${categories[category].map(menuItem => {
-                                    const menuItemId = `menu-item-${menuItem.name.replace(/\s+/g, '-')}`;
-                                    const borderColor = (menuItem.rarity === 'Premium' || menuItem.rarity === 'Limited Edition') ? 'gold' : '#343a40';
-                                    return `
-                                        <div class="menu-item" id="${menuItemId}" style="border-color: ${borderColor};">
-                                            <h3>${menuItem.name}</h3>
-                                            <p>Rs ${menuItem.totalPrice.toFixed(2)} per ${menuItem.startingValue !== 1 ? menuItem.startingValue + ' ' : ''}${menuItem.displayUnit}</p>
-                                            <div class="item-controls" id="controls-${menuItemId}">
-                                                <button onclick="addToCart('${menuItem.name}', ${menuItem.totalPrice}, '${menuItem.displayUnit}', ${menuItem.startingValue}, ${menuItem.profit})">Add Cart</button>
-                                            </div>
-                                        </div>
-                                    `;
-                                }).join('')}
+                        const menuItemId = `menu-item-${menuItem.name.replace(/\s+/g, '-')}`;
+                        const borderColor = (menuItem.rarity === 'Premium' || menuItem.rarity === 'Limited Edition') ? 'gold' : '#343a40';
+                        const savedState = cartItemsState[menuItemId];
+                        const controlsHtml = savedState && savedState.hasQuantityControl ?
+                            `<div class="quantity-control">
+                                <button onclick="decreaseQuantity('${menuItem.name}', ${menuItem.totalPrice}, '${menuItem.displayUnit}', ${menuItem.startingValue}, ${menuItem.profit})">-</button>
+                                <div class="quantity-display">${savedState.quantity}</div>
+                                <button onclick="increaseQuantity('${menuItem.name}', ${menuItem.totalPrice}, '${menuItem.displayUnit}', ${menuItem.startingValue}, ${menuItem.profit})">+</button>
+                            </div>` :
+                            `<button onclick="addToCart('${menuItem.name}', ${menuItem.totalPrice}, '${menuItem.displayUnit}', ${menuItem.startingValue}, ${menuItem.profit})">Add Cart</button>`;
+
+                        return `
+                            <div class="menu-item" id="${menuItemId}" style="border-color: ${borderColor};">
+                                <h3>${menuItem.name}</h3>
+                                <p>Rs ${menuItem.totalPrice.toFixed(2)} per ${menuItem.startingValue !== 1 ? menuItem.startingValue + ' ' : ''}${menuItem.displayUnit}</p>
+                                <div class="item-controls" id="controls-${menuItemId}">
+                                    ${controlsHtml}
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
                             </div>
                         </div>
                     `;
@@ -1658,7 +1776,7 @@
 
             adjustSpacerHeight();
         }
-        
+
         function updateDeliveryCharge() {
             let deliveryCharge = 100 - totalProfit;
             deliveryCharge = Math.max(deliveryCharge, 0);
@@ -1699,7 +1817,7 @@
             const existingCartItem = Array.from(cartItems.children).find(cartItem => {
                 const itemName = cartItem.querySelector('.item-name').innerText.trim();
                 const itemUnit = cartItem.querySelector('.item-quantity').dataset.unit || '';
-                return itemName === item.trim() && itemUnit === unit;
+                                return itemName === item.trim() && itemUnit === unit;
             });
             if (existingCartItem) {
                 const quantitySpan = existingCartItem.querySelector('.item-quantity');
@@ -1879,16 +1997,16 @@
         }
 
         function showQRCodePayment() {
-document.getElementById('paymentOverlay').classList.remove('active');
-document.getElementById('qrCodeOverlay').classList.add('active');
+            document.getElementById('paymentOverlay').classList.remove('active');
+            document.getElementById('qrCodeOverlay').classList.add('active');
             const phone = localStorage.getItem('phone');
-            document.querySelector('.qr-note').textContent = 
+            document.querySelector('.qr-note').textContent =
                 'Note: Please include the number ' + phone + 'in the remark so we can verify your Payment\n';
         }
 
 
         function confirmQRPayment() {
-document.getElementById('qrCodeOverlay').classList.remove('active');
+            document.getElementById('qrCodeOverlay').classList.remove('active');
             processOrder('online');
         }
 
@@ -1900,21 +2018,21 @@ document.getElementById('qrCodeOverlay').classList.remove('active');
         // Event listener initialization function
         function initPaymentEvents() {
             // Payment method selection events
-            document.getElementById('closePaymentBtn').addEventListener('click', function() {
+            document.getElementById('closePaymentBtn').addEventListener('click', function () {
                 document.getElementById('paymentOverlay').classList.remove('active');
             });
 
-            document.getElementById('codOption').addEventListener('click', function() {
+            document.getElementById('codOption').addEventListener('click', function () {
                 document.getElementById('paymentOverlay').classList.remove('active');
                 processOrder('cod');
             });
 
-            document.getElementById('onlineOption').addEventListener('click', function() {
+            document.getElementById('onlineOption').addEventListener('click', function () {
                 showQRCodePayment();
             });
 
             // QR code payment events
-            document.getElementById('closeQRBtn').addEventListener('click', function() {
+            document.getElementById('closeQRBtn').addEventListener('click', function () {
                 document.getElementById('qrCodeOverlay').classList.remove('active');
             });
 
@@ -1924,30 +2042,30 @@ document.getElementById('qrCodeOverlay').classList.remove('active');
 
         // Call this function when your page loads
         document.addEventListener('DOMContentLoaded', initPaymentEvents);
-        
+
         function resetQuantityControlsToAddCart(orderItems) {
-                    orderItems.forEach(item => {
-                        const itemId = `menu-item-${item.name.replace(/\s+/g, '-')}`;
-                        const controlsContainer = document.getElementById(`controls-${itemId}`);
+            orderItems.forEach(item => {
+                const itemId = `menu-item-${item.name.replace(/\s+/g, '-')}`;
+                const controlsContainer = document.getElementById(`controls-${itemId}`);
 
-                        if (controlsContainer) {
-        menuRef.orderByChild('name').equalTo(item.name).once('value', snapshot => {
-                                snapshot.forEach(childSnapshot => {
-                                    const menuItem = childSnapshot.val();
-                                    const profit = menuItem.profit || 0;
-                                    const price = menuItem.price + profit;
-                                    const unit = menuItem.unit || '';
-                                    const startingValue = menuItem.startingValue || 1;
+                if (controlsContainer) {
+                    menuRef.orderByChild('name').equalTo(item.name).once('value', snapshot => {
+                        snapshot.forEach(childSnapshot => {
+                            const menuItem = childSnapshot.val();
+                            const profit = menuItem.profit || 0;
+                            const price = menuItem.price + profit;
+                            const unit = menuItem.unit || '';
+                            const startingValue = menuItem.startingValue || 1;
 
-                                    // Reset to Add Cart button
-                                    controlsContainer.innerHTML = `
+                            // Reset to Add Cart button
+                            controlsContainer.innerHTML = `
                                         <button onclick="addToCart('${item.name}', ${price}, '${unit}', ${startingValue}, ${profit})">Add Cart</button>
                                     `;
-                                });
-                            });
-                        }
+                        });
                     });
                 }
+            });
+        }
         function showOrderConfirmation() {
             const confirmationElement = document.getElementById('orderConfirmation');
             if (confirmationElement) {
@@ -2021,7 +2139,7 @@ document.getElementById('qrCodeOverlay').classList.remove('active');
                 alert('Phone number must be exactly 10 digits long.');
                 return;
             }
-            if (!loginPart2) { 
+            if (!loginPart2) {
                 alert('Please select a Bharatpur ward.');
                 return;
             }
@@ -2032,7 +2150,7 @@ document.getElementById('qrCodeOverlay').classList.remove('active');
             localStorage.setItem('username', loginUsername);
             localStorage.setItem('phone', loginPhone);
             localStorage.setItem('address', `${loginPart2}, ${loginPart3}`); // Updated format
-            
+
             adjustSpacerHeight();
             showOrderConfirmation();
             resetOrderVariables();
@@ -2042,7 +2160,7 @@ document.getElementById('qrCodeOverlay').classList.remove('active');
             }, 600);
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             setupLoginInputs(); // Initialize phone input formatting
 
             const registerOrderBtn = document.getElementById('registerOrderBtn');
