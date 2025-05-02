@@ -635,8 +635,11 @@
         // Resize image
         const resizedBlob = await resizeImage(file, 200, 200);
         
-        // Create storage reference
-        const fileName = `${itemName}-${Date.now()}-${file.name}`;
+        // Get file extension
+        const fileExtension = file.name.split('.').pop();
+        // Create filename using selected item's display name
+        const selectedItemText = itemSelect.options[itemSelect.selectedIndex].text;
+        const fileName = `${selectedItemText.replace(/\s+/g, '')}.${fileExtension}`;
         const storageRef = storage.ref('images/' + fileName);
         
         // Upload file
