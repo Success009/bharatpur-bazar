@@ -1699,13 +1699,32 @@
                             </div>` :
                             `<button onclick="addToCart('${menuItem.name}', ${menuItem.totalPrice}, '${menuItem.displayUnit}', ${menuItem.startingValue}, ${menuItem.profit})">Add Cart</button>`;
 
+                        let rarityLabel = (menuItem.rarity === 'Premium' || menuItem.rarity === 'Limited Edition') ? 
+                            `<div style="color: gold; font-weight: bold; font-style: italic;">${menuItem.rarity}</div>` : '';
+
+                        const imageName = `${menuItem.name.replace(/\s+/g, '')}.jpg`;
+                        const storageRef = storage.ref().child(`images/${imageName}`);
+                        let itemContent = `
+                            ${rarityLabel}
+                            <h3>${menuItem.name}</h3>
+                            <p>Rs ${menuItem.totalPrice.toFixed(2)} per ${menuItem.startingValue !== 1 ? menuItem.startingValue + ' ' : ''}${menuItem.displayUnit}</p>
+                            <div class="item-controls" id="controls-${menuItemId}">
+                                ${controlsHtml}
+                            </div>
+                        `;
+
+                        storageRef.getDownloadURL()
+                            .then(url => {
+                                document.getElementById(menuItemId).innerHTML = `
+                                    <img src="${url}" alt="${menuItem.name}" class="menu-item-image" style="width:100%; height:auto;">
+                                    ${itemContent}
+                                `;
+                            }).catch(() => {
+                                document.getElementById(menuItemId).innerHTML = itemContent;
+                            });
+
                         return `
                             <div class="menu-item" id="${menuItemId}" style="border-color: ${borderColor};">
-                                <h3>${menuItem.name}</h3>
-                                <p>Rs ${menuItem.totalPrice.toFixed(2)} per ${menuItem.startingValue !== 1 ? menuItem.startingValue + ' ' : ''}${menuItem.displayUnit}</p>
-                                <div class="item-controls" id="controls-${menuItemId}">
-                                    ${controlsHtml}
-                                </div>
                             </div>
                         `;
                     }).join('')}
@@ -2291,4 +2310,5 @@
         fetchMenuItems();
     </script>
 </body>
+
 </html>
