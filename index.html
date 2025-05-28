@@ -41,37 +41,98 @@
 
         .menu-items {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 20px;
+            padding: 10px 0;
         }
 
         .menu-item {
             background-color: white;
-            border: 1px solid #343a40;
-            border-radius: 10px;
-            padding: 10px;
+            border: none;
+            border-radius: 15px;
+            padding: 0;
             text-align: center;
-            transition: transform .3s, box-shadow .3s;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            position: relative;
         }
-
+        .menu-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
         .menu-item:active {
-            transform: scale(0.98);
-            transition: transform 0.2s;
+            transform: translateY(-2px);
+            transition: transform 0.1s;
+        }
+        .menu-item h3 {
+            margin: 0;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #2c3e50;
+            line-height: 1.3;
         }
 
+        .menu-item p {
+            margin: 0;
+            font-size: 1em;
+            font-weight: 700;
+            color: #dcb909;
+        }
+        .menu-item-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 15px 15px 0 0;
+        }
         .menu-item button {
-            background-color: #343a40;
+            background: linear-gradient(135deg, #3498db, #2980b9);
             color: white;
             border: none;
-            padding: 10px;
-            border-radius: 5px;
+            padding: 12px 20px;
+            border-radius: 25px;
             cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(52, 152, 219, 0.3);
+            width: 100%;
         }
 
         .menu-item button:hover {
-            background-color: #495057;
+            background: linear-gradient(135deg, #2980b9, #1f5f8b);
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+        .menu-item-content {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .rarity-label {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
+        .rarity-label.premium {
+            background: linear-gradient(135deg, #ffd700, #ffb347);
+            color: #2c3e50;
+        }
+
+        .rarity-label.limited {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+        }
         .order-section {
             position: fixed;
             bottom: 0;
@@ -99,7 +160,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 10px 0;
-            animation: slideIn 0.3s ease; /*Added animation for mobile*/
+            animation: slideIn 0.3s ease;
         }
 
         @media (hover: hover) {
@@ -603,34 +664,77 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border: 1px solid #343a40;
-            border-radius: 5px;
+            border: 2px solid #ecf0f1;
+            border-radius: 25px;
             overflow: hidden;
             width: 100%;
+            background: #f8f9fa;
         }
 
         .quantity-control button {
-            background-color: #343a40;
+            background: linear-gradient(135deg, #34495e, #2c3e50);
             color: white;
             border: none;
-            padding: 5px 10px;
+            padding: 8px 15px;
             cursor: pointer;
             font-weight: bold;
-            width: 40px;
-            height: 35px;
+            font-size: 1.1em;
+            width: auto;
+            min-width: 40px;
+            height: 40px;
             border-radius: 0;
+            transition: all 0.3s ease;
+            box-shadow: none;
         }
 
         .quantity-control button:hover {
-            background-color: #495057;
+            background: linear-gradient(135deg, #2c3e50, #1a252f);
+            transform: none;
+        }
+
+        .quantity-control button:first-child {
+            border-radius: 25px 0 0 25px;
+        }
+
+        .quantity-control button:last-child {
+            border-radius: 0 25px 25px 0;
         }
 
         .quantity-display {
             flex: 1;
             text-align: center;
-            padding: 5px;
+            padding: 10px;
+            font-weight: 600;
+            color: #2c3e50;
+            background: white;
+            border-left: 1px solid #ecf0f1;
+            border-right: 1px solid #ecf0f1;
         }
+        .item-controls {
+            margin-top: auto;
+        }
+        @media (max-width: 768px) {
+            .menu-items {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 15px;
+            }
 
+            .menu-item-image {
+                height: 120px;
+            }
+
+            .menu-item-content {
+                padding: 12px;
+            }
+
+            .menu-item h3 {
+                font-size: 1em;
+            }
+
+            .menu-item p {
+                font-size: 0.9em;
+            }
+        }
         .deliveryC {
             margin: 15px 0;
             padding: 12px;
@@ -1688,46 +1792,57 @@
                             <h2>${category}</h2>
                             <div class="menu-items">
                                 ${categories[category].map(menuItem => {
-                        const menuItemId = `menu-item-${menuItem.name.replace(/\s+/g, '-')}`;
-                        const borderColor = (menuItem.rarity === 'Premium' || menuItem.rarity === 'Limited Edition') ? 'gold' : '#343a40';
-                        const savedState = cartItemsState[menuItemId];
-                        const controlsHtml = savedState && savedState.hasQuantityControl ?
-                            `<div class="quantity-control">
-                                <button onclick="decreaseQuantity('${menuItem.name}', ${menuItem.totalPrice}, '${menuItem.displayUnit}', ${menuItem.startingValue}, ${menuItem.profit})">-</button>
-                                <div class="quantity-display">${savedState.quantity}</div>
-                                <button onclick="increaseQuantity('${menuItem.name}', ${menuItem.totalPrice}, '${menuItem.displayUnit}', ${menuItem.startingValue}, ${menuItem.profit})">+</button>
-                            </div>` :
-                            `<button onclick="addToCart('${menuItem.name}', ${menuItem.totalPrice}, '${menuItem.displayUnit}', ${menuItem.startingValue}, ${menuItem.profit})">Add Cart</button>`;
+                                    const menuItemId = `menu-item-${menuItem.name.replace(/\s+/g, '-')}`;
+                                    const savedState = cartItemsState[menuItemId];
+                                    const controlsHtml = savedState && savedState.hasQuantityControl ?
+                                        `<div class="quantity-control">
+                                            <button onclick="decreaseQuantity('${menuItem.name}', ${menuItem.totalPrice}, '${menuItem.displayUnit}', ${menuItem.startingValue}, ${menuItem.profit})">-</button>
+                                            <div class="quantity-display">${savedState.quantity}</div>
+                                            <button onclick="increaseQuantity('${menuItem.name}', ${menuItem.totalPrice}, '${menuItem.displayUnit}', ${menuItem.startingValue}, ${menuItem.profit})">+</button>
+                                        </div>` :
+                                        `<button onclick="addToCart('${menuItem.name}', ${menuItem.totalPrice}, '${menuItem.displayUnit}', ${menuItem.startingValue}, ${menuItem.profit})">Add to Cart</button>`;
 
-                        let rarityLabel = (menuItem.rarity === 'Premium' || menuItem.rarity === 'Limited Edition') ? 
-                            `<div style="color: gold; font-weight: bold; font-style: italic;">${menuItem.rarity}</div>` : '';
+                                    // Rarity label HTML with proper styling classes
+                                    let rarityLabel = '';
+                                    if (menuItem.rarity === 'Premium') {
+                                        rarityLabel = `<div class="rarity-label premium">Premium</div>`;
+                                    } else if (menuItem.rarity === 'Limited Edition') {
+                                        rarityLabel = `<div class="rarity-label limited">Limited</div>`;
+                                    }
 
-                        const imageName = `${menuItem.name.replace(/\s+/g, '')}.jpg`;
-                        const storageRef = storage.ref().child(`images/${imageName}`);
-                        let itemContent = `
-                            ${rarityLabel}
-                            <h3>${menuItem.name}</h3>
-                            <p>Rs ${menuItem.totalPrice.toFixed(2)} per ${menuItem.startingValue !== 1 ? menuItem.startingValue + ' ' : ''}${menuItem.displayUnit}</p>
-                            <div class="item-controls" id="controls-${menuItemId}">
-                                ${controlsHtml}
-                            </div>
-                        `;
+                                    const imageName = `${menuItem.name.replace(/\s+/g, '')}.jpg`;
+                                    const storageRef = storage.ref().child(`images/${imageName}`);
 
-                        storageRef.getDownloadURL()
-                            .then(url => {
-                                document.getElementById(menuItemId).innerHTML = `
-                                    <img src="${url}" alt="${menuItem.name}" class="menu-item-image" style="width:100%; height:auto;">
-                                    ${itemContent}
-                                `;
-                            }).catch(() => {
-                                document.getElementById(menuItemId).innerHTML = itemContent;
-                            });
+                                    // Content structure for better organization
+                                    let itemContent = `
+                                        <div class="menu-item-content">
+                                            <h3>${menuItem.name}</h3>
+                                            <p>Rs ${menuItem.totalPrice.toFixed(2)} ${menuItem.startingValue !== 1 ? 'per ' + menuItem.startingValue + ' ' : 'per '}${menuItem.displayUnit}</p>
+                                            <div class="item-controls" id="controls-${menuItemId}">
+                                                ${controlsHtml}
+                                            </div>
+                                        </div>
+                                    `;
 
-                        return `
-                            <div class="menu-item" id="${menuItemId}" style="border-color: ${borderColor};">
-                            </div>
-                        `;
-                    }).join('')}
+                                    // Load image and update content
+                                    storageRef.getDownloadURL()
+                                        .then(url => {
+                                            document.getElementById(menuItemId).innerHTML = `
+                                                ${rarityLabel}
+                                                <img src="${url}" alt="${menuItem.name}" class="menu-item-image">
+                                                ${itemContent}
+                                            `;
+                                        }).catch(() => {
+                                            // Fallback with placeholder or just content without image
+                                            document.getElementById(menuItemId).innerHTML = `
+                                                ${rarityLabel}
+                                                <div class="menu-item-placeholder" style="height: 150px; background: linear-gradient(135deg, #ecf0f1, #bdc3c7); display: flex; align-items: center; justify-content: center; color: #7f8c8d; font-size: 0.9em; border-radius: 15px 15px 0 0;">No Image</div>
+                                                ${itemContent}
+                                            `;
+                                        });
+
+                                    return `<div class="menu-item" id="${menuItemId}"></div>`;
+                                }).join('')}
                             </div>
                         </div>
                     `;
@@ -2310,5 +2425,4 @@
         fetchMenuItems();
     </script>
 </body>
-
 </html>
