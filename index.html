@@ -150,17 +150,91 @@
         }
 
         .cart-items {
-            max-height: 110px;
-            overflow-y: auto;
-            margin-bottom: 15px;
+          max-height: 300px;
+          overflow-y: auto;
+          padding: 20px;
+          background: transparent;
+        }
+
+        .cart-items::-webkit-scrollbar {
+          width: 6px;
+        }
+
+        .cart-items::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 10px;
+        }
+
+        .cart-items::-webkit-scrollbar-thumb {
+          background: linear-gradient(135deg, #3498db, #2980b9);
+          border-radius: 10px;
         }
 
         .cart-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            animation: slideIn 0.3s ease;
+          display: grid;
+          grid-template-columns: 2fr 1fr 1fr;
+          gap: 10px;
+          align-items: center;
+          background: linear-gradient(135deg, #ffffff, #f8f9fa);
+          margin-bottom: 12px;
+          padding: 16px;
+          border-radius: 15px;
+          border: 1px solid #e9ecef;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+          transition: all 0.3s ease;
+          animation: cartItemSlideIn 0.4s ease-out;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .cart-item::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 4px;
+          height: 100%;
+          background: linear-gradient(135deg, #28a745, #20c997);
+          border-radius: 0 2px 2px 0;
+        }
+
+        .cart-item:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        .cart-item .item-name {
+          font-weight: 600;
+          color: #2c3e50;
+          font-size: 1em;
+        }
+
+        .cart-item .item-quantity {
+          text-align: center;
+          font-weight: 500;
+          color: #6c757d;
+          background: #e9ecef;
+          padding: 4px 8px;
+          border-radius: 8px;
+          font-size: 0.9em;
+        }
+
+        .cart-item .item-price {
+          text-align: right;
+          font-weight: 700;
+          color: #28a745;
+          font-size: 1.1em;
+        }
+
+        @keyframes cartItemSlideIn {
+          from {
+            opacity: 0;
+            transform: translateX(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
         }
 
         @media (hover: hover) {
@@ -195,8 +269,35 @@
         }
 
         .order-actions {
-            text-align: left;
-            margin-top: 10px;
+          padding: 20px;
+          background: #f8f9fa;
+          border-top: 1px solid #e9ecef;
+        }
+
+        .order-but {
+          width: 100%;
+          background: linear-gradient(135deg, #28a745, #20c997);
+          color: white;
+          border: none;
+          padding: 16px;
+          border-radius: 12px;
+          font-size: 1.2em;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .order-but:hover {
+          background: linear-gradient(135deg, #218838, #1e7e34);
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .order-but:active {
+          transform: translateY(0);
         }
 
         .order-actions button,
@@ -303,90 +404,134 @@
         }
 
         .cart-icon {
-            width: 65px;
-            height: 65px;
-            font-size: 2em;
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-            background-color: #343a40;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+          width: 70px;
+          height: 70px;
+          font-size: 2.2em;
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          z-index: 1000;
+          background: linear-gradient(135deg, #343a40, #495057);
+          border-radius: 50%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          color: white;
+          box-shadow: 0 6px 20px rgba(52, 58, 64, 0.3);
+          cursor: pointer;
+          transition: all 0.3s ease;
+          border: 3px solid white;
+        }
+
+        .cart-icon:hover {
+          transform: scale(1.1);
+          box-shadow: 0 8px 25px rgba(52, 58, 64, 0.4);
         }
 
         .cart-icon::before {
-            content: "";
-            position: absolute;
-            top: 0px;
-            right: 0;
-            width: 10px;
-            height: 10px;
-            background-color: red;
-            border-radius: 50%;
-            display: none;
+          content: "";
+          position: absolute;
+          top: -2px;
+          right: -2px;
+          width: 12px;
+          height: 12px;
+          background: linear-gradient(135deg, #dc3545, #c82333);
+          border-radius: 50%;
+          display: none;
+          border: 2px solid white;
+          animation: pulse 2s infinite;
         }
 
-        .cart-icon#cartNotification::before {
-            display: block;
+        #cartNotification::before {
+          display: block;
         }
 
-        .cart-window,
+        @keyframes pulse {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.2); }
+          100% { transform: scale(1); }
+        }
+
+
         .notification-window,
-        .order-history-window {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 300px;
-            max-height: 550px;
-            background-color: #f9f9f9;
-            border: 2px solid #343a40;
-            border-radius: 15px;
-            box-shadow: 0 5px 25px rgba(0, 0, 0, .2);
-            display: none;
-            z-index: 1001;
-            padding: 20px;
-            overflow-y: auto;
+        .order-history-window,
+        .cart-window {
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 90%;
+          max-width: 420px;
+          max-height: 85vh;
+          background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+          border: none;
+          border-radius: 20px;
+          box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+          display: none;
+          z-index: 1001;
+          padding: 0;
+          overflow: hidden;
+          animation: cartSlideIn 0.3s ease-out;
+        }
+
+        @keyframes cartSlideIn {
+          from {
+            opacity: 0;
+            transform: translate(-50%, -60%) scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+          }
         }
 
         .window-header {
-            position: relative;
-            margin-bottom: 15px;
+          background: linear-gradient(135deg, #343a40, #495057);
+          color: white;
+          padding: 20px;
+          margin: 0;
+          border-radius: 20px 20px 0 0;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .window-header h2 {
+          margin: 0;
+          font-size: 1.4em;
+          font-weight: 600;
+          color: white;
+          border: none;
+          padding: 0;
         }
 
         .close-button {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 24px;
-            height: 24px;
-            background-color: #f44336;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            transition: all .2s;
+          width: 32px;
+          height: 32px;
+          background: rgba(255, 255, 255, 0.2);
+          color: white;
+          border: none;
+          border-radius: 50%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          cursor: pointer;
+          font-size: 16px;
+          font-weight: bold;
+          transition: all 0.3s ease;
+          backdrop-filter: blur(10px);
         }
 
         .close-button:hover {
-            background-color: #d32f2f;
-            transform: scale(1.1);
+          background: rgba(244, 67, 54, 0.8);
+          transform: scale(1.1);
         }
 
         .cart-window h2,
         .notification-window h3,
         .order-history-window h3 {
-            color: #343a40;
+            color: white;
             text-align: center;
             margin-bottom: 15px;
             font-size: 1.5em;
@@ -736,25 +881,22 @@
             }
         }
         .deliveryC {
-            margin: 15px 0;
-            padding: 12px;
-            background-color: #f0f8ff;
-            border-radius: 8px;
-            border-left: 3px solid #17a2b8;
-            font-weight: 500;
-            display: flex;
-            justify-content: space-between;
+          margin: 20px;
+          padding: 16px;
+          background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+          border-radius: 12px;
+          border-left: 4px solid #2196f3;
+          font-weight: 600;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          box-shadow: 0 2px 10px rgba(33, 150, 243, 0.1);
         }
 
-        .order-but {
-            width: 100%;
-            background-color: #28a745;
-            font-size: 1.1em;
-            padding: 12px;
-            border-radius: 8px;
-            transition: all 0.3s;
+        .deliveryC span:last-child {
+          color: #1976d2;
+          font-weight: 700;
         }
-
 
         /* Login Overlay CSS - Add this to your CSS file */
         .login-container {
@@ -1309,6 +1451,29 @@
         }
 
         @media (max-width: 768px) {
+          .cart-window {
+            width: 95%;
+            max-height: 90vh;
+          }
+
+          .cart-item {
+            grid-template-columns: 1fr;
+            gap: 8px;
+            text-align: center;
+          }
+
+          .cart-item .item-name {
+            border-bottom: 1px solid #e9ecef;
+            padding-bottom: 8px;
+          }
+
+          .cart-item .item-quantity,
+          .cart-item .item-price {
+            text-align: center;
+          }
+        }
+
+        @media (max-width: 768px) {
             .order-history-item {
                 animation: fadeInUp 0.3s ease;
             }
@@ -1562,20 +1727,31 @@
             const cartWindow = document.getElementById('cartWindow');
             const notificationWindow = document.getElementById('notificationWindow');
             const orderHistoryWindow = document.getElementById('orderHistoryWindow');
+
             if (cartWindow.style.display === 'none' || !cartWindow.style.display) {
+                // Show cart window
                 cartWindow.style.display = 'block';
+                setTimeout(() => cartWindow.classList.add('show'), 10);
+
+                // Remove cart notification
                 if (document.getElementById('cartNotification')) {
                     document.getElementById('cartNotification').id = 'cartIcon';
                 }
 
+                // Hide other windows
                 if (notificationWindow.style.display === 'block') {
                     notificationWindow.style.display = 'none';
                 }
                 if (orderHistoryWindow.style.display === 'block') {
                     orderHistoryWindow.style.display = 'none';
                 }
+
+                // Update cart display
+                updateCartDisplay();
             } else {
-                cartWindow.style.display = 'none';
+                // Hide cart window
+                cartWindow.classList.remove('show');
+                setTimeout(() => cartWindow.style.display = 'none', 300);
             }
         }
         document.addEventListener('click', function (event) {
@@ -1616,7 +1792,53 @@
                 notificationWindow.style.display = 'none';
             }
         }
+        function updateCartDisplay() {
+            const cartItems = document.getElementById('cartItems');
+            const cartItemElements = cartItems.querySelectorAll('.cart-item');
 
+            if (cartItemElements.length === 0) {
+                cartItems.innerHTML = `
+                    <div class="empty-cart">
+                        <div class="empty-cart-icon">🛒</div>
+                        <h3>Your cart is empty</h3>
+                        <p>Add some delicious items to get started!</p>
+                    </div>
+                `;
+            }
+
+            // Update total price display
+            updateTotalDisplay();
+        }
+
+        // Enhanced total display update
+        function updateTotalDisplay() {
+            const cartItems = document.querySelectorAll('.cart-item');
+            let calculatedTotal = 0;
+
+            cartItems.forEach(item => {
+                const priceElement = item.querySelector('.item-price');
+                if (priceElement && !item.classList.contains('empty-cart')) {
+                    const price = parseFloat(priceElement.innerText.replace('Rs ', ''));
+                    if (!isNaN(price)) {
+                        calculatedTotal += price;
+                    }
+                }
+            });
+
+            // Update total price
+            totalPrice = calculatedTotal;
+            document.getElementById('totalPrice').lastElementChild.innerText = calculatedTotal.toFixed(2);
+
+            // Update delivery charge
+            updateDeliveryCharge();
+
+            // Add visual feedback for total
+            const totalElement = document.getElementById('totalPrice');
+            totalElement.style.transform = 'scale(1.05)';
+            setTimeout(() => {
+                totalElement.style.transform = 'scale(1)';
+            }, 200);
+        }
         function showNotification(message, type) {
             const notificationHistory = document.getElementById('notificationHistory');
             const historyItem = document.createElement('div');
@@ -1855,15 +2077,25 @@
         let totalProfit = 0;
         function addToCart(item, price, unit = '', startingValue, profit = 0) {
             const cartItems = document.getElementById('cartItems');
+
+            // Remove empty cart message if it exists
+            const emptyCart = cartItems.querySelector('.empty-cart');
+            if (emptyCart) {
+                emptyCart.remove();
+            }
+
             const existingCartItem = Array.from(cartItems.children).find(cartItem => {
-                const itemName = cartItem.querySelector('.item-name').innerText.trim();
-                const itemUnit = cartItem.querySelector('.item-quantity').dataset.unit || '';
+                const itemName = cartItem.querySelector('.item-name')?.innerText.trim();
+                const itemUnit = cartItem.querySelector('.item-quantity')?.dataset.unit || '';
                 return itemName === item.trim() && itemUnit === unit;
             });
+
             const profitPerUnit = profit / startingValue;
             const pricePerUnit = price / startingValue;
             const itemId = `menu-item-${item.replace(/\s+/g, '-')}`;
             const controlsContainer = document.getElementById(`controls-${itemId}`);
+
+            // Update menu item controls
             if (controlsContainer && controlsContainer.querySelector('button')) {
                 controlsContainer.innerHTML = `
                     <div class="quantity-control">
@@ -1875,12 +2107,23 @@
             }
 
             if (existingCartItem) {
+                // Update existing item
                 const quantitySpan = existingCartItem.querySelector('.item-quantity');
                 let newQuantity = Math.max(parseFloat(quantitySpan.dataset.quantity) + startingValue, 0.001);
                 quantitySpan.dataset.quantity = newQuantity;
-                quantitySpan.innerText = unit ? `${newQuantity.toFixed(3).replace(/\.?0+$/, '')} ${unit}` : `${newQuantity.toFixed(3).replace(/\.?0+$/, '')}x`;
+                quantitySpan.innerText = unit ? 
+                    `${newQuantity.toFixed(3).replace(/\.?0+$/, '')} ${unit}` : 
+                    `${newQuantity.toFixed(3).replace(/\.?0+$/, '')}x`;
+
                 const itemPriceElement = existingCartItem.querySelector('.item-price');
                 itemPriceElement.innerText = `Rs ${(pricePerUnit * newQuantity).toFixed(2)}`;
+
+                // Add update animation
+                existingCartItem.style.background = 'linear-gradient(135deg, #d4edda, #c3e6cb)';
+                setTimeout(() => {
+                    existingCartItem.style.background = 'linear-gradient(135deg, #ffffff, #f8f9fa)';
+                }, 500);
+
                 if (controlsContainer) {
                     const quantityDisplay = controlsContainer.querySelector('.quantity-display');
                     if (quantityDisplay) {
@@ -1889,27 +2132,122 @@
                     }
                 }
             } else {
+                // Add new item
                 const cartItem = document.createElement('div');
                 cartItem.className = 'cart-item';
                 const quantity = Math.max(startingValue, 0.001);
                 cartItem.innerHTML = `
                     <span class="item-name">${item}</span>
-                    <span class="item-quantity" data-quantity="${quantity}" data-unit="${unit}">${quantity.toFixed(3).replace(/\.?0+$/, '')} ${unit || 'x'}</span>
+                    <span class="item-quantity" data-quantity="${quantity}" data-unit="${unit}">
+                        ${quantity.toFixed(3).replace(/\.?0+$/, '')} ${unit || 'x'}
+                    </span>
                     <span class="item-price">Rs ${(pricePerUnit * quantity).toFixed(2)}</span>
                 `;
                 cartItems.appendChild(cartItem);
             }
 
+            // Update totals
             totalPrice += pricePerUnit * startingValue;
             totalProfit += profitPerUnit * startingValue;
-            document.getElementById('totalPrice').lastElementChild.innerText = `Rs ${totalPrice.toFixed(2)}`;
-            updateDeliveryCharge();
+
+            // Update displays
+            updateTotalDisplay();
+
+            // Show cart notification
             if (document.getElementById('cartIcon')) {
                 document.getElementById('cartIcon').id = 'cartNotification';
             }
-
+            showCartFeedback('Item added to cart!', 'success');
             adjustSpacerHeight();
         }
+
+        function showCartFeedback(message, type = 'success') {
+            // Remove existing feedback
+            const existingFeedback = document.querySelector('.cart-feedback');
+            if (existingFeedback) {
+                existingFeedback.remove();
+            }
+
+            // Create feedback element
+            const feedback = document.createElement('div');
+            feedback.className = `cart-feedback cart-feedback-${type}`;
+            feedback.innerHTML = `
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()">×</button>
+            `;
+
+            // Add styles
+            feedback.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? 'linear-gradient(135deg, #28a745, #20c997)' : 'linear-gradient(135deg, #dc3545, #c82333)'};
+                color: white;
+                padding: 12px 16px;
+                border-radius: 8px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+                z-index: 1002;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-weight: 500;
+                animation: slideInRight 0.3s ease;
+            `;
+
+            // Add button styles
+            const button = feedback.querySelector('button');
+            button.style.cssText = `
+                background: none;
+                border: none;
+                color: white;
+                font-size: 18px;
+                cursor: pointer;
+                padding: 0;
+                width: 20px;
+                height: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+
+            document.body.appendChild(feedback);
+
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                if (feedback.parentElement) {
+                    feedback.style.animation = 'slideOutRight 0.3s ease';
+                    setTimeout(() => feedback.remove(), 300);
+                }
+            }, 3000);
+        }
+
+        // Add CSS for feedback animations
+        const feedbackStyles = document.createElement('style');
+        feedbackStyles.textContent = `
+            @keyframes slideInRight {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+
+            @keyframes slideOutRight {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(feedbackStyles);
+
 
         function updateDeliveryCharge() {
             let deliveryCharge = 100 - totalProfit;
@@ -2043,7 +2381,13 @@
             return deviceId;
         }
         function placeOrder() {
-            const cartItems = document.querySelectorAll('.cart-item');
+            const cartItems = document.querySelectorAll('.cart-item:not(.empty-cart)');
+
+            if (cartItems.length === 0) {
+                showCartFeedback('Your cart is empty!', 'error');
+                return;
+            }
+
             const location = localStorage.getItem('address');
             const phone = localStorage.getItem('phone');
             const username = localStorage.getItem('username');
@@ -2053,9 +2397,20 @@
                 showLoginOverlay();
                 return;
             }
+
+            // Add loading state to order button
+            const orderButton = document.querySelector('.order-but');
+            const originalText = orderButton.innerText;
+            orderButton.innerText = 'Processing...';
+            orderButton.disabled = true;
+            orderButton.style.opacity = '0.7';
+
+            // Continue with existing order logic...
+            const cartWindow = document.getElementById('cartWindow');
             if (cartWindow.style.display === 'block') {
-                toggleCartWindow()
+                toggleCartWindow();
             }
+
             let totalPrice = parseFloat(document.getElementById('totalPrice').lastElementChild.innerText.replace('Rs ', ''));
             if (isNaN(totalPrice)) totalPrice = 0;
             let deliveryCharge = 100 - totalProfit;
@@ -2067,6 +2422,13 @@
             document.getElementById('paymentOrderAmount').textContent = `Rs ${totalPrice.toFixed(2)}`;
             document.getElementById('paymentDeliveryAmount').textContent = `Rs ${deliveryCharge.toFixed(2)}`;
             document.getElementById('paymentOverlay').classList.add('active');
+
+            // Reset button state
+            setTimeout(() => {
+                orderButton.innerText = originalText;
+                orderButton.disabled = false;
+                orderButton.style.opacity = '1';
+            }, 1000);
         }
         function processOrder(paymentMethod) {
             const cartItems = document.querySelectorAll('.cart-item');
