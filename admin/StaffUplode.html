@@ -598,8 +598,8 @@
     // State variable to hold the processed image data
     let processedFileBlob = null;
 
-    // Fetch menu items from Firebase and populate a select element
-    const fetchMenuItems = (populateRenameSelect = false) => {
+    // Fetch menu items, filtering out items that already have an image
+    const fetchMenuItems = (existingImageNames = [], populateRenameSelect = false) => {
       return new Promise((resolve) => {
         const menuRef = database.ref('menu');
         menuRef.once('value', (snapshot) => {
@@ -612,13 +612,18 @@
             });
           });
           items.sort((a, b) => a.displayName.localeCompare(b.displayName));
+          
           const selectElement = populateRenameSelect ? document.getElementById('renameSelect') : itemSelect;
           selectElement.innerHTML = '<option value="">Select an item</option>';
+          
           items.forEach((item) => {
-            const option = document.createElement('option');
-            option.value = item.name;
-            option.textContent = item.displayName;
-            selectElement.appendChild(option);
+            // Only add item if it's for the rename modal OR if an image for it doesn't already exist
+            if (populateRenameSelect || !existingImageNames.includes(item.name)) {
+              const option = document.createElement('option');
+              option.value = item.name;
+              option.textContent = item.displayName;
+              selectElement.appendChild(option);
+            }
           });
           resolve();
         });
@@ -633,8 +638,7 @@
     };
 
     /**
-     * Processes an image file: crops to 1:1 from center, resizes to 800x800,
-     * and converts to a high-quality JPG Blob.
+     * Processes an image file: crops to 1:1, resizes to 800x800, converts to JPG.
      * @param {File} file The image file to process.
      * @returns {Promise<Blob>} A promise that resolves with the processed image as a Blob.
      */
@@ -752,7 +756,7 @@
             progressContainer.style.display = 'none';
             showStatus('<i class="fas fa-check-circle"></i> Image uploaded successfully!', 'success');
             removeFile.click();
-            displayImages();
+            displayImages(); // Refresh gallery and dropdown
           }
         );
       } catch (error) {
@@ -771,10 +775,18 @@
       setTimeout(() => { statusBar.style.display = 'none'; }, 5000);
     };
 
-    // Display images in gallery
+    // Display images in gallery and update the item dropdown
     const displayImages = () => {
       const storageRef = storage.ref('images');
       storageRef.listAll().then((result) => {
+        // First, get the names of all images that already exist
+        const existingImageNames = result.items.map(ref =>
+          ref.name.substring(0, ref.name.lastIndexOf('.'))
+        );
+
+        // Now, populate the main dropdown, filtering out existing items
+        fetchMenuItems(existingImageNames);
+
         imageGallery.innerHTML = '';
         if (result.items.length === 0) {
           imageGallery.innerHTML = `<div class="empty-gallery"><i class="fas fa-image fa-3x"></i><p>No images found. Upload some!</p></div>`;
@@ -802,7 +814,7 @@
               if (confirm('Are you sure you want to delete this image?')) {
                 storage.ref('images/' + imageRef.name).delete().then(() => {
                   showStatus('<i class="fas fa-check-circle"></i> Image deleted!', 'success');
-                  displayImages();
+                  displayImages(); // Refresh gallery and dropdown
                 }).catch((error) => showStatus('Error deleting image!', 'error'));
               }
             });
@@ -819,7 +831,8 @@
     let currentImageName = '';
     function openRenameModal(imageName) {
       currentImageName = imageName;
-      fetchMenuItems(true).then(() => {
+      // Pass an empty array to fetch all menu items for the rename dropdown
+      fetchMenuItems([], true).then(() => {
         document.getElementById('renameModal').style.display = 'flex';
       });
     }
@@ -846,7 +859,7 @@
         await oldRef.delete();
         showStatus('<i class="fas fa-check-circle"></i> Image reassigned!', 'success');
         closeRenameModal();
-        displayImages();
+        displayImages(); // Refresh everything
       } catch (error) {
         console.error('Error reassigning image:', error);
         showStatus('Error reassigning image!', 'error');
@@ -855,7 +868,7 @@
 
     // Initialize the app
     window.onload = () => {
-      fetchMenuItems();
+      // Call displayImages on load, which now handles populating the dropdown correctly
       displayImages();
     };
   </script>
