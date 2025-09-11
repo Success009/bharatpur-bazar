@@ -595,131 +595,147 @@
     const modalImage = document.getElementById('modalImage');
     const closeModal = document.getElementById('closeModal');
 
-    // Fetch menu items from Firebase
-    const fetchMenuItems = () => {
-      const menuRef = database.ref('menu');
-      menuRef.once('value', (snapshot) => {
-        const items = [];
-        snapshot.forEach((childSnapshot) => {
-          const item = childSnapshot.val();
-          items.push({
-            name: item.name.replace(/\s+/g, ''),
-            displayName: item.name
+    // State variable to hold the processed image data
+    let processedFileBlob = null;
+
+    // Fetch menu items from Firebase and populate a select element
+    const fetchMenuItems = (populateRenameSelect = false) => {
+      return new Promise((resolve) => {
+        const menuRef = database.ref('menu');
+        menuRef.once('value', (snapshot) => {
+          const items = [];
+          snapshot.forEach((childSnapshot) => {
+            const item = childSnapshot.val();
+            items.push({
+              name: item.name.replace(/\s+/g, ''),
+              displayName: item.name
+            });
           });
-        });
-
-        // Sort items alphabetically
-        items.sort((a, b) => a.displayName.localeCompare(b.displayName));
-
-        // Populate dropdown
-        itemSelect.innerHTML = '<option value="">Select an item</option>';
-        items.forEach((item) => {
-          const option = document.createElement('option');
-          option.value = item.name;
-          option.textContent = item.displayName;
-          itemSelect.appendChild(option);
+          items.sort((a, b) => a.displayName.localeCompare(b.displayName));
+          const selectElement = populateRenameSelect ? document.getElementById('renameSelect') : itemSelect;
+          selectElement.innerHTML = '<option value="">Select an item</option>';
+          items.forEach((item) => {
+            const option = document.createElement('option');
+            option.value = item.name;
+            option.textContent = item.displayName;
+            selectElement.appendChild(option);
+          });
+          resolve();
         });
       });
     };
 
-    // Format file size
+    // Format file size for display
     const formatFileSize = (bytes) => {
       if (bytes < 1024) return bytes + ' bytes';
       else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
       else return (bytes / 1048576).toFixed(1) + ' MB';
     };
 
-    // Show file preview
-    imageUpload.addEventListener('change', () => {
-      const file = imageUpload.files[0];
-
-      if (file) {
+    /**
+     * Processes an image file: crops to 1:1 from center, resizes to 800x800,
+     * and converts to a high-quality JPG Blob.
+     * @param {File} file The image file to process.
+     * @returns {Promise<Blob>} A promise that resolves with the processed image as a Blob.
+     */
+    const processImage = (file) => {
+      return new Promise((resolve, reject) => {
         const reader = new FileReader();
-
-        reader.onload = (e) => {
-          previewImage.src = e.target.result;
-          fileName.textContent = file.name;
-          fileSize.textContent = formatFileSize(file.size);
-          filePreview.style.display = 'flex';
-          fileLabel.innerHTML = '<i class="fas fa-check"></i> Image selected';
-
-          // Enable upload button if item is selected
-          uploadButton.disabled = !itemSelect.value;
-        };
-
         reader.readAsDataURL(file);
+        reader.onload = (event) => {
+          const img = new Image();
+          img.src = event.target.result;
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const targetSize = 800;
+            canvas.width = targetSize;
+            canvas.height = targetSize;
+            let sourceX, sourceY, sourceSize;
+            if (img.width > img.height) {
+              sourceSize = img.height;
+              sourceX = (img.width - img.height) / 2;
+              sourceY = 0;
+            } else {
+              sourceSize = img.width;
+              sourceX = 0;
+              sourceY = (img.height - img.width) / 2;
+            }
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, sourceX, sourceY, sourceSize, sourceSize, 0, 0, targetSize, targetSize);
+            canvas.toBlob((blob) => {
+              if (blob) resolve(blob);
+              else reject(new Error('Canvas to Blob conversion failed.'));
+            }, 'image/jpeg', 0.9); // 90% quality JPG
+          };
+          img.onerror = (error) => reject(error);
+        };
+        reader.onerror = (error) => reject(error);
+      });
+    };
+
+    // Process image on selection and update preview
+    imageUpload.addEventListener('change', async (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      fileLabel.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+      uploadButton.disabled = true;
+      filePreview.style.display = 'none';
+
+      try {
+        processedFileBlob = await processImage(file);
+        previewImage.src = URL.createObjectURL(processedFileBlob);
+        const originalName = file.name.substring(0, file.name.lastIndexOf('.'));
+        fileName.textContent = `${originalName}.jpg`;
+        fileSize.textContent = formatFileSize(processedFileBlob.size);
+        filePreview.style.display = 'flex';
+        fileLabel.innerHTML = '<i class="fas fa-check"></i> Image ready';
+        uploadButton.disabled = !itemSelect.value;
+      } catch (error) {
+        console.error('Image processing failed:', error);
+        showStatus('Failed to process image. Please try another.', 'error');
+        removeFile.click();
       }
     });
 
-    // Remove selected file
+    // Remove selected file and clear state
     removeFile.addEventListener('click', () => {
       imageUpload.value = '';
       filePreview.style.display = 'none';
       fileLabel.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Choose an image to upload';
       uploadButton.disabled = true;
+      if (previewImage.src.startsWith('blob:')) {
+        URL.revokeObjectURL(previewImage.src);
+      }
+      previewImage.src = "";
+      processedFileBlob = null;
     });
 
     // Enable/disable upload button based on selections
     itemSelect.addEventListener('change', () => {
-      uploadButton.disabled = !(itemSelect.value && imageUpload.files.length > 0);
+      uploadButton.disabled = !(itemSelect.value && processedFileBlob);
     });
 
-    // Resize image function
-    const resizeImage = (file, maxWidth, maxHeight) => {
-      return new Promise((resolve) => {
-        const img = document.createElement('img');
-        const reader = new FileReader();
-
-        reader.onload = (e) => {
-          img.src = e.target.result;
-          img.onload = () => {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-
-            canvas.width = maxWidth;
-            canvas.height = maxHeight;
-
-            ctx.drawImage(img, 0, 0, maxWidth, maxHeight);
-
-            canvas.toBlob((blob) => {
-              resolve(blob);
-            }, 'image/jpeg', 0.85);
-          };
-        };
-
-        reader.readAsDataURL(file);
-      });
-    };
-
-    // Upload image
+    // Upload the processed image
     uploadButton.addEventListener('click', async () => {
-      const file = imageUpload.files[0];
       const itemName = itemSelect.value;
-
-      if (!file || !itemName) {
-        showStatus('Please select both an item and an image file.', 'error');
+      if (!processedFileBlob || !itemName) {
+        showStatus('Please select an item and a processed image.', 'error');
         return;
       }
 
-      // Show progress bar
       progressContainer.style.display = 'block';
       uploadButton.disabled = true;
-
+      
       try {
-        // Resize image
-        const resizedBlob = await resizeImage(file, 200, 200);
-
-        // Get file extension
-        const fileExtension = file.name.split('.').pop();
-        // Create filename using selected item's display name
         const selectedItemText = itemSelect.options[itemSelect.selectedIndex].text;
-        const fileName = `${selectedItemText.replace(/\s+/g, '')}.${fileExtension}`;
-        const storageRef = storage.ref('images/' + fileName);
+        const newFileName = `${selectedItemText.replace(/\s+/g, '')}.jpg`;
+        const storageRef = storage.ref('images/' + newFileName);
 
-        // Upload file
-        const uploadTask = storageRef.put(resizedBlob);
+        const uploadTask = storageRef.put(processedFileBlob);
 
-        // Monitor upload progress
         uploadTask.on('state_changed',
           (snapshot) => {
             const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
@@ -735,20 +751,13 @@
           () => {
             progressContainer.style.display = 'none';
             showStatus('<i class="fas fa-check-circle"></i> Image uploaded successfully!', 'success');
-
-            // Reset form
-            imageUpload.value = '';
-            filePreview.style.display = 'none';
-            fileLabel.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Choose an image to upload';
-            uploadButton.disabled = true;
-
-            // Refresh gallery
+            removeFile.click();
             displayImages();
           }
         );
       } catch (error) {
-        console.error('Resize error:', error);
-        showStatus('Failed to process image!', 'error');
+        console.error('Upload process error:', error);
+        showStatus('Failed to start upload!', 'error');
         progressContainer.style.display = 'none';
         uploadButton.disabled = false;
       }
@@ -758,121 +767,60 @@
     const showStatus = (message, type) => {
       statusBar.innerHTML = message;
       statusBar.className = 'status-bar ' + type;
-      statusBar.style.display = 'block';
-
-      // Auto hide after 5 seconds
-      setTimeout(() => {
-        statusBar.style.display = 'none';
-      }, 5000);
+      statusBar.style.display = 'flex';
+      setTimeout(() => { statusBar.style.display = 'none'; }, 5000);
     };
 
     // Display images in gallery
     const displayImages = () => {
       const storageRef = storage.ref('images');
-
       storageRef.listAll().then((result) => {
         imageGallery.innerHTML = '';
-
         if (result.items.length === 0) {
-          imageGallery.innerHTML = `
-              <div class="empty-gallery">
-                <i class="fas fa-image fa-3x"></i>
-                <p>No images found. Upload some!</p>
-              </div>
-            `;
+          imageGallery.innerHTML = `<div class="empty-gallery"><i class="fas fa-image fa-3x"></i><p>No images found. Upload some!</p></div>`;
           imageCount.textContent = '0';
           return;
         }
-
         imageCount.textContent = result.items.length;
-
         result.items.forEach((imageRef) => {
           imageRef.getDownloadURL().then((url) => {
             const imageItem = document.createElement('div');
             imageItem.className = 'image-item';
-
             imageItem.innerHTML = `
                 <div class="image-wrapper">
                   <img src="${url}" alt="${imageRef.name}">
-                  <button class="rename-button" onclick="openRenameModal('${imageRef.name}')">
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button class="delete-button" data-name="${imageRef.name}">
-                    <i class="fas fa-trash"></i>
-                  </button>
+                  <button class="rename-button" onclick="openRenameModal('${imageRef.name}')"><i class="fas fa-edit"></i></button>
+                  <button class="delete-button" data-name="${imageRef.name}"><i class="fas fa-trash"></i></button>
                 </div>
-                <div class="image-info">
-                  <div class="image-name">${imageRef.name}</div>
-                </div>
-              `;
-
-            // Add event listener to image for preview
+                <div class="image-info"><div class="image-name">${imageRef.name}</div></div>`;
             imageItem.querySelector('img').addEventListener('click', () => {
               modalImage.src = url;
               imageModal.style.display = 'flex';
             });
-
-            // Add event listener to delete button
             imageItem.querySelector('.delete-button').addEventListener('click', (e) => {
               e.stopPropagation();
-              const imageName = e.target.closest('.delete-button').dataset.name;
-
               if (confirm('Are you sure you want to delete this image?')) {
-                const imageRef = storage.ref('images/' + imageName);
-
-                imageRef.delete().then(() => {
-                  imageItem.remove();
-                  showStatus('<i class="fas fa-check-circle"></i> Image deleted successfully!', 'success');
-
-                  // Update image count
-                  const currentCount = parseInt(imageCount.textContent) - 1;
-                  imageCount.textContent = currentCount;
-
-                  if (currentCount === 0) {
-                    imageGallery.innerHTML = `
-                        <div class="empty-gallery">
-                          <i class="fas fa-image fa-3x"></i>
-                          <p>No images found. Upload some!</p>
-                        </div>
-                      `;
-                  }
-                }).catch((error) => {
-                  console.error('Error deleting image:', error);
-                  showStatus('Error deleting image!', 'error');
-                });
+                storage.ref('images/' + imageRef.name).delete().then(() => {
+                  showStatus('<i class="fas fa-check-circle"></i> Image deleted!', 'success');
+                  displayImages();
+                }).catch((error) => showStatus('Error deleting image!', 'error'));
               }
             });
-
             imageGallery.appendChild(imageItem);
           });
         });
-      }).catch((error) => {
-        console.error('Error fetching images:', error);
-        showStatus('Error fetching images!', 'error');
-      });
+      }).catch((error) => showStatus('Error fetching images!', 'error'));
     };
 
-    // Close modal when clicking on X or outside the modal
-    closeModal.addEventListener('click', () => {
-      imageModal.style.display = 'none';
-    });
-
-    imageModal.addEventListener('click', (e) => {
-      if (e.target === imageModal) {
-        imageModal.style.display = 'none';
-      }
-    });
+    // Modal close handlers
+    closeModal.addEventListener('click', () => { imageModal.style.display = 'none'; });
+    imageModal.addEventListener('click', (e) => { if (e.target === imageModal) imageModal.style.display = 'none'; });
 
     let currentImageName = '';
-
     function openRenameModal(imageName) {
       currentImageName = imageName;
-      const renameModal = document.getElementById('renameModal');
-      const renameSelect = document.getElementById('renameSelect');
-
-      // Populate select with current menu items
       fetchMenuItems(true).then(() => {
-        renameModal.style.display = 'flex';
+        document.getElementById('renameModal').style.display = 'flex';
       });
     }
 
@@ -883,22 +831,20 @@
     async function handleRename() {
       const newItemName = document.getElementById('renameSelect').value;
       if (!newItemName) return;
-
-      const fileExtension = currentImageName.split('.').pop();
-      const newFileName = `${newItemName}.${fileExtension}`;
-
+      const newFileName = `${newItemName}.jpg`;
+      if (newFileName === currentImageName) {
+        closeRenameModal();
+        return;
+      }
       try {
         const oldRef = storage.ref('images/' + currentImageName);
         const newRef = storage.ref('images/' + newFileName);
-
         const url = await oldRef.getDownloadURL();
         const response = await fetch(url);
         const blob = await response.blob();
-
         await newRef.put(blob);
         await oldRef.delete();
-
-        showStatus('<i class="fas fa-check-circle"></i> Image reassigned successfully!', 'success');
+        showStatus('<i class="fas fa-check-circle"></i> Image reassigned!', 'success');
         closeRenameModal();
         displayImages();
       } catch (error) {
