@@ -1963,40 +1963,37 @@ function verifyOtp() {
                 }
             }
         }
-        function sendMessage() {
+                function sendMessage() {
             const inputField = document.getElementById('notificationInput');
             const message = inputField.value.trim();
-            if (message) {
-                const username = localStorage.getItem('username') || 'User';
-                const randomChars = Math.random().toString(36).substring(2, 7);
-                const userId = `${username}_${randomChars}`;
-                const userMessagesRef = firebase.database().ref(`userMessages/${userId}`);
+            const currentUser = auth.currentUser;
 
-                // Create a new message entry with timestamp
-                const newMessageRef = userMessagesRef.push();
-                const timestamp = firebase.database.ServerValue.TIMESTAMP;
+            if (message && currentUser) { // Only send if logged in
+                // THIS IS THE KEY CHANGE: Save message under the user's unique ID
+                const userMessagesRef = firebase.database().ref(`userMessages/${currentUser.uid}`);
 
-                newMessageRef.set({
-                    timestamp: timestamp,
+                userMessagesRef.push({
+                    timestamp: firebase.database.ServerValue.TIMESTAMP,
                     type: 'user',
-                    message: message,
-                    userId: userId,
-                    username: username
+                    message: message
                 }, error => {
                     if (!error) {
-                        const isUserMessage = true;
                         const notificationHistory = document.getElementById('notificationHistory');
                         const historyItem = document.createElement('div');
                         historyItem.className = 'notification-message';
                         const bubble = document.createElement('div');
-                        bubble.className = `notification-bubble ${isUserMessage ? 'user' : 'staff'}`;
+                        bubble.className = `notification-bubble user`;
                         bubble.innerText = message;
                         historyItem.appendChild(bubble);
                         notificationHistory.appendChild(historyItem);
                         inputField.value = '';
                         notificationHistory.scrollTop = notificationHistory.scrollHeight;
+                    } else {
+                        alert("Message failed to send.");
                     }
                 });
+            } else if (!currentUser) {
+                alert("You must be logged in to send a message.");
             }
         }
         function dismissNotification() {
@@ -2016,39 +2013,49 @@ function verifyOtp() {
             }
         }
         function displayOrderHistory() {
-            let orderHistory = JSON.parse(localStorage.getItem('orderHistory')) || [];
             const orderHistoryContainer = document.getElementById('orderHistory');
-            orderHistoryContainer.innerHTML = '';
+            orderHistoryContainer.innerHTML = ''; // Clear previous content
 
-            if (orderHistory.length > 2) {
-                orderHistory = orderHistory.slice(-2);
-                localStorage.setItem('orderHistory', JSON.stringify(orderHistory));
-            }
-            orderHistory.slice().reverse().forEach(order => {
-                const orderDate = new Date(order.timestamp).toLocaleString();
-                let orderDetails = `<div class="order-history-item">
-                    <div class="order-date">Order placed on ${orderDate}</div>
-                    <div class="order-details">`;
-                order.items.forEach(item => {
-                    let quantity = item.quantity;
-                    if (quantity < 0.001) {
-                        quantity = 0.001;
+            const currentUser = auth.currentUser;
+            if (currentUser) {
+                // User is logged in, fetch their orders from the database.
+                const userOrdersRef = firebase.database().ref(`orders/${currentUser.uid}`).orderByChild('timestamp').limitToLast(10); // Get last 10 orders
+                
+                userOrdersRef.once('value', snapshot => {
+                    if (!snapshot.exists()) {
+                        orderHistoryContainer.innerHTML = '<p style="text-align: center; padding: 20px;">You have no past orders.</p>';
+                        return;
                     }
-                    const roundedQuantity = quantity.toFixed(3);
-                    const itemText = item.unit ? `${item.name}: ${roundedQuantity} ${item.unit}` : `${item.name}: ${roundedQuantity}x`;
-                    orderDetails += `<p>${itemText}</p>`;
+                    
+                    const orders = [];
+                    snapshot.forEach(childSnapshot => {
+                        orders.push(childSnapshot.val());
+                    });
+
+                    // Display orders, newest first
+                    orders.reverse().forEach(order => {
+                        const orderDate = new Date(order.timestamp).toLocaleString();
+                        let orderDetailsHTML = `<div class="order-history-item">
+                            <div class="order-date">Order placed on ${orderDate}</div>
+                            <div class="order-details">`;
+                        
+                        order.items.forEach(item => {
+                            const quantity = item.quantity.toFixed(3).replace(/\.?0+$/, '');
+                            const itemText = item.unit ? `${item.name}: ${quantity} ${item.unit}` : `${item.name}: ${quantity}x`;
+                            orderDetailsHTML += `<p>${itemText}</p>`;
+                        });
+
+                        orderDetailsHTML += `
+                            <p><strong>Total Price: Rs ${order.totalPrice.toFixed(2)}</strong></p>
+                            </div></div>`;
+                        
+                        orderHistoryContainer.innerHTML += orderDetailsHTML;
+                    });
                 });
-
-                const deliveryCharge = order.deliveryCharge || 100;
-                const totalWithDelivery = order.totalPrice + deliveryCharge;
-                orderDetails += `
-                    <p><strong>Delivery Charge: Rs ${deliveryCharge.toFixed(2)}</strong></p>
-                    <p><strong>Total Price: Rs ${totalWithDelivery.toFixed(2)}</strong></p>
-                </div></div>`;
-
-                orderHistoryContainer.innerHTML += orderDetails;
-            });
-            scrollToOrderHistoryBottom();
+            } else {
+                // User is not logged in, show a message.
+                orderHistoryContainer.innerHTML = '<p style="text-align: center; padding: 20px;">Please log in to see your order history.</p>';
+            }
         }
         function scrollToOrderHistoryBottom() {
             const orderHistoryWindow = document.getElementById('orderHistoryWindow');
@@ -2536,13 +2543,23 @@ function verifyOtp() {
                 orderButton.style.opacity = '1';
             }, 1000);
         }
-        function processOrder(paymentMethod) {
+                function processOrder(paymentMethod) {
+            // Ensure a user is logged in
+            const currentUser = auth.currentUser;
+            if (!currentUser) {
+                alert("Authentication error. Please try logging in again.");
+                showLoginOverlay();
+                return;
+            }
+
             const cartItems = document.querySelectorAll('.cart-item');
             const location = localStorage.getItem('address');
             const phone = localStorage.getItem('phone');
             const username = localStorage.getItem('username');
 
-            const ordersRef = firebase.database().ref('orders');
+            // THIS IS THE KEY CHANGE: Save order under the user's unique ID
+            const ordersRef = firebase.database().ref(`orders/${currentUser.uid}`);
+
             const orderItems = Array.from(cartItems).map(cartItem => {
                 const itemName = cartItem.querySelector('.item-name').innerText;
                 const quantity = parseFloat(cartItem.querySelector('.item-quantity').dataset.quantity);
@@ -2559,11 +2576,8 @@ function verifyOtp() {
             let deliveryCharge = 100 - totalProfit;
             deliveryCharge = Math.max(deliveryCharge, 0);
             const finalPrice = totalPrice + deliveryCharge;
-
-            // Create payment method display text
             const paymentMethodText = paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment';
 
-            // Include payment method in the order data
             ordersRef.push({
                 location: location,
                 phone: phone,
@@ -2573,31 +2587,32 @@ function verifyOtp() {
                 timestamp: timestamp,
                 totalPrice: finalPrice,
                 deliveryCharge: deliveryCharge,
-                paymentMethod: paymentMethod,            // Store payment method code (cod/online)
-                paymentMethodText: paymentMethodText     // Store human-readable payment method text
+                paymentMethod: paymentMethod,
+                paymentMethodText: paymentMethodText
             }).then(() => {
+                // We keep saving to localStorage for quick display of recent orders,
+                // but the database is now the permanent, secure source.
                 const newOrderHistory = JSON.parse(localStorage.getItem('orderHistory')) || [];
                 newOrderHistory.push({
                     timestamp: timestamp,
                     items: orderItems,
                     totalPrice: totalPrice,
                     deliveryCharge: deliveryCharge,
-                    paymentMethod: paymentMethod,
-                    paymentMethodText: paymentMethodText
                 });
+                if (newOrderHistory.length > 5) newOrderHistory.shift(); // Keep it to 5 recent
                 localStorage.setItem('orderHistory', JSON.stringify(newOrderHistory));
+
                 resetQuantityControlsToAddCart(orderItems);
                 document.getElementById('cartItems').innerHTML = '';
                 adjustSpacerHeight();
-
-                // Pass payment method to order confirmation to display it
                 showOrderConfirmation(paymentMethodText);
-
                 resetOrderVariables();
                 document.getElementById('cartIcon').id = 'cartIcon';
+            }).catch(error => {
+                console.error("Order failed: ", error);
+                alert("Failed to place order. Please check your connection and try again.");
             });
         }
-
         function showQRCodePayment() {
             document.getElementById('paymentOverlay').classList.remove('active');
             document.getElementById('qrCodeOverlay').classList.add('active');
