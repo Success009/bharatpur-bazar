@@ -584,13 +584,10 @@
                     }
                 });
             } else {
-                // No user is signed in, prompt for login
-                function handleLogin() {
-    // No user is signed in, prompt for login
+               function handleLogin() {
     const password = prompt("Please enter the admin password to continue:");
     if (password) {
-        // Replace with your admin email if you changed it
-        const email = "admin@bkbazar.com"; 
+        const email = "admin@bkbazar.com"; // Your admin email
         auth.signInWithEmailAndPassword(email, password)
             .catch(error => {
                 console.error("Login failed:", error);
@@ -601,40 +598,34 @@
     }
 }
 
-// Define a function to handle the state when a user is logged in
+// This function will be called AFTER a user has successfully logged in.
 function handleUserLoggedIn(user) {
-    // User is signed in, check if they are an admin
+    // THIS IS THE CORRECTED LINE:
     const adminRef = firebase.database().ref('admins/' + user.uid);
+    
     adminRef.once('value', snapshot => {
         if (snapshot.exists()) {
-            // Yes, this is an admin. Fetch the orders.
+            // Success! The user is an admin. Fetch the orders.
             console.log("Admin access granted.");
             fetchOrders();
         } else {
-            // Not an admin. Log them out and show an error.
-            auth.signOut(); // This will trigger onAuthStateChanged again with user=null
+            // The user logged in, but they are not in the admins list. Deny access.
+            auth.signOut();
             document.body.innerHTML = '<h1>Access Denied</h1><p>You do not have permission to view this page.</p>';
         }
     });
 }
-                auth.onAuthStateChanged(user => { // <-- LISTENER #1 STARTS HERE
-            if (user) {
-                // ... user is logged in logic ...
-            } else {
-                // No user is signed in, prompt for login
 
-                function handleLogin() { /* ... */ }
-                function handleUserLoggedIn(user) { /* ... */ }
-
-                // The main listener is now much simpler
-                auth.onAuthStateChanged(user => { // <-- LISTENER #2 (THE PROBLEM) STARTS HERE
-                    if (user) {
-                        // ...
-                    } else {
-                        // ...
-                    }
-                }); // <-- LISTENER #2 ENDS HERE
-
+// This is the ONLY auth listener. It runs once when the page loads.
+auth.onAuthStateChanged(user => {
+    if (user) {
+        // A user session exists. Verify they are an admin.
+        handleUserLoggedIn(user);
+    } else {
+        // No user session exists. Prompt them to log in.
+        handleLogin();
+    }
+});
                 window.onload = fetchOrders;
     </script>
 </body>
