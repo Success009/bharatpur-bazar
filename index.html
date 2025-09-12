@@ -1482,6 +1482,38 @@
                 animation: slideIn 0.3s ease;
             }
         }
+        .login-overlay.light-mode button:disabled {
+    background: #a5c9e4;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.login-overlay.light-mode .spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+    margin-right: 10px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.login-overlay.light-mode .form-feedback {
+    color: #dc3545;
+    font-size: 0.9em;
+    margin-top: 10px;
+    height: 15px; /* Reserve space to prevent layout shift */
+}
+
+.storedAddress {
+    white-space: pre-wrap; /* Allows line breaks for phone number */
+}
     </style>
 </head>
 
@@ -1551,46 +1583,44 @@
         </div>
     </div>
     <div id="loginContainer" class="login-container">
-        <div class="login-overlay light-mode">
-            <h1>Please register first</h1>
-            <h1> To place your order</h1>
-            <p>Please enter your details to proceed:</p>
+    <div class="login-overlay light-mode">
+        <!-- Step 1: Phone Number Input -->
+        <div id="phoneAuthSection">
+            <h1>Verify Your Phone Number</h1>
+            <p>We'll send a verification code to your phone.</p>
+            <label for="phoneNumber">Phone Number:</label>
+            <input type="tel" id="phoneNumber" placeholder="+977 98********" required>
+            <div id="phone-feedback" class="form-feedback"></div>
+            <div class="login-buttons">
+                <button id="sendOtpBtn">Send Code</button>
+                <button id="cancelLoginBtn" class="cancel-btn">Cancel</button>
+            </div>
+            <!-- This container is required for reCAPTCHA -->
+            <div id="recaptcha-container" style="margin-top: 20px;"></div>
+        </div>
+
+        <!-- Step 2: OTP Input -->
+        <div id="otpSection" style="display: none;">
+            <h1>Enter Code</h1>
+            <p>Enter the 6-digit code we sent to your phone.</p>
+            <label for="otpInput">Verification Code:</label>
+            <input type="number" id="otpInput" placeholder="123456" required>
+            <div id="otp-feedback" class="form-feedback"></div>
+            <div class="login-buttons">
+                <button id="verifyOtpBtn">Verify & Proceed</button>
+            </div>
+        </div>
+
+        <!-- Step 3: User Details (Your original form) -->
+        <div id="userDetailsSection" style="display: none;">
+            <h1>Almost Done!</h1>
+            <p>Please enter your details to complete the registration:</p>
             <label for="loginUsername">Enter your name:</label>
             <input type="text" id="loginUsername" placeholder="Enter your name" required>
-            <label for="loginPhone">Enter your phone number:</label>
-            <input type="tel" id="loginPhone" value="9" placeholder="Enter your phone number" required>
             <label for="loginPart2">Bharatpur-(ward)</label>
             <select id="bharatpurWard" name="bharatpurWard" required>
                 <option value="">-- Select a Ward --</option>
-                <option value="1">Bharatpur 1</option>
-                <option value="2">Bharatpur 2</option>
-                <option value="3">Bharatpur 3</option>
-                <option value="4">Bharatpur 4</option>
-                <option value="5">Bharatpur 5</option>
-                <option value="6">Bharatpur 6</option>
-                <option value="7">Bharatpur 7</option>
-                <option value="8">Bharatpur 8</option>
-                <option value="9">Bharatpur 9</option>
-                <option value="10">Bharatpur 10</option>
-                <option value="11">Bharatpur 11</option>
-                <option value="12">Bharatpur 12</option>
-                <option value="13">Bharatpur 13</option>
-                <option value="14">Bharatpur 14</option>
-                <option value="15">Bharatpur 15</option>
-                <option value="16">Bharatpur 16</option>
-                <option value="17">Bharatpur 17</option>
-                <option value="18">Bharatpur 18</option>
-                <option value="19">Bharatpur 19</option>
-                <option value="20">Bharatpur 20</option>
-                <option value="21">Bharatpur 21</option>
-                <option value="22">Bharatpur 22</option>
-                <option value="23">Bharatpur 23</option>
-                <option value="24">Bharatpur 24</option>
-                <option value="25">Bharatpur 25</option>
-                <option value="26">Bharatpur 26</option>
-                <option value="27">Bharatpur 27</option>
-                <option value="28">Bharatpur 28</option>
-                <option value="29">Bharatpur 29</option>
+                <option value="1">Bharatpur 1</option><option value="2">Bharatpur 2</option><option value="3">Bharatpur 3</option><option value="4">Bharatpur 4</option><option value="5">Bharatpur 5</option><option value="6">Bharatpur 6</option><option value="7">Bharatpur 7</option><option value="8">Bharatpur 8</option><option value="9">Bharatpur 9</option><option value="10">Bharatpur 10</option><option value="11">Bharatpur 11</option><option value="12">Bharatpur 12</option><option value="13">Bharatpur 13</option><option value="14">Bharatpur 14</option><option value="15">Bharatpur 15</option><option value="16">Bharatpur 16</option><option value="17">Bharatpur 17</option><option value="18">Bharatpur 18</option><option value="19">Bharatpur 19</option><option value="20">Bharatpur 20</option><option value="21">Bharatpur 21</option><option value="22">Bharatpur 22</option><option value="23">Bharatpur 23</option><option value="24">Bharatpur 24</option><option value="25">Bharatpur 25</option><option value="26">Bharatpur 26</option><option value="27">Bharatpur 27</option><option value="28">Bharatpur 28</option><option value="29">Bharatpur 29</option>
             </select>
             <label for="loginPart3">Chowk</label>
             <input type="text" id="loginPart3" placeholder="e.g., Hakim Chowk" required>
@@ -1598,10 +1628,10 @@
                     class="terms-link">Terms and Service</a></label>
             <div class="login-buttons">
                 <button id="registerOrderBtn">Register & Order</button>
-                <button id="cancelLoginBtn" class="cancel-btn">Cancel</button>
             </div>
         </div>
     </div>
+</div>
     <div id="orderConfirmation" class="order-confirmation">
         <div class="confirmation-overlay">
             <div class="success-icon">
@@ -1691,6 +1721,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyAHOiriisWOpuVLAdcYun_mCkOhbYfB5y4",
@@ -1705,7 +1736,9 @@
         firebase.initializeApp(firebaseConfig);
         const menuRef = firebase.database().ref('menu');
         const storage = firebase.storage();
+        const auth = firebase.auth();
         const notificationsRef = firebase.database().ref('notifications');
+        
         function fetchNotifications() {
             setInterval(() => {
                 notificationsRef.once('value', snapshot => {
@@ -1723,6 +1756,79 @@
                 });
             }, 1000);
         }
+        function setupRecaptcha() {
+    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+        'size': 'invisible',
+        'callback': (response) => { console.log("reCAPTCHA verified"); }
+    });
+}
+
+function sendOtp() {
+    const phoneNumberInput = document.getElementById('phoneNumber');
+    const phoneFeedback = document.getElementById('phone-feedback');
+    phoneFeedback.textContent = ''; // Clear previous errors
+
+    let phoneNumber = phoneNumberInput.value.trim();
+    if (!phoneNumber.startsWith('+977')) {
+        if (phoneNumber.length === 10 && phoneNumber.startsWith('9')) {
+             phoneNumber = '+977' + phoneNumber;
+        } else {
+             phoneFeedback.textContent = 'Please enter a valid 10-digit number.';
+             return;
+        }
+    }
+    
+    const sendOtpBtn = document.getElementById('sendOtpBtn');
+    sendOtpBtn.disabled = true;
+    sendOtpBtn.innerHTML = '<span class="spinner"></span>Sending...';
+
+    const appVerifier = window.recaptchaVerifier;
+
+    auth.signInWithPhoneNumber(phoneNumber, appVerifier)
+        .then((confirmationResult) => {
+            window.confirmationResult = confirmationResult;
+            showCartFeedback('Verification code sent!', 'success');
+            document.getElementById('phoneAuthSection').style.display = 'none';
+            document.getElementById('otpSection').style.display = 'block';
+        }).catch((error) => {
+            console.error("Error sending OTP:", error);
+            phoneFeedback.textContent = `Error: ${error.message}`;
+            sendOtpBtn.disabled = false;
+            sendOtpBtn.innerHTML = 'Send Code';
+            window.recaptchaVerifier.render().then(widgetId => {
+              grecaptcha.reset(widgetId);
+            });
+        });
+}
+
+function verifyOtp() {
+    const otpInput = document.getElementById('otpInput');
+    const otpFeedback = document.getElementById('otp-feedback');
+    otpFeedback.textContent = ''; // Clear previous errors
+
+    const otp = otpInput.value.trim();
+    if (otp.length !== 6) {
+        otpFeedback.textContent = 'Please enter a valid 6-digit code.';
+        return;
+    }
+
+    const verifyBtn = document.getElementById('verifyOtpBtn');
+    verifyBtn.disabled = true;
+    verifyBtn.innerHTML = '<span class="spinner"></span>Verifying...';
+
+    window.confirmationResult.confirm(otp).then((result) => {
+        const user = result.user;
+        console.log("User verified:", user.phoneNumber);
+        localStorage.setItem('phone', user.phoneNumber);
+        document.getElementById('otpSection').style.display = 'none';
+        document.getElementById('userDetailsSection').style.display = 'block';
+    }).catch((error) => {
+        console.error("Error verifying OTP:", error);
+        otpFeedback.textContent = 'Invalid code. Please try again.';
+        verifyBtn.disabled = false;
+        verifyBtn.innerHTML = 'Verify & Proceed';
+    });
+}
         function toggleCartWindow() {
             const cartWindow = document.getElementById('cartWindow');
             const notificationWindow = document.getElementById('notificationWindow');
@@ -2590,11 +2696,36 @@
                 }, 300);
             }
         }
-        function showLoginOverlay() {
+                function showLoginOverlay() {
             const loginContainer = document.getElementById('loginContainer');
             if (loginContainer) {
                 loginContainer.classList.add('active');
-                setupLoginInputs();
+                
+                // Reset form to the first step and clear fields/feedback
+                document.getElementById('phoneAuthSection').style.display = 'block';
+                document.getElementById('otpSection').style.display = 'none';
+                document.getElementById('userDetailsSection').style.display = 'none';
+                
+                document.getElementById('phoneNumber').value = '';
+                document.getElementById('otpInput').value = '';
+                document.getElementById('phone-feedback').textContent = '';
+                document.getElementById('otp-feedback').textContent = '';
+
+                const sendOtpBtn = document.getElementById('sendOtpBtn');
+                sendOtpBtn.disabled = false;
+                sendOtpBtn.innerHTML = 'Send Code';
+                
+                const verifyBtn = document.getElementById('verifyOtpBtn');
+                verifyBtn.disabled = false;
+                verifyBtn.innerHTML = 'Verify & Proceed';
+
+                // Setup reCAPTCHA
+                setupRecaptcha();
+                setTimeout(() => { 
+                    if (window.recaptchaVerifier) {
+                        window.recaptchaVerifier.render();
+                    }
+                }, 500);
             }
         }
 
@@ -2613,26 +2744,15 @@
             }
         }
 
-        function setupLoginInputs() {
-            const phoneInput = document.getElementById('loginPhone');
-            if (phoneInput) {
-                phoneInput.oninput = e => e.target.value = '9' + e.target.value.replace(/\D/g, '').slice(1, 10);
-            }
-        }
-
         function saveDetailsAndPlaceOrder() {
-            const loginUsername = document.getElementById('loginUsername').value;
-            const loginPhone = document.getElementById('loginPhone').value;
-            const loginPart2 = document.getElementById('bharatpurWard').value; // Updated ID
-            const loginPart3 = document.getElementById('loginPart3').value;
+            const loginUsername = document.getElementById('loginUsername').value.trim();
+            const loginPart2 = document.getElementById('bharatpurWard').value;
+            const loginPart3 = document.getElementById('loginPart3').value.trim();
+            const verifiedPhone = localStorage.getItem('phone'); // Phone is already verified
 
             // Validation
             if (!loginUsername) {
                 alert('Please enter your name.');
-                return;
-            }
-            if (!/^9\d{9}$/.test(loginPhone)) {
-                alert('Phone number must be exactly 10 digits long.');
                 return;
             }
             if (!loginPart2) {
@@ -2644,36 +2764,17 @@
                 return;
             }
             localStorage.setItem('username', loginUsername);
-            localStorage.setItem('phone', loginPhone);
-            localStorage.setItem('address', `${loginPart2}, ${loginPart3}`); // Updated format
+            localStorage.setItem('address', `Bharatpur-${loginPart2}, ${loginPart3}`);
 
-            adjustSpacerHeight();
-            showOrderConfirmation();
-            resetOrderVariables();
+            displayStoredAddress();
             closeLoginOverlay();
+            
+            // Proceed to the payment modal
             setTimeout(() => {
                 placeOrder();
-            }, 600);
+            }, 300); // Small delay to let modal close smoothly
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
-            setupLoginInputs(); // Initialize phone input formatting
-
-            const registerOrderBtn = document.getElementById('registerOrderBtn');
-            if (registerOrderBtn) {
-                registerOrderBtn.addEventListener('click', saveDetailsAndPlaceOrder);
-            }
-
-            const cancelLoginBtn = document.getElementById('cancelLoginBtn');
-            if (cancelLoginBtn) {
-                cancelLoginBtn.addEventListener('click', closeLoginOverlay);
-            }
-
-            const confirmationCloseBtn = document.getElementById('confirmationCloseBtn');
-            if (confirmationCloseBtn) {
-                confirmationCloseBtn.addEventListener('click', closeOrderConfirmation);
-            }
-        });
         function resetOrderVariables() {
             totalProfit = 0;
             deliveryCharge = 100;
@@ -2704,17 +2805,21 @@
             }
         }
         function displayStoredAddress() {
-            const storedAddress = localStorage.getItem('address') || 'Address not set';
-            document.getElementById('storedAddress').innerText = `Address: ${storedAddress}`;
+            const storedAddress = localStorage.getItem('address') || 'Not set';
+            const storedPhone = localStorage.getItem('phone') || 'Not set';
+            // Using template literal for cleaner multi-line string
+            document.getElementById('storedAddress').innerText = `Address: ${storedAddress}\nPhone: ${storedPhone}`;
         }
         function changeAddress() {
-            if (confirm('Are you sure you want to edit your data?')) {
+            if (confirm('Are you sure you want to edit your data? This will require you to verify your phone number again.')) {
                 const deviceId = getDeviceId();
                 firebase.database().ref(`users/${deviceId}`).remove();
                 localStorage.removeItem('username');
-                localStorage.removeItem('phone');
+                localStorage.removeItem('phone'); // This is the key change
                 localStorage.removeItem('address');
-                toggleOrderHistoryWindow()
+                displayStoredAddress(); // Update UI to show "not set"
+                toggleOrderHistoryWindow();
+                showCartFeedback('Your data has been cleared.', 'success');
             }
         }
         document.getElementById('searchInput').addEventListener('keydown', function (event) {
@@ -2782,9 +2887,33 @@
             }
         });
         document.addEventListener('DOMContentLoaded', userData);
-        displayStoredAddress();
-        displayOrderHistory();
-        fetchMenuItems();
+        document.addEventListener('DOMContentLoaded', function () {
+            // New Listeners for Phone Auth
+            document.getElementById('sendOtpBtn').addEventListener('click', sendOtp);
+            document.getElementById('verifyOtpBtn').addEventListener('click', verifyOtp);
+
+            // Existing listeners
+            const registerOrderBtn = document.getElementById('registerOrderBtn');
+            if (registerOrderBtn) {
+                registerOrderBtn.addEventListener('click', saveDetailsAndPlaceOrder);
+            }
+
+            const cancelLoginBtn = document.getElementById('cancelLoginBtn');
+            if (cancelLoginBtn) {
+                cancelLoginBtn.addEventListener('click', closeLoginOverlay);
+            }
+
+            const confirmationCloseBtn = document.getElementById('confirmationCloseBtn');
+            if (confirmationCloseBtn) {
+                confirmationCloseBtn.addEventListener('click', closeOrderConfirmation);
+            }
+            
+            initPaymentEvents(); // This was already here, but good to confirm
+            userData();
+            displayStoredAddress();
+            displayOrderHistory();
+            fetchMenuItems();
+        });
     </script>
 </body>
 </html>
