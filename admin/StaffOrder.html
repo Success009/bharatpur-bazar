@@ -617,19 +617,25 @@ function handleUserLoggedIn(user) {
         }
     });
 }
+                auth.onAuthStateChanged(user => { // <-- LISTENER #1 STARTS HERE
+            if (user) {
+                // ... user is logged in logic ...
+            } else {
+                // No user is signed in, prompt for login
 
-// The main listener is now much simpler
-auth.onAuthStateChanged(user => {
-    if (user) {
-        // A user is present. Let's verify they are an admin.
-        handleUserLoggedIn(user);
-    } else {
-        // No user is present. Show the login prompt.
-        handleLogin();
-    }
-});
+                function handleLogin() { /* ... */ }
+                function handleUserLoggedIn(user) { /* ... */ }
 
-        window.onload = fetchOrders;
+                // The main listener is now much simpler
+                auth.onAuthStateChanged(user => { // <-- LISTENER #2 (THE PROBLEM) STARTS HERE
+                    if (user) {
+                        // ...
+                    } else {
+                        // ...
+                    }
+                }); // <-- LISTENER #2 ENDS HERE
+
+                window.onload = fetchOrders;
     </script>
 </body>
 </html>
