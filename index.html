@@ -1482,38 +1482,6 @@
                 animation: slideIn 0.3s ease;
             }
         }
-        .login-overlay.light-mode button:disabled {
-    background: #a5c9e4;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}
-
-.login-overlay.light-mode .spinner {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    border: 3px solid rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    border-top-color: #fff;
-    animation: spin 1s ease-in-out infinite;
-    margin-right: 10px;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-.login-overlay.light-mode .form-feedback {
-    color: #dc3545;
-    font-size: 0.9em;
-    margin-top: 10px;
-    height: 15px; /* Reserve space to prevent layout shift */
-}
-
-.storedAddress {
-    white-space: pre-wrap; /* Allows line breaks for phone number */
-}
     </style>
 </head>
 
@@ -1583,44 +1551,46 @@
         </div>
     </div>
     <div id="loginContainer" class="login-container">
-    <div class="login-overlay light-mode">
-        <!-- Step 1: Phone Number Input -->
-        <div id="phoneAuthSection">
-            <h1>Verify Your Phone Number</h1>
-            <p>We'll send a verification code to your phone.</p>
-            <label for="phoneNumber">Phone Number:</label>
-            <input type="tel" id="phoneNumber" placeholder="+977 98********" required>
-            <div id="phone-feedback" class="form-feedback"></div>
-            <div class="login-buttons">
-                <button id="sendOtpBtn">Send Code</button>
-                <button id="cancelLoginBtn" class="cancel-btn">Cancel</button>
-            </div>
-            <!-- This container is required for reCAPTCHA -->
-            <div id="recaptcha-container" style="margin-top: 20px;"></div>
-        </div>
-
-        <!-- Step 2: OTP Input -->
-        <div id="otpSection" style="display: none;">
-            <h1>Enter Code</h1>
-            <p>Enter the 6-digit code we sent to your phone.</p>
-            <label for="otpInput">Verification Code:</label>
-            <input type="number" id="otpInput" placeholder="123456" required>
-            <div id="otp-feedback" class="form-feedback"></div>
-            <div class="login-buttons">
-                <button id="verifyOtpBtn">Verify & Proceed</button>
-            </div>
-        </div>
-
-        <!-- Step 3: User Details (Your original form) -->
-        <div id="userDetailsSection" style="display: none;">
-            <h1>Almost Done!</h1>
-            <p>Please enter your details to complete the registration:</p>
+        <div class="login-overlay light-mode">
+            <h1>Please register first</h1>
+            <h1> To place your order</h1>
+            <p>Please enter your details to proceed:</p>
             <label for="loginUsername">Enter your name:</label>
             <input type="text" id="loginUsername" placeholder="Enter your name" required>
+            <label for="loginPhone">Enter your phone number:</label>
+            <input type="tel" id="loginPhone" value="9" placeholder="Enter your phone number" required>
             <label for="loginPart2">Bharatpur-(ward)</label>
             <select id="bharatpurWard" name="bharatpurWard" required>
                 <option value="">-- Select a Ward --</option>
-                <option value="1">Bharatpur 1</option><option value="2">Bharatpur 2</option><option value="3">Bharatpur 3</option><option value="4">Bharatpur 4</option><option value="5">Bharatpur 5</option><option value="6">Bharatpur 6</option><option value="7">Bharatpur 7</option><option value="8">Bharatpur 8</option><option value="9">Bharatpur 9</option><option value="10">Bharatpur 10</option><option value="11">Bharatpur 11</option><option value="12">Bharatpur 12</option><option value="13">Bharatpur 13</option><option value="14">Bharatpur 14</option><option value="15">Bharatpur 15</option><option value="16">Bharatpur 16</option><option value="17">Bharatpur 17</option><option value="18">Bharatpur 18</option><option value="19">Bharatpur 19</option><option value="20">Bharatpur 20</option><option value="21">Bharatpur 21</option><option value="22">Bharatpur 22</option><option value="23">Bharatpur 23</option><option value="24">Bharatpur 24</option><option value="25">Bharatpur 25</option><option value="26">Bharatpur 26</option><option value="27">Bharatpur 27</option><option value="28">Bharatpur 28</option><option value="29">Bharatpur 29</option>
+                <option value="1">Bharatpur 1</option>
+                <option value="2">Bharatpur 2</option>
+                <option value="3">Bharatpur 3</option>
+                <option value="4">Bharatpur 4</option>
+                <option value="5">Bharatpur 5</option>
+                <option value="6">Bharatpur 6</option>
+                <option value="7">Bharatpur 7</option>
+                <option value="8">Bharatpur 8</option>
+                <option value="9">Bharatpur 9</option>
+                <option value="10">Bharatpur 10</option>
+                <option value="11">Bharatpur 11</option>
+                <option value="12">Bharatpur 12</option>
+                <option value="13">Bharatpur 13</option>
+                <option value="14">Bharatpur 14</option>
+                <option value="15">Bharatpur 15</option>
+                <option value="16">Bharatpur 16</option>
+                <option value="17">Bharatpur 17</option>
+                <option value="18">Bharatpur 18</option>
+                <option value="19">Bharatpur 19</option>
+                <option value="20">Bharatpur 20</option>
+                <option value="21">Bharatpur 21</option>
+                <option value="22">Bharatpur 22</option>
+                <option value="23">Bharatpur 23</option>
+                <option value="24">Bharatpur 24</option>
+                <option value="25">Bharatpur 25</option>
+                <option value="26">Bharatpur 26</option>
+                <option value="27">Bharatpur 27</option>
+                <option value="28">Bharatpur 28</option>
+                <option value="29">Bharatpur 29</option>
             </select>
             <label for="loginPart3">Chowk</label>
             <input type="text" id="loginPart3" placeholder="e.g., Hakim Chowk" required>
@@ -1628,10 +1598,10 @@
                     class="terms-link">Terms and Service</a></label>
             <div class="login-buttons">
                 <button id="registerOrderBtn">Register & Order</button>
+                <button id="cancelLoginBtn" class="cancel-btn">Cancel</button>
             </div>
         </div>
     </div>
-</div>
     <div id="orderConfirmation" class="order-confirmation">
         <div class="confirmation-overlay">
             <div class="success-icon">
@@ -1721,7 +1691,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDlnzH1D7D7Q663eWE086ng_1KdP46MZEs",
@@ -1736,9 +1705,7 @@
         firebase.initializeApp(firebaseConfig);
         const menuRef = firebase.database().ref('menu');
         const storage = firebase.storage();
-        const auth = firebase.auth();
         const notificationsRef = firebase.database().ref('notifications');
-        
         function fetchNotifications() {
             setInterval(() => {
                 notificationsRef.once('value', snapshot => {
@@ -1756,79 +1723,6 @@
                 });
             }, 1000);
         }
-        function setupRecaptcha() {
-    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-        'size': 'invisible',
-        'callback': (response) => { console.log("reCAPTCHA verified"); }
-    });
-}
-
-function sendOtp() {
-    const phoneNumberInput = document.getElementById('phoneNumber');
-    const phoneFeedback = document.getElementById('phone-feedback');
-    phoneFeedback.textContent = ''; // Clear previous errors
-
-    let phoneNumber = phoneNumberInput.value.trim();
-    if (!phoneNumber.startsWith('+977')) {
-        if (phoneNumber.length === 10 && phoneNumber.startsWith('9')) {
-             phoneNumber = '+977' + phoneNumber;
-        } else {
-             phoneFeedback.textContent = 'Please enter a valid 10-digit number.';
-             return;
-        }
-    }
-    
-    const sendOtpBtn = document.getElementById('sendOtpBtn');
-    sendOtpBtn.disabled = true;
-    sendOtpBtn.innerHTML = '<span class="spinner"></span>Sending...';
-
-    const appVerifier = window.recaptchaVerifier;
-
-    auth.signInWithPhoneNumber(phoneNumber, appVerifier)
-        .then((confirmationResult) => {
-            window.confirmationResult = confirmationResult;
-            showCartFeedback('Verification code sent!', 'success');
-            document.getElementById('phoneAuthSection').style.display = 'none';
-            document.getElementById('otpSection').style.display = 'block';
-        }).catch((error) => {
-            console.error("Error sending OTP:", error);
-            phoneFeedback.textContent = `Error: ${error.message}`;
-            sendOtpBtn.disabled = false;
-            sendOtpBtn.innerHTML = 'Send Code';
-            window.recaptchaVerifier.render().then(widgetId => {
-              grecaptcha.reset(widgetId);
-            });
-        });
-}
-
-function verifyOtp() {
-    const otpInput = document.getElementById('otpInput');
-    const otpFeedback = document.getElementById('otp-feedback');
-    otpFeedback.textContent = ''; // Clear previous errors
-
-    const otp = otpInput.value.trim();
-    if (otp.length !== 6) {
-        otpFeedback.textContent = 'Please enter a valid 6-digit code.';
-        return;
-    }
-
-    const verifyBtn = document.getElementById('verifyOtpBtn');
-    verifyBtn.disabled = true;
-    verifyBtn.innerHTML = '<span class="spinner"></span>Verifying...';
-
-    window.confirmationResult.confirm(otp).then((result) => {
-        const user = result.user;
-        console.log("User verified:", user.phoneNumber);
-        localStorage.setItem('phone', user.phoneNumber);
-        document.getElementById('otpSection').style.display = 'none';
-        document.getElementById('userDetailsSection').style.display = 'block';
-    }).catch((error) => {
-        console.error("Error verifying OTP:", error);
-        otpFeedback.textContent = 'Invalid code. Please try again.';
-        verifyBtn.disabled = false;
-        verifyBtn.innerHTML = 'Verify & Proceed';
-    });
-}
         function toggleCartWindow() {
             const cartWindow = document.getElementById('cartWindow');
             const notificationWindow = document.getElementById('notificationWindow');
@@ -1963,37 +1857,40 @@ function verifyOtp() {
                 }
             }
         }
-                function sendMessage() {
+        function sendMessage() {
             const inputField = document.getElementById('notificationInput');
             const message = inputField.value.trim();
-            const currentUser = auth.currentUser;
+            if (message) {
+                const username = localStorage.getItem('username') || 'User';
+                const randomChars = Math.random().toString(36).substring(2, 7);
+                const userId = `${username}_${randomChars}`;
+                const userMessagesRef = firebase.database().ref(`userMessages/${userId}`);
 
-            if (message && currentUser) { // Only send if logged in
-                // THIS IS THE KEY CHANGE: Save message under the user's unique ID
-                const userMessagesRef = firebase.database().ref(`userMessages/${currentUser.uid}`);
+                // Create a new message entry with timestamp
+                const newMessageRef = userMessagesRef.push();
+                const timestamp = firebase.database.ServerValue.TIMESTAMP;
 
-                userMessagesRef.push({
-                    timestamp: firebase.database.ServerValue.TIMESTAMP,
+                newMessageRef.set({
+                    timestamp: timestamp,
                     type: 'user',
-                    message: message
+                    message: message,
+                    userId: userId,
+                    username: username
                 }, error => {
                     if (!error) {
+                        const isUserMessage = true;
                         const notificationHistory = document.getElementById('notificationHistory');
                         const historyItem = document.createElement('div');
                         historyItem.className = 'notification-message';
                         const bubble = document.createElement('div');
-                        bubble.className = `notification-bubble user`;
+                        bubble.className = `notification-bubble ${isUserMessage ? 'user' : 'staff'}`;
                         bubble.innerText = message;
                         historyItem.appendChild(bubble);
                         notificationHistory.appendChild(historyItem);
                         inputField.value = '';
                         notificationHistory.scrollTop = notificationHistory.scrollHeight;
-                    } else {
-                        alert("Message failed to send.");
                     }
                 });
-            } else if (!currentUser) {
-                alert("You must be logged in to send a message.");
             }
         }
         function dismissNotification() {
@@ -2013,49 +1910,39 @@ function verifyOtp() {
             }
         }
         function displayOrderHistory() {
+            let orderHistory = JSON.parse(localStorage.getItem('orderHistory')) || [];
             const orderHistoryContainer = document.getElementById('orderHistory');
-            orderHistoryContainer.innerHTML = ''; // Clear previous content
+            orderHistoryContainer.innerHTML = '';
 
-            const currentUser = auth.currentUser;
-            if (currentUser) {
-                // User is logged in, fetch their orders from the database.
-                const userOrdersRef = firebase.database().ref(`orders/${currentUser.uid}`).orderByChild('timestamp').limitToLast(10); // Get last 10 orders
-                
-                userOrdersRef.once('value', snapshot => {
-                    if (!snapshot.exists()) {
-                        orderHistoryContainer.innerHTML = '<p style="text-align: center; padding: 20px;">You have no past orders.</p>';
-                        return;
-                    }
-                    
-                    const orders = [];
-                    snapshot.forEach(childSnapshot => {
-                        orders.push(childSnapshot.val());
-                    });
-
-                    // Display orders, newest first
-                    orders.reverse().forEach(order => {
-                        const orderDate = new Date(order.timestamp).toLocaleString();
-                        let orderDetailsHTML = `<div class="order-history-item">
-                            <div class="order-date">Order placed on ${orderDate}</div>
-                            <div class="order-details">`;
-                        
-                        order.items.forEach(item => {
-                            const quantity = item.quantity.toFixed(3).replace(/\.?0+$/, '');
-                            const itemText = item.unit ? `${item.name}: ${quantity} ${item.unit}` : `${item.name}: ${quantity}x`;
-                            orderDetailsHTML += `<p>${itemText}</p>`;
-                        });
-
-                        orderDetailsHTML += `
-                            <p><strong>Total Price: Rs ${order.totalPrice.toFixed(2)}</strong></p>
-                            </div></div>`;
-                        
-                        orderHistoryContainer.innerHTML += orderDetailsHTML;
-                    });
-                });
-            } else {
-                // User is not logged in, show a message.
-                orderHistoryContainer.innerHTML = '<p style="text-align: center; padding: 20px;">Please log in to see your order history.</p>';
+            if (orderHistory.length > 2) {
+                orderHistory = orderHistory.slice(-2);
+                localStorage.setItem('orderHistory', JSON.stringify(orderHistory));
             }
+            orderHistory.slice().reverse().forEach(order => {
+                const orderDate = new Date(order.timestamp).toLocaleString();
+                let orderDetails = `<div class="order-history-item">
+                    <div class="order-date">Order placed on ${orderDate}</div>
+                    <div class="order-details">`;
+                order.items.forEach(item => {
+                    let quantity = item.quantity;
+                    if (quantity < 0.001) {
+                        quantity = 0.001;
+                    }
+                    const roundedQuantity = quantity.toFixed(3);
+                    const itemText = item.unit ? `${item.name}: ${roundedQuantity} ${item.unit}` : `${item.name}: ${roundedQuantity}x`;
+                    orderDetails += `<p>${itemText}</p>`;
+                });
+
+                const deliveryCharge = order.deliveryCharge || 100;
+                const totalWithDelivery = order.totalPrice + deliveryCharge;
+                orderDetails += `
+                    <p><strong>Delivery Charge: Rs ${deliveryCharge.toFixed(2)}</strong></p>
+                    <p><strong>Total Price: Rs ${totalWithDelivery.toFixed(2)}</strong></p>
+                </div></div>`;
+
+                orderHistoryContainer.innerHTML += orderDetails;
+            });
+            scrollToOrderHistoryBottom();
         }
         function scrollToOrderHistoryBottom() {
             const orderHistoryWindow = document.getElementById('orderHistoryWindow');
@@ -2543,23 +2430,13 @@ function verifyOtp() {
                 orderButton.style.opacity = '1';
             }, 1000);
         }
-                function processOrder(paymentMethod) {
-            // Ensure a user is logged in
-            const currentUser = auth.currentUser;
-            if (!currentUser) {
-                alert("Authentication error. Please try logging in again.");
-                showLoginOverlay();
-                return;
-            }
-
+        function processOrder(paymentMethod) {
             const cartItems = document.querySelectorAll('.cart-item');
             const location = localStorage.getItem('address');
             const phone = localStorage.getItem('phone');
             const username = localStorage.getItem('username');
 
-            // THIS IS THE KEY CHANGE: Save order under the user's unique ID
-            const ordersRef = firebase.database().ref(`orders/${currentUser.uid}`);
-
+            const ordersRef = firebase.database().ref('orders');
             const orderItems = Array.from(cartItems).map(cartItem => {
                 const itemName = cartItem.querySelector('.item-name').innerText;
                 const quantity = parseFloat(cartItem.querySelector('.item-quantity').dataset.quantity);
@@ -2576,8 +2453,11 @@ function verifyOtp() {
             let deliveryCharge = 100 - totalProfit;
             deliveryCharge = Math.max(deliveryCharge, 0);
             const finalPrice = totalPrice + deliveryCharge;
+
+            // Create payment method display text
             const paymentMethodText = paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment';
 
+            // Include payment method in the order data
             ordersRef.push({
                 location: location,
                 phone: phone,
@@ -2587,32 +2467,31 @@ function verifyOtp() {
                 timestamp: timestamp,
                 totalPrice: finalPrice,
                 deliveryCharge: deliveryCharge,
-                paymentMethod: paymentMethod,
-                paymentMethodText: paymentMethodText
+                paymentMethod: paymentMethod,            // Store payment method code (cod/online)
+                paymentMethodText: paymentMethodText     // Store human-readable payment method text
             }).then(() => {
-                // We keep saving to localStorage for quick display of recent orders,
-                // but the database is now the permanent, secure source.
                 const newOrderHistory = JSON.parse(localStorage.getItem('orderHistory')) || [];
                 newOrderHistory.push({
                     timestamp: timestamp,
                     items: orderItems,
                     totalPrice: totalPrice,
                     deliveryCharge: deliveryCharge,
+                    paymentMethod: paymentMethod,
+                    paymentMethodText: paymentMethodText
                 });
-                if (newOrderHistory.length > 5) newOrderHistory.shift(); // Keep it to 5 recent
                 localStorage.setItem('orderHistory', JSON.stringify(newOrderHistory));
-
                 resetQuantityControlsToAddCart(orderItems);
                 document.getElementById('cartItems').innerHTML = '';
                 adjustSpacerHeight();
+
+                // Pass payment method to order confirmation to display it
                 showOrderConfirmation(paymentMethodText);
+
                 resetOrderVariables();
                 document.getElementById('cartIcon').id = 'cartIcon';
-            }).catch(error => {
-                console.error("Order failed: ", error);
-                alert("Failed to place order. Please check your connection and try again.");
             });
         }
+
         function showQRCodePayment() {
             document.getElementById('paymentOverlay').classList.remove('active');
             document.getElementById('qrCodeOverlay').classList.add('active');
@@ -2711,36 +2590,11 @@ function verifyOtp() {
                 }, 300);
             }
         }
-                function showLoginOverlay() {
+        function showLoginOverlay() {
             const loginContainer = document.getElementById('loginContainer');
             if (loginContainer) {
                 loginContainer.classList.add('active');
-                
-                // Reset form to the first step and clear fields/feedback
-                document.getElementById('phoneAuthSection').style.display = 'block';
-                document.getElementById('otpSection').style.display = 'none';
-                document.getElementById('userDetailsSection').style.display = 'none';
-                
-                document.getElementById('phoneNumber').value = '';
-                document.getElementById('otpInput').value = '';
-                document.getElementById('phone-feedback').textContent = '';
-                document.getElementById('otp-feedback').textContent = '';
-
-                const sendOtpBtn = document.getElementById('sendOtpBtn');
-                sendOtpBtn.disabled = false;
-                sendOtpBtn.innerHTML = 'Send Code';
-                
-                const verifyBtn = document.getElementById('verifyOtpBtn');
-                verifyBtn.disabled = false;
-                verifyBtn.innerHTML = 'Verify & Proceed';
-
-                // Setup reCAPTCHA
-                setupRecaptcha();
-                setTimeout(() => { 
-                    if (window.recaptchaVerifier) {
-                        window.recaptchaVerifier.render();
-                    }
-                }, 500);
+                setupLoginInputs();
             }
         }
 
@@ -2759,15 +2613,26 @@ function verifyOtp() {
             }
         }
 
+        function setupLoginInputs() {
+            const phoneInput = document.getElementById('loginPhone');
+            if (phoneInput) {
+                phoneInput.oninput = e => e.target.value = '9' + e.target.value.replace(/\D/g, '').slice(1, 10);
+            }
+        }
+
         function saveDetailsAndPlaceOrder() {
-            const loginUsername = document.getElementById('loginUsername').value.trim();
-            const loginPart2 = document.getElementById('bharatpurWard').value;
-            const loginPart3 = document.getElementById('loginPart3').value.trim();
-            const verifiedPhone = localStorage.getItem('phone'); // Phone is already verified
+            const loginUsername = document.getElementById('loginUsername').value;
+            const loginPhone = document.getElementById('loginPhone').value;
+            const loginPart2 = document.getElementById('bharatpurWard').value; // Updated ID
+            const loginPart3 = document.getElementById('loginPart3').value;
 
             // Validation
             if (!loginUsername) {
                 alert('Please enter your name.');
+                return;
+            }
+            if (!/^9\d{9}$/.test(loginPhone)) {
+                alert('Phone number must be exactly 10 digits long.');
                 return;
             }
             if (!loginPart2) {
@@ -2779,17 +2644,36 @@ function verifyOtp() {
                 return;
             }
             localStorage.setItem('username', loginUsername);
-            localStorage.setItem('address', `Bharatpur-${loginPart2}, ${loginPart3}`);
+            localStorage.setItem('phone', loginPhone);
+            localStorage.setItem('address', `${loginPart2}, ${loginPart3}`); // Updated format
 
-            displayStoredAddress();
+            adjustSpacerHeight();
+            showOrderConfirmation();
+            resetOrderVariables();
             closeLoginOverlay();
-            
-            // Proceed to the payment modal
             setTimeout(() => {
                 placeOrder();
-            }, 300); // Small delay to let modal close smoothly
+            }, 600);
         }
 
+        document.addEventListener('DOMContentLoaded', function () {
+            setupLoginInputs(); // Initialize phone input formatting
+
+            const registerOrderBtn = document.getElementById('registerOrderBtn');
+            if (registerOrderBtn) {
+                registerOrderBtn.addEventListener('click', saveDetailsAndPlaceOrder);
+            }
+
+            const cancelLoginBtn = document.getElementById('cancelLoginBtn');
+            if (cancelLoginBtn) {
+                cancelLoginBtn.addEventListener('click', closeLoginOverlay);
+            }
+
+            const confirmationCloseBtn = document.getElementById('confirmationCloseBtn');
+            if (confirmationCloseBtn) {
+                confirmationCloseBtn.addEventListener('click', closeOrderConfirmation);
+            }
+        });
         function resetOrderVariables() {
             totalProfit = 0;
             deliveryCharge = 100;
@@ -2820,21 +2704,17 @@ function verifyOtp() {
             }
         }
         function displayStoredAddress() {
-            const storedAddress = localStorage.getItem('address') || 'Not set';
-            const storedPhone = localStorage.getItem('phone') || 'Not set';
-            // Using template literal for cleaner multi-line string
-            document.getElementById('storedAddress').innerText = `Address: ${storedAddress}\nPhone: ${storedPhone}`;
+            const storedAddress = localStorage.getItem('address') || 'Address not set';
+            document.getElementById('storedAddress').innerText = `Address: ${storedAddress}`;
         }
         function changeAddress() {
-            if (confirm('Are you sure you want to edit your data? This will require you to verify your phone number again.')) {
+            if (confirm('Are you sure you want to edit your data?')) {
                 const deviceId = getDeviceId();
                 firebase.database().ref(`users/${deviceId}`).remove();
                 localStorage.removeItem('username');
-                localStorage.removeItem('phone'); // This is the key change
+                localStorage.removeItem('phone');
                 localStorage.removeItem('address');
-                displayStoredAddress(); // Update UI to show "not set"
-                toggleOrderHistoryWindow();
-                showCartFeedback('Your data has been cleared.', 'success');
+                toggleOrderHistoryWindow()
             }
         }
         document.getElementById('searchInput').addEventListener('keydown', function (event) {
@@ -2901,33 +2781,10 @@ function verifyOtp() {
                 orderHistoryWindow.style.display = 'none';
             }
         });
-        document.addEventListener('DOMContentLoaded', function () {
-            // New Listeners for Phone Auth
-            document.getElementById('sendOtpBtn').addEventListener('click', sendOtp);
-            document.getElementById('verifyOtpBtn').addEventListener('click', verifyOtp);
-
-            // Existing listeners
-            const registerOrderBtn = document.getElementById('registerOrderBtn');
-            if (registerOrderBtn) {
-                registerOrderBtn.addEventListener('click', saveDetailsAndPlaceOrder);
-            }
-
-            const cancelLoginBtn = document.getElementById('cancelLoginBtn');
-            if (cancelLoginBtn) {
-                cancelLoginBtn.addEventListener('click', closeLoginOverlay);
-            }
-
-            const confirmationCloseBtn = document.getElementById('confirmationCloseBtn');
-            if (confirmationCloseBtn) {
-                confirmationCloseBtn.addEventListener('click', closeOrderConfirmation);
-            }
-            
-            initPaymentEvents(); // This was already here, but good to confirm
-            userData();
-            displayStoredAddress();
-            displayOrderHistory();
-            fetchMenuItems();
-        });
+        document.addEventListener('DOMContentLoaded', userData);
+        displayStoredAddress();
+        displayOrderHistory();
+        fetchMenuItems();
     </script>
 </body>
 </html>
