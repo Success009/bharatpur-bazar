@@ -305,6 +305,7 @@
         firebase.initializeApp(firebaseConfig);
         const ordersRef = firebase.database().ref('orders');
         const menuRef = firebase.database().ref('menu');
+        const auth = firebase.auth();
         const notificationsRef = firebase.database().ref('notifications');
 
         function calculateTotalProfit(orderItems) {
@@ -319,145 +320,103 @@
                 });
         }
 
-        function fetchOrders() {
+                function fetchOrders() {
             ordersRef.on('value', (snapshot) => {
                 const orderSection = document.getElementById('orderSection');
                 orderSection.innerHTML = '';
+                const allOrders = []; // Array to hold all orders before displaying
 
                 if (!snapshot.exists()) {
-                    orderSection.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-inbox"></i>
-                            <h3>No Orders Yet</h3>
-                            <p>New orders will appear here.</p>
-                        </div>
-                    `;
+                    orderSection.innerHTML = `<div class="empty-state"><i class="fas fa-inbox"></i><h3>No Orders Yet</h3><p>New orders will appear here.</p></div>`;
                     return;
                 }
 
-                snapshot.forEach((childSnapshot) => {
-                    const order = childSnapshot.val();
-                    const orderId = childSnapshot.key;
-                    const orderItems = order.items;
-                    let totalItemPrice = 0;
-                    let totalItemProfit = 0;
+                // First loop: Iterate through each user's UID
+                snapshot.forEach((userSnapshot) => {
+                    const userUid = userSnapshot.key;
+                    // Second loop: Iterate through each order for that user
+                    userSnapshot.forEach((orderSnapshot) => {
+                        const order = orderSnapshot.val();
+                        const orderId = orderSnapshot.key;
+                        allOrders.push({ userUid, orderId, ...order });
+                    });
+                });
 
+                // Sort all collected orders by timestamp, newest first
+                allOrders.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                // Now, render the sorted orders
+                allOrders.forEach(fullOrder => {
+                    const { userUid, orderId, items: orderItems, timestamp, paymentMethod, paymentVerified, location, username, phone, accepted } = fullOrder;
+                    
+                    // The Promise-based rendering logic remains the same
                     Promise.all(orderItems.map(item => fetchMenuItemDetails(item.name)))
                         .then(menuItems => {
+                            let totalItemPrice = 0;
+                            let totalItemProfit = 0;
+
                             const orderItemsHTML = orderItems.map((item, index) => {
-                                const menuItem = menuItems[index];
-                                const price = menuItem.price || 0;
-                                const profit = menuItem.profit || 0;
-                                const startingValue = menuItem.startingValue || 1;
-
-                                const pricePerUnit = price / startingValue;
-                                const profitPerUnit = profit / startingValue;
-
-                                const itemTotalPrice = pricePerUnit * item.quantity;
-                                const itemTotalProfit = profitPerUnit * item.quantity;
-
-                                totalItemPrice += itemTotalPrice;
-                                totalItemProfit += itemTotalProfit;
-
-                                return `<li>${item.name} - Rs ${(pricePerUnit).toFixed(2)} × ${item.quantity} (Profit: Rs ${(profitPerUnit).toFixed(2)})</li>`;
+                                const menuItem = menuItems[index] || { price: 0, profit: 0, startingValue: 1 };
+                                const pricePerUnit = menuItem.price / menuItem.startingValue;
+                                const profitPerUnit = menuItem.profit / menuItem.startingValue;
+                                totalItemPrice += pricePerUnit * item.quantity;
+                                totalItemProfit += profitPerUnit * item.quantity;
+                                return `<li>${item.name} - ${item.quantity} x Rs ${pricePerUnit.toFixed(2)}</li>`;
                             }).join('');
 
                             const deliveryCharge = Math.max(100 - totalItemProfit, 0);
-                            const totalProfit = totalItemProfit + deliveryCharge;
                             const finalPrice = totalItemPrice + deliveryCharge;
 
-                            // Format the payment badge based on payment method and verification status
                             let paymentBadgeClass = 'payment-cod';
                             let paymentText = 'Cash on Delivery';
-
-                            if (order.paymentMethod === 'online') {
-                                paymentBadgeClass = order.paymentVerified ? 'payment-verified' : 'payment-online';
-                                paymentText = order.paymentVerified ? 'Payment Verified' : 'Online Payment';
+                            if (paymentMethod === 'online') {
+                                paymentBadgeClass = paymentVerified ? 'payment-verified' : 'payment-online';
+                                paymentText = paymentVerified ? 'Payment Verified' : 'Online Payment';
                             }
 
+                            // IMPORTANT: Notice the onclick handlers now pass BOTH userUid and orderId
                             const orderHTML = `
                                 <div class="order-card" id="${orderId}">
                                     <div class="card-header">
                                         <div class="card-title">Order #${orderId.slice(-6)}</div>
-                                        <div class="timestamp" data-time="${order.timestamp}">
-                                            ${new Date(order.timestamp).toLocaleString()}
-                                        </div>
-                                        <span class="payment-badge ${paymentBadgeClass}">
-                                            <i class="${order.paymentMethod === 'online' ? 'fas fa-credit-card' : 'fas fa-money-bill-wave'}"></i>
-                                            ${paymentText}
-                                        </span>
+                                        <div class="timestamp" data-time="${timestamp}">${new Date(timestamp).toLocaleString()}</div>
+                                        <span class="payment-badge ${paymentBadgeClass}"><i class="${paymentMethod === 'online' ? 'fas fa-credit-card' : 'fas fa-money-bill-wave'}"></i> ${paymentText}</span>
                                     </div>
                                     <div class="card-body">
                                         <div class="customer-info">
-                                            <p><strong><i class="fas fa-map-marker-alt"></i> Location:</strong> ${order.location}</p>
-                                            <p><strong><i class="fas fa-user"></i> Customer:</strong> ${order.username}</p>
-                                            <p><strong><i class="fas fa-phone"></i> Phone:</strong> ${order.phone}</p>
+                                            <p><strong><i class="fas fa-user"></i> Customer:</strong> ${username}</p>
+                                            <p><strong><i class="fas fa-phone"></i> Phone:</strong> ${phone}</p>
+                                            <p><strong><i class="fas fa-map-marker-alt"></i> Location:</strong> ${location}</p>
                                         </div>
-
                                         <div class="order-items">
-                                            <h4><i class="fas fa-shopping-basket"></i> Order Items</h4>
-                                            <ul class="item-list">
-                                                ${orderItemsHTML}
-                                            </ul>
+                                            <h4><i class="fas fa-shopping-basket"></i> Items</h4>
+                                            <ul class="item-list">${orderItemsHTML}</ul>
                                         </div>
-
                                         <div class="price-info">
-                                            <div class="price-row">
-                                                <span>Item Price:</span>
-                                                <span>Rs ${totalItemPrice.toFixed(2)}</span>
-                                            </div>
-                                            <div class="price-row">
-                                                <span>Delivery Charge:</span>
-                                                <span>Rs ${deliveryCharge.toFixed(2)}</span>
-                                            </div>
-                                            <div class="price-row">
-                                                <span>Total Profit:</span>
-                                                <span>Rs ${totalProfit.toFixed(2)}</span>
-                                            </div>
-                                            <div class="price-row total-price">
-                                                <span>Total Price:</span>
-                                                <span>Rs ${finalPrice.toFixed(2)}</span>
-                                            </div>
+                                            <div class="price-row"><span>Subtotal:</span><span>Rs ${totalItemPrice.toFixed(2)}</span></div>
+                                            <div class="price-row"><span>Delivery:</span><span>Rs ${deliveryCharge.toFixed(2)}</span></div>
+                                            <div class="price-row total-price"><span>Total:</span><span>Rs ${finalPrice.toFixed(2)}</span></div>
                                         </div>
                                     </div>
-
                                     <div class="card-footer">
-                                        ${!order.accepted ? 
-                                            `<button class="btn btn-primary" onclick="processOrder('${orderId}')">
-                                                <i class="fas fa-check-circle"></i> Accept Order
-                                            </button>` : 
-                                            `<button class="btn btn-success" onclick="completeOrder('${orderId}')">
-                                                <i class="fas fa-flag-checkered"></i> Complete
-                                            </button>`
+                                        ${!accepted ? 
+                                            `<button class="btn btn-primary" onclick="processOrder('${userUid}', '${orderId}')"><i class="fas fa-check-circle"></i> Accept</button>` : 
+                                            `<button class="btn btn-success" onclick="completeOrder('${userUid}', '${orderId}')"><i class="fas fa-flag-checkered"></i> Complete</button>`
                                         }
-
-                                        <button class="btn btn-danger" onclick="cancelOrder('${orderId}')">
-                                            <i class="fas fa-times-circle"></i> Cancel
-                                        </button>
-
-                                        ${(order.paymentMethod === 'online' && !order.paymentVerified) ? 
-                                            `<button class="btn btn-info verify-payment-btn" onclick="verifyPayment('${orderId}')">
-                                                <i class="fas fa-check"></i> Verify Payment
-                                            </button>` : ''
+                                        <button class="btn btn-danger" onclick="cancelOrder('${userUid}', '${orderId}')"><i class="fas fa-times-circle"></i> Cancel</button>
+                                        ${(paymentMethod === 'online' && !paymentVerified) ? 
+                                            `<button class="btn btn-info verify-payment-btn" onclick="verifyPayment('${userUid}', '${orderId}')"><i class="fas fa-check"></i> Verify Pay</button>` : ''
                                         }
-
-                                        <button class="btn btn-warning" onclick="outOfIngredient('${orderId}')">
-                                            <i class="fas fa-exclamation-triangle"></i> Out of Stock
-                                        </button>
                                     </div>
-
-                                </div>
-                            `;
-
-                            orderSection.insertAdjacentHTML('afterbegin', orderHTML);
+                                </div>`;
+                            orderSection.innerHTML += orderHTML;
                         });
                 });
 
-                setInterval(updateTimeSinceOrder, 60000); // Update time every minute
-                updateTimeSinceOrder(); // Update immediately on load
+                setInterval(updateTimeSinceOrder, 60000);
+                updateTimeSinceOrder();
             });
         }
-
         function fetchMenuItemDetails(itemName) {
             return new Promise((resolve, reject) => {
                 menuRef.once('value', (snapshot) => {
@@ -505,93 +464,61 @@
             });
         }
 
-        function processOrder(orderId) {
+        function processOrder(userUid, orderId) {
             if (confirm('Are you accepting this order?')) {
-                ordersRef.child(orderId).once('value').then(snapshot => {
+                const orderRef = ordersRef.child(userUid).child(orderId);
+                orderRef.once('value').then(snapshot => {
                     const order = snapshot.val();
                     if (order && order.device) {
-                        ordersRef.child(orderId).update({ accepted: true })
-                            .then(() => {
-                                const orderCard = document.getElementById(orderId);
-                                logNotification(order.device, 'process');
-                                fetchOrders(); // Refresh orders display
-                            })
-                    } else {
-                        console.error('Order or device is undefined.');
+                        orderRef.update({ accepted: true }).then(() => {
+                            logNotification(order.device, 'process');
+                        });
                     }
-                })
+                });
             }
         }
 
-        function completeOrder(orderId) {
+        function completeOrder(userUid, orderId) {
             if (confirm('Are you sure the order is completed?')) {
-                ordersRef.child(orderId).once('value').then(snapshot => {
+                const orderRef = ordersRef.child(userUid).child(orderId);
+                orderRef.once('value').then(snapshot => {
                     const order = snapshot.val();
                     if (order && order.device) {
-                        fetch('https://api.ipify.org?format=json')
-                            .then(response => response.json())
-                            .then(data => {
-                                const userIp = data.ip;
-                                const totalOrdersRef = firebase.database().ref('totalorders');
-                                totalOrdersRef.child(orderId).set({
-                                    ...order,
-                                    ip: userIp
-                                })
-                                .then(() => {
-                                    ordersRef.child(orderId).remove()
-                                        .then(() => {
-                                            logNotification(order.device, 'complete');
-                                            const orderElement = document.getElementById(orderId);
-                                            if (orderElement) {
-                                                orderElement.remove();
-                                            }
-                                        })
-                                })
-                            })
-                    }
-                })
-            }
-        }
-
-        function cancelOrder(orderId) {
-            if (confirm('Are you sure you want to cancel this order?')) {
-                ordersRef.child(orderId).once('value').then(snapshot => {
-                    const order = snapshot.val();
-                    if (order && order.device) {
-                        ordersRef.child(orderId).remove()
+                        const totalOrdersRef = firebase.database().ref('totalorders');
+                        totalOrdersRef.child(orderId).set(order)
                             .then(() => {
-                                logNotification(order.device, 'cancel');
-                                const orderElement = document.getElementById(orderId);
-                                if (orderElement) {
-                                    orderElement.remove();
-                                }
-                            })
-                    }
-                })
-            }
-        }
-
-        function verifyPayment(orderId) {
-            if (confirm('Do you confirm that payment has been received for this order?')) {
-                ordersRef.child(orderId).once('value').then(snapshot => {
-                    const order = snapshot.val();
-                    if (order && order.device) {
-                        ordersRef.child(orderId).update({ paymentVerified: true })
-                            .then(() => {
-                                logNotification(order.device, 'custom', 'Your payment has been verified by our staff. Your order will be arriving soon.');
-                                // Update UI without full refresh
-                                const orderCard = document.getElementById(orderId);
-                                if (orderCard) {
-                                    const paymentBadge = orderCard.querySelector('.payment-badge');
-                                    paymentBadge.className = 'payment-badge payment-verified';
-                                    paymentBadge.innerHTML = '<i class="fas fa-check-circle"></i> Payment Verified';
-
-                                    const verifyBtn = orderCard.querySelector('.verify-payment-btn');
-                                    if (verifyBtn) {
-                                        verifyBtn.remove();
-                                    }
-                                }
+                                orderRef.remove().then(() => {
+                                    logNotification(order.device, 'complete');
+                                });
                             });
+                    }
+                });
+            }
+        }
+
+        function cancelOrder(userUid, orderId) {
+            if (confirm('Are you sure you want to cancel this order?')) {
+                const orderRef = ordersRef.child(userUid).child(orderId);
+                orderRef.once('value').then(snapshot => {
+                    const order = snapshot.val();
+                    if (order && order.device) {
+                        orderRef.remove().then(() => {
+                            logNotification(order.device, 'cancel');
+                        });
+                    }
+                });
+            }
+        }
+
+        function verifyPayment(userUid, orderId) {
+            if (confirm('Do you confirm that payment has been received?')) {
+                const orderRef = ordersRef.child(userUid).child(orderId);
+                orderRef.once('value').then(snapshot => {
+                    const order = snapshot.val();
+                    if (order && order.device) {
+                        orderRef.update({ paymentVerified: true }).then(() => {
+                            logNotification(order.device, 'custom', 'Your payment has been verified. Your order is on its way.');
+                        });
                     }
                 });
             }
@@ -640,6 +567,37 @@
                 });
             }
         }
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                // User is signed in, check if they are an admin
+                const adminRef = firebase.database().ref('admins/' + user.uid);
+                adminRef.once('value', snapshot => {
+                    if (snapshot.exists()) {
+                        // Yes, this is an admin. Fetch the orders.
+                        console.log("Admin access granted.");
+                        fetchOrders();
+                    } else {
+                        // Not an admin. Log them out and show an error.
+                        auth.signOut();
+                        document.body.innerHTML = '<h1>Access Denied</h1><p>You do not have permission to view this page.</p>';
+                    }
+                });
+            } else {
+                // No user is signed in, prompt for login
+                const password = prompt("Please enter the admin password to continue:");
+                if (password) {
+                    // Replace with your admin email
+                    const email = "admin@bkbazar.com"; 
+                    auth.signInWithEmailAndPassword(email, password)
+                        .catch(error => {
+                            console.error("Login failed:", error);
+                            document.body.innerHTML = '<h1>Login Failed</h1><p>Incorrect password.</p>';
+                        });
+                } else {
+                     document.body.innerHTML = '<h1>Login Required</h1>';
+                }
+            }
+        });
 
         window.onload = fetchOrders;
     </script>
