@@ -2387,56 +2387,94 @@
             }
             return deviceId;
         }
-        function placeOrder() {
-            const cartItems = document.querySelectorAll('.cart-item:not(.empty-cart)');
-
-            if (cartItems.length === 0) {
-                showCartFeedback('Your cart is empty!', 'error');
-                return;
-            }
-
-            const location = localStorage.getItem('address');
-            const phone = localStorage.getItem('phone');
-            const username = localStorage.getItem('username');
-
-            if (!location || !phone || !username) {
-                toggleCartWindow();
-                showLoginOverlay();
-                return;
-            }
-
-            // Add loading state to order button
-            const orderButton = document.querySelector('.order-but');
-            const originalText = orderButton.innerText;
-            orderButton.innerText = 'Processing...';
-            orderButton.disabled = true;
-            orderButton.style.opacity = '0.7';
-
-            // Continue with existing order logic...
-            const cartWindow = document.getElementById('cartWindow');
-            if (cartWindow.style.display === 'block') {
-                toggleCartWindow();
-            }
-
-            let totalPrice = parseFloat(document.getElementById('totalPrice').lastElementChild.innerText.replace('Rs ', ''));
-            if (isNaN(totalPrice)) totalPrice = 0;
-            let deliveryCharge = 100 - totalProfit;
-            deliveryCharge = Math.max(deliveryCharge, 0);
-            const finalPrice = totalPrice + deliveryCharge;
-
-            // Show payment method selection
-            document.getElementById('paymentAmount').textContent = `Rs ${finalPrice.toFixed(2)}`;
-            document.getElementById('paymentOrderAmount').textContent = `Rs ${totalPrice.toFixed(2)}`;
-            document.getElementById('paymentDeliveryAmount').textContent = `Rs ${deliveryCharge.toFixed(2)}`;
-            document.getElementById('paymentOverlay').classList.add('active');
-
-            // Reset button state
-            setTimeout(() => {
-                orderButton.innerText = originalText;
-                orderButton.disabled = false;
-                orderButton.style.opacity = '1';
-            }, 1000);
+        function promptForUserDetails() {
+    return new Promise((resolve, reject) => {
+        // Show the login modal
+        const loginContainer = document.getElementById('loginContainer');
+        if (loginContainer) {
+            loginContainer.classList.add('active');
+            setupLoginInputs();
         }
+
+        // Find the buttons
+        const registerBtn = document.getElementById('registerOrderBtn');
+        const cancelBtn = document.getElementById('cancelLoginBtn');
+
+        const onRegisterClick = () => {
+            // This function will be called when the user clicks "Register"
+            cleanup();
+            resolve(); // Signal that we can continue
+        };
+
+        const onCancelClick = () => {
+            // This function will be called when the user clicks "Cancel"
+            cleanup();
+            reject(); // Signal that we should stop
+        };
+
+        // A cleanup function to remove the event listeners so they don't fire multiple times
+        const cleanup = () => {
+            registerBtn.removeEventListener('click', onRegisterClick);
+            cancelBtn.removeEventListener('click', onCancelClick);
+        };
+        
+        // Attach the listeners
+        registerBtn.addEventListener('click', onRegisterClick);
+        cancelBtn.addEventListener('click', onCancelClick);
+    });
+}
+        async function placeOrder() {
+    const cartItems = document.querySelectorAll('.cart-item:not(.empty-cart)');
+    if (cartItems.length === 0) {
+        showCartFeedback('Your cart is empty!', 'error');
+        return;
+    }
+
+    let location = localStorage.getItem('address');
+    let phone = localStorage.getItem('phone');
+    let username = localStorage.getItem('username');
+
+    // If details are missing, we now WAIT for the user to provide them.
+    if (!location || !phone || !username) {
+        try {
+            await promptForUserDetails(); // This will pause the function here
+        } catch (error) {
+            // The user clicked "Cancel", so we stop the whole process.
+            console.log("Order cancelled by user.");
+            closeLoginOverlay();
+            return;
+        }
+    }
+
+    // By the time we get here, we are GUARANTEED to have the user details.
+    // The rest of the function can now proceed as normal.
+    const orderButton = document.querySelector('.order-but');
+    const originalText = orderButton.innerText;
+    orderButton.innerText = 'Processing...';
+    orderButton.disabled = true;
+    orderButton.style.opacity = '0.7';
+
+    if (document.getElementById('cartWindow').style.display === 'block') {
+        toggleCartWindow();
+    }
+
+    let totalPrice = parseFloat(document.getElementById('totalPrice').lastElementChild.innerText.replace('Rs ', ''));
+    if (isNaN(totalPrice)) totalPrice = 0;
+    let deliveryCharge = 100 - totalProfit;
+    deliveryCharge = Math.max(deliveryCharge, 0);
+    const finalPrice = totalPrice + deliveryCharge;
+
+    document.getElementById('paymentAmount').textContent = `Rs ${finalPrice.toFixed(2)}`;
+    document.getElementById('paymentOrderAmount').textContent = `Rs ${totalPrice.toFixed(2)}`;
+    document.getElementById('paymentDeliveryAmount').textContent = `Rs ${deliveryCharge.toFixed(2)}`;
+    document.getElementById('paymentOverlay').classList.add('active');
+
+    setTimeout(() => {
+        orderButton.innerText = originalText;
+        orderButton.disabled = false;
+        orderButton.style.opacity = '1';
+    }, 1000);
+}
                 function processOrder(paymentMethod) {
             const currentUser = auth.currentUser;
             if (!currentUser) {
@@ -2630,40 +2668,25 @@
         }
 
         function saveDetailsAndPlaceOrder() {
-            const loginUsername = document.getElementById('loginUsername').value;
-            const loginPhone = document.getElementById('loginPhone').value;
-            const loginPart2 = document.getElementById('bharatpurWard').value; // Updated ID
-            const loginPart3 = document.getElementById('loginPart3').value;
+    const loginUsername = document.getElementById('loginUsername').value;
+    const loginPhone = document.getElementById('loginPhone').value;
+    const loginPart2 = document.getElementById('bharatpurWard').value;
+    const loginPart3 = document.getElementById('loginPart3').value;
 
-            // Validation
-            if (!loginUsername) {
-                alert('Please enter your name.');
-                return;
-            }
-            if (!/^9\d{9}$/.test(loginPhone)) {
-                alert('Phone number must be exactly 10 digits long.');
-                return;
-            }
-            if (!loginPart2) {
-                alert('Please select a Bharatpur ward.');
-                return;
-            }
-            if (!loginPart3) {
-                alert('Please enter a Chowk.');
-                return;
-            }
-            localStorage.setItem('username', loginUsername);
-            localStorage.setItem('phone', loginPhone);
-            localStorage.setItem('address', `${loginPart2}, ${loginPart3}`); // Updated format
+    if (!loginUsername || !/^9\d{9}$/.test(loginPhone) || !loginPart2 || !loginPart3) {
+        alert('Please fill in all fields correctly. Phone number must be 10 digits starting with 9.');
+        return;
+    }
 
-            adjustSpacerHeight();
-            showOrderConfirmation();
-            resetOrderVariables();
-            closeLoginOverlay();
-            setTimeout(() => {
-                placeOrder();
-            }, 600);
-        }
+    // Save the details to localStorage
+    localStorage.setItem('username', loginUsername);
+    localStorage.setItem('phone', loginPhone);
+    localStorage.setItem('address', `${loginPart2}, ${loginPart3}`);
+
+    // Update the UI
+    displayStoredAddress();
+    closeLoginOverlay();
+}
 
         document.addEventListener('DOMContentLoaded', function () {
             setupLoginInputs(); // Initialize phone input formatting
