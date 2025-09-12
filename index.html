@@ -1691,6 +1691,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDlnzH1D7D7Q663eWE086ng_1KdP46MZEs",
@@ -1705,7 +1706,21 @@
         firebase.initializeApp(firebaseConfig);
         const menuRef = firebase.database().ref('menu');
         const storage = firebase.storage();
+        const auth = firebase.auth();
+        auth.onAuthStateChanged(user => {
+    if (user) {
+        console.log('User is signed in with UID:', user.uid);
+        displayOrderHistory();
+    } else {
+        console.log('No user found, signing in anonymously...');
+        auth.signInAnonymously().catch(error => {
+            console.error("Anonymous sign-in failed:", error);
+            alert("Could not connect to the service. Please check your internet connection and refresh the page.");
+        });
+    }
+});
         const notificationsRef = firebase.database().ref('notifications');
+        
         function fetchNotifications() {
             setInterval(() => {
                 notificationsRef.once('value', snapshot => {
@@ -1860,30 +1875,22 @@
         function sendMessage() {
             const inputField = document.getElementById('notificationInput');
             const message = inputField.value.trim();
-            if (message) {
-                const username = localStorage.getItem('username') || 'User';
-                const randomChars = Math.random().toString(36).substring(2, 7);
-                const userId = `${username}_${randomChars}`;
-                const userMessagesRef = firebase.database().ref(`userMessages/${userId}`);
+            const currentUser = auth.currentUser;
 
-                // Create a new message entry with timestamp
-                const newMessageRef = userMessagesRef.push();
-                const timestamp = firebase.database.ServerValue.TIMESTAMP;
-
-                newMessageRef.set({
-                    timestamp: timestamp,
+            if (message && currentUser) { // Only send if logged in
+                // KEY CHANGE: Save message under the user's unique ID
+                const userMessagesRef = firebase.database().ref(`userMessages/${currentUser.uid}`);
+                userMessagesRef.push({
+                    timestamp: firebase.database.ServerValue.TIMESTAMP,
                     type: 'user',
-                    message: message,
-                    userId: userId,
-                    username: username
+                    message: message
                 }, error => {
                     if (!error) {
-                        const isUserMessage = true;
                         const notificationHistory = document.getElementById('notificationHistory');
                         const historyItem = document.createElement('div');
                         historyItem.className = 'notification-message';
                         const bubble = document.createElement('div');
-                        bubble.className = `notification-bubble ${isUserMessage ? 'user' : 'staff'}`;
+                        bubble.className = `notification-bubble user`;
                         bubble.innerText = message;
                         historyItem.appendChild(bubble);
                         notificationHistory.appendChild(historyItem);
@@ -1909,40 +1916,40 @@
                 orderHistoryWindow.style.display = 'none';
             }
         }
-        function displayOrderHistory() {
-            let orderHistory = JSON.parse(localStorage.getItem('orderHistory')) || [];
+                function displayOrderHistory() {
             const orderHistoryContainer = document.getElementById('orderHistory');
-            orderHistoryContainer.innerHTML = '';
+            orderHistoryContainer.innerHTML = ''; // Clear previous content
+            const currentUser = auth.currentUser;
 
-            if (orderHistory.length > 2) {
-                orderHistory = orderHistory.slice(-2);
-                localStorage.setItem('orderHistory', JSON.stringify(orderHistory));
-            }
-            orderHistory.slice().reverse().forEach(order => {
-                const orderDate = new Date(order.timestamp).toLocaleString();
-                let orderDetails = `<div class="order-history-item">
-                    <div class="order-date">Order placed on ${orderDate}</div>
-                    <div class="order-details">`;
-                order.items.forEach(item => {
-                    let quantity = item.quantity;
-                    if (quantity < 0.001) {
-                        quantity = 0.001;
+            if (currentUser) {
+                // User is signed in, fetch their specific orders from the database.
+                const userOrdersRef = firebase.database().ref(`orders/${currentUser.uid}`).orderByChild('timestamp').limitToLast(10);
+                userOrdersRef.once('value', snapshot => {
+                    if (!snapshot.exists()) {
+                        orderHistoryContainer.innerHTML = '<p style="padding: 20px; text-align: center;">You have no past orders.</p>';
+                        return;
                     }
-                    const roundedQuantity = quantity.toFixed(3);
-                    const itemText = item.unit ? `${item.name}: ${roundedQuantity} ${item.unit}` : `${item.name}: ${roundedQuantity}x`;
-                    orderDetails += `<p>${itemText}</p>`;
+                    const orders = [];
+                    snapshot.forEach(childSnapshot => { orders.push(childSnapshot.val()); });
+                    // Display orders, newest first
+                    orders.reverse().forEach(order => {
+                        const orderDate = new Date(order.timestamp).toLocaleString();
+                        let orderDetailsHTML = `<div class="order-history-item">
+                            <div class="order-date">Order placed on ${orderDate}</div>
+                            <div class="order-details">`;
+                        order.items.forEach(item => {
+                            const quantity = item.quantity.toFixed(3).replace(/\.?0+$/, '');
+                            const itemText = item.unit ? `${item.name}: ${quantity} ${item.unit}` : `${item.name}: ${quantity}x`;
+                            orderDetailsHTML += `<p>${itemText}</p>`;
+                        });
+                        orderDetailsHTML += `<p><strong>Total Price: Rs ${order.totalPrice.toFixed(2)}</strong></p></div></div>`;
+                        orderHistoryContainer.innerHTML += orderDetailsHTML;
+                    });
                 });
-
-                const deliveryCharge = order.deliveryCharge || 100;
-                const totalWithDelivery = order.totalPrice + deliveryCharge;
-                orderDetails += `
-                    <p><strong>Delivery Charge: Rs ${deliveryCharge.toFixed(2)}</strong></p>
-                    <p><strong>Total Price: Rs ${totalWithDelivery.toFixed(2)}</strong></p>
-                </div></div>`;
-
-                orderHistoryContainer.innerHTML += orderDetails;
-            });
-            scrollToOrderHistoryBottom();
+            } else {
+                // This state should be brief, but handle it just in case.
+                orderHistoryContainer.innerHTML = '<p style="padding: 20px; text-align: center;">Connecting to service...</p>';
+            }
         }
         function scrollToOrderHistoryBottom() {
             const orderHistoryWindow = document.getElementById('orderHistoryWindow');
@@ -2430,13 +2437,21 @@
                 orderButton.style.opacity = '1';
             }, 1000);
         }
-        function processOrder(paymentMethod) {
+                function processOrder(paymentMethod) {
+            const currentUser = auth.currentUser;
+            if (!currentUser) {
+                alert("Authentication error. Please refresh the page and try again.");
+                return;
+            }
+
             const cartItems = document.querySelectorAll('.cart-item');
             const location = localStorage.getItem('address');
             const phone = localStorage.getItem('phone');
             const username = localStorage.getItem('username');
 
-            const ordersRef = firebase.database().ref('orders');
+            // KEY CHANGE: Save order under the user's unique ID
+            const ordersRef = firebase.database().ref(`orders/${currentUser.uid}`);
+
             const orderItems = Array.from(cartItems).map(cartItem => {
                 const itemName = cartItem.querySelector('.item-name').innerText;
                 const quantity = parseFloat(cartItem.querySelector('.item-quantity').dataset.quantity);
@@ -2446,18 +2461,14 @@
 
             const now = new Date();
             const timestamp = now.toISOString();
-            const deviceId = getDeviceId();
-
+            const deviceId = getDeviceId(); // We can still keep this for reference
             let totalPrice = parseFloat(document.getElementById('totalPrice').lastElementChild.innerText.replace('Rs ', ''));
             if (isNaN(totalPrice)) totalPrice = 0;
             let deliveryCharge = 100 - totalProfit;
             deliveryCharge = Math.max(deliveryCharge, 0);
             const finalPrice = totalPrice + deliveryCharge;
-
-            // Create payment method display text
             const paymentMethodText = paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment';
 
-            // Include payment method in the order data
             ordersRef.push({
                 location: location,
                 phone: phone,
@@ -2467,8 +2478,8 @@
                 timestamp: timestamp,
                 totalPrice: finalPrice,
                 deliveryCharge: deliveryCharge,
-                paymentMethod: paymentMethod,            // Store payment method code (cod/online)
-                paymentMethodText: paymentMethodText     // Store human-readable payment method text
+                paymentMethod: paymentMethod,
+                paymentMethodText: paymentMethodText
             }).then(() => {
                 const newOrderHistory = JSON.parse(localStorage.getItem('orderHistory')) || [];
                 newOrderHistory.push({
@@ -2476,22 +2487,20 @@
                     items: orderItems,
                     totalPrice: totalPrice,
                     deliveryCharge: deliveryCharge,
-                    paymentMethod: paymentMethod,
-                    paymentMethodText: paymentMethodText
                 });
+                if (newOrderHistory.length > 5) newOrderHistory.shift();
                 localStorage.setItem('orderHistory', JSON.stringify(newOrderHistory));
                 resetQuantityControlsToAddCart(orderItems);
                 document.getElementById('cartItems').innerHTML = '';
                 adjustSpacerHeight();
-
-                // Pass payment method to order confirmation to display it
                 showOrderConfirmation(paymentMethodText);
-
                 resetOrderVariables();
                 document.getElementById('cartIcon').id = 'cartIcon';
+            }).catch(error => {
+                console.error("Order failed: ", error);
+                alert("Failed to place order. Please check your connection and try again.");
             });
         }
-
         function showQRCodePayment() {
             document.getElementById('paymentOverlay').classList.remove('active');
             document.getElementById('qrCodeOverlay').classList.add('active');
@@ -2708,13 +2717,12 @@
             document.getElementById('storedAddress').innerText = `Address: ${storedAddress}`;
         }
         function changeAddress() {
-            if (confirm('Are you sure you want to edit your data?')) {
-                const deviceId = getDeviceId();
-                firebase.database().ref(`users/${deviceId}`).remove();
+            if (confirm('Are you sure you want to clear your saved name and address?')) {
                 localStorage.removeItem('username');
                 localStorage.removeItem('phone');
                 localStorage.removeItem('address');
-                toggleOrderHistoryWindow()
+                displayStoredAddress();
+                toggleOrderHistoryWindow();
             }
         }
         document.getElementById('searchInput').addEventListener('keydown', function (event) {
@@ -2783,7 +2791,6 @@
         });
         document.addEventListener('DOMContentLoaded', userData);
         displayStoredAddress();
-        displayOrderHistory();
         fetchMenuItems();
     </script>
 </body>
