@@ -949,58 +949,60 @@
             }
         };
 
-        function initializeApp() {
-            console.log("Admin verified. Initializing application...");
-            fetchMenuItems();
-            populateCategoryDropdown();
-        }
+        // START: REPLACE WITH THIS FINAL AUTH BLOCK FOR StaffMenu.html
 
-        // This function will be called AFTER a user has successfully logged in.
-        function handleAdminVerification(user) {
-            const adminRef = firebase.database().ref('admins/' + user.uid);
-            
-            adminRef.once('value', snapshot => {
-                if (snapshot.exists() && snapshot.val() === true) {
-                    // Success! The user is a verified admin.
-                    console.log("Admin access granted for:", user.email);
-                    initializeApp(); 
-                } else {
-                    // The user logged in, but they are not in the admins list.
-                    console.warn("Access Denied: User is not a verified admin.", user.email);
-                    auth.signOut();
-                    document.body.innerHTML = '<h1>Access Denied</h1><p>You do not have permission to view this page.</p>';
-                }
-            });
-        }
+// This function holds the code that should ONLY run AFTER a successful admin login.
+function initializeApp() {
+    console.log("Admin verified. Initializing Menu Editor...");
+    fetchMenuItems();
+    populateCategoryDropdown();
+}
 
-        // This function will be called when NO user is logged in.
-        function handleLogin() {
-            const password = prompt("Admin Access Required. Please enter the password:");
-            if (password) {
-                // IMPORTANT: This must be the email of the admin account you created.
-                const email = "bharatpurbazar@gmail.com"; 
-                
-                auth.signInWithEmailAndPassword(email, password)
-                    .catch(error => {
-                        console.error("Login failed:", error.message);
-                        alert(`Login Failed: Incorrect password or user not found.`);
-                        handleLogin(); // Prompt again on failure
-                    });
-            } else {
-                 document.body.innerHTML = '<h1>Login Canceled</h1><p>You canceled the login prompt. Please refresh to try again.</p>';
-            }
+// This function will be called to check if the current user is a valid admin.
+function handleAdminVerification(user) {
+    const adminRef = firebase.database().ref('admins/' + user.uid);
+    
+    adminRef.once('value', snapshot => {
+        if (snapshot.exists() && snapshot.val() === true) {
+            // Success! The user is a verified admin.
+            console.log("Admin access granted for:", user.email);
+            initializeApp(); 
+        } else {
+            // The user logged in, but they are not in the admins list.
+            console.warn("Access Denied: User is not a verified admin.", user.email);
+            auth.signOut(); // Log out the unauthorized user.
         }
+    });
+}
 
-        // This is the main listener. It runs when the page loads and directs traffic.
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                // A user session exists. Verify they are an admin.
-                handleAdminVerification(user);
-            } else {
-                // No user session exists. Prompt them to log in.
-                handleLogin();
-            }
-        });
+// This is the main listener that controls access to the page.
+auth.onAuthStateChanged(user => {
+    if (user && !user.isAnonymous) {
+        // A non-anonymous user is signed in. Let's verify if they are an admin.
+        handleAdminVerification(user);
+    } else {
+        // EITHER no user is signed in, OR an anonymous user is signed in.
+        if (user && user.isAnonymous) {
+            auth.signOut(); // This will re-trigger onAuthStateChanged with user=null.
+            return; // Stop execution and wait for the re-trigger.
+        }
+        
+        // Now we know for sure user is null. Prompt for admin login.
+        const password = prompt("Admin Access Required. Please enter the password:");
+        if (password) {
+            const email = "bharatpurbazar@gmail.com";
+            auth.signInWithEmailAndPassword(email, password)
+                .catch(error => {
+                    console.error("Login failed:", error.message);
+                    alert(`Login Failed: Incorrect password or user not found.`);
+                    // After a failed attempt, reload the page to restart the process cleanly.
+                    window.location.reload();
+                });
+        } else {
+             document.body.innerHTML = '<h1>Login Canceled</h1><p>You canceled the login prompt. Please refresh to try again.</p>';
+        }
+    }
+});
     </script>
 </body>
 </html>
