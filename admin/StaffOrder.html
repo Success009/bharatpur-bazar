@@ -399,15 +399,21 @@
                                             <div class="price-row total-price"><span>Total:</span><span>Rs ${finalPrice.toFixed(2)}</span></div>
                                         </div>
                                     </div>
-                                    <div class="card-footer">
+                                <div class="card-footer">
                                         ${!accepted ? 
                                             `<button class="btn btn-primary" onclick="processOrder('${userUid}', '${orderId}')"><i class="fas fa-check-circle"></i> Accept</button>` : 
                                             `<button class="btn btn-success" onclick="completeOrder('${userUid}', '${orderId}')"><i class="fas fa-flag-checkered"></i> Complete</button>`
                                         }
                                         <button class="btn btn-danger" onclick="cancelOrder('${userUid}', '${orderId}')"><i class="fas fa-times-circle"></i> Cancel</button>
+                                        
                                         ${(paymentMethod === 'online' && !paymentVerified) ? 
                                             `<button class="btn btn-info verify-payment-btn" onclick="verifyPayment('${userUid}', '${orderId}')"><i class="fas fa-check"></i> Verify Pay</button>` : ''
                                         }
+                                        
+                                        <!-- ADD THIS BUTTON -->
+                                        <button class="btn btn-warning" onclick="outOfIngredient('${userUid}', '${orderId}')">
+                                            <i class="fas fa-exclamation-triangle"></i> Out of Stock
+                                        </button>
                                     </div>
                                 </div>`;
                             orderSection.innerHTML += orderHTML;
@@ -525,14 +531,17 @@
             }
         }
 
-        function outOfIngredient(orderId) {
+        function outOfIngredient(userUid, orderId) {
             if (confirm('Is it really not available or are you being lazy?')) {
-                ordersRef.child(orderId).once('value').then(snapshot => {
+                const orderRef = ordersRef.child(userUid).child(orderId);
+                orderRef.once('value').then(snapshot => {
                     const order = snapshot.val();
                     if (order && order.device) {
                         logNotification(order.device, 'outOfIngredient');
+                        // Provide feedback to the admin that the action was successful
+                        alert('"Out of Stock" notification sent to the user.');
                     }
-                })
+                });
             }
         }
 
