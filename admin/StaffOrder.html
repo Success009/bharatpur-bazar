@@ -276,6 +276,9 @@
 <body>
     <header>
         <div class="header-title">Staff Order Management</div>
+        <button class="nav-button" onclick="signOut()" style="background-color: var(--danger);">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
         <div class="header-actions">
             <button class="btn btn-info" onclick="window.location.href='StaffMenu.html'">
                 <i class="fas fa-edit"></i> Edit Menu
@@ -639,6 +642,11 @@ auth.onAuthStateChanged(user => {
         }
     }
 });
+    function signOut() {
+        if (confirm("Are you sure you want to log out?")) {
+            auth.signOut();
+        }
+    }
     </script>
 </body>
 </html>
