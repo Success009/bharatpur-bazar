@@ -423,159 +423,120 @@
         }
 
         function loadUsers() {
+            const usersRef = firebase.database().ref('users');
             const userMessagesRef = firebase.database().ref('userMessages');
             const adminMessagesRef = firebase.database().ref('adminMessages');
             const usersList = document.getElementById('usersList');
             
-            const users = new Map();
-
-            // Function to process a message and update the user map
-            const processMessage = (userId, message) => {
-                const existingUser = users.get(userId) || { id: userId, name: 'Unknown User', lastMessageTimestamp: 0 };
-                if (message.timestamp > existingUser.lastMessageTimestamp) {
-                    existingUser.lastMessageTimestamp = message.timestamp;
-                    // Attempt to get a real name if available from the message
-                    if(message.username) existingUser.name = message.username;
+            usersRef.on('value', async (usersSnapshot) => {
+                if (!usersSnapshot.exists()) {
+                    usersList.innerHTML = '<div class="loading">No users have registered yet.</div>';
+                    return;
                 }
-                users.set(userId, existingUser);
-            };
 
-            // Listen to both nodes
-            userMessagesRef.on('value', userMessagesSnapshot => {
-                adminMessagesRef.on('value', adminMessagesSnapshot => {
-                    users.clear(); // Clear the map to rebuild it with fresh data
-                    
-                    userMessagesSnapshot.forEach(userSnapshot => {
-                        userSnapshot.forEach(msgSnapshot => processMessage(userSnapshot.key, msgSnapshot.val()));
-                    });
+                let userProfiles = [];
+                usersSnapshot.forEach(userSnap => {
+                    userProfiles.push(userSnap.val());
+                });
 
-                    adminMessagesSnapshot.forEach(userSnapshot => {
-                        userSnapshot.forEach(msgSnapshot => processMessage(userSnapshot.key, msgSnapshot.val()));
-                    });
+                // For each user, find their last message timestamp
+                for (const user of userProfiles) {
+                    const userMsgSnap = await userMessagesRef.child(user.uid).orderByChild('timestamp').limitToLast(1).once('value');
+                    const adminMsgSnap = await adminMessagesRef.child(user.uid).orderByChild('timestamp').limitToLast(1).once('value');
 
-                    if (users.size === 0) {
-                        usersList.innerHTML = '<div class="loading">No user chats found.</div>';
-                        return;
-                    }
+                    let lastUserTimestamp = 0;
+                    let lastAdminTimestamp = 0;
 
-                    // Sort users by the most recent message timestamp
-                    const sortedUsers = Array.from(users.values()).sort((a, b) => b.lastMessageTimestamp - a.lastMessageTimestamp);
-                    
-                    usersList.innerHTML = '';
-                    sortedUsers.forEach(user => {
-                        const userElement = createUserElement(user);
-                        if (userElement) usersList.appendChild(userElement);
-                    });
+                    if (userMsgSnap.exists()) userMsgSnap.forEach(s => lastUserTimestamp = s.val().timestamp);
+                    if (adminMsgSnap.exists()) adminMsgSnap.forEach(s => lastAdminTimestamp = s.val().timestamp);
+
+                    user.lastMessageTimestamp = Math.max(lastUserTimestamp, lastAdminTimestamp);
+                }
+
+                // Sort users by the most recent message timestamp
+                userProfiles.sort((a, b) => b.lastMessageTimestamp - a.lastMessageTimestamp);
+                
+                usersList.innerHTML = '';
+                userProfiles.forEach(user => {
+                    const userElement = createUserElement(user);
+                    if (userElement) usersList.appendChild(userElement);
                 });
             });
         }
 
         function createUserElement(user) {
-            try {
-                if (!user || !user.id || !user.name) {
-                    console.error('Invalid user data:', user);
-                    return null;
-                }
+            const div = document.createElement('div');
+            div.className = `user-item ${selectedUserId === user.uid ? 'active' : ''}`;
+            div.dataset.userId = user.uid; // Use dataset for modern attribute handling
+            div.dataset.userName = user.username;
+            
+            div.onclick = () => selectUser(user.uid, user.username);
 
-                const div = document.createElement('div');
-                div.className = `user-item ${selectedUserId === user.id ? 'active' : ''}`;
-                div.setAttribute('data-user-id', user.id);
-                div.onclick = (e) => {
-                    e.preventDefault();
-                    selectUser(user.id, user.name);
-                };
-
-                const header = document.createElement('div');
-                header.className = 'user-header';
-
-                const avatar = document.createElement('div');
-                avatar.className = 'user-avatar';
-                avatar.textContent = (user.name || '').slice(0, 2).toUpperCase();
-
-                const info = document.createElement('div');
-                info.className = 'user-info';
-
-                const name = document.createElement('div');
-                name.className = 'user-name';
-                name.textContent = user.name;
-
-                const status = document.createElement('div');
-                status.className = 'user-status';
-                status.textContent = formatTime(user.lastMessage?.timestamp || Date.now());
-
-                info.appendChild(name);
-                info.appendChild(status);
-                header.appendChild(avatar);
-                header.appendChild(info);
-                div.appendChild(header);
-
-                return div;
-            } catch (error) {
-                console.error('Error creating user element:', error);
-                return null;
-            }
+            div.innerHTML = `
+                <div class="user-header">
+                    <div class="user-avatar">${user.username.slice(0, 2).toUpperCase()}</div>
+                    <div class="user-info">
+                        <div class="user-name">${user.username}</div>
+                        <div class="user-status">${user.phone || 'No phone number'}</div>
+                    </div>
+                </div>
+            `;
+            return div;
         }
 
         function selectUser(userId, userName) {
+            if (selectedUserId === userId) return; // Don't reload if already selected
             selectedUserId = userId;
             
-            // Update UI to show who is selected
             document.querySelectorAll('.user-item').forEach(item => item.classList.remove('active'));
             const userElement = document.querySelector(`.user-item[data-user-id="${userId}"]`);
             if (userElement) userElement.classList.add('active');
 
             document.getElementById('selectedUserAvatar').textContent = userName.slice(0, 2).toUpperCase();
             document.getElementById('selectedUserName').textContent = userName;
-            document.getElementById('selectedUserStatus').textContent = `User ID: ${userId.slice(0, 8)}...`; // Show partial UID
+            document.getElementById('selectedUserStatus').textContent = `User ID: ${userId.slice(0, 8)}...`;
             
             messageInput.disabled = false;
             sendButton.disabled = false;
+            messageInput.focus();
             
             loadMessages(userId);
         }
-                function loadMessages(userId) {
+        function loadMessages(userId) {
             const chatMessages = document.getElementById('chatMessages');
             chatMessages.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading conversation...</div>';
 
             const userMessagesRef = firebase.database().ref(`userMessages/${userId}`);
             const adminMessagesRef = firebase.database().ref(`adminMessages/${userId}`);
 
-            // Use Promise.all to fetch from both locations
-            Promise.all([
-                userMessagesRef.once('value'),
-                adminMessagesRef.once('value')
-            ]).then(([userSnapshot, adminSnapshot]) => {
-                const allMessages = [];
-
-                userSnapshot.forEach(msgSnapshot => {
-                    allMessages.push({ type: 'user', ...msgSnapshot.val() });
-                });
-
-                adminSnapshot.forEach(msgSnapshot => {
-                    allMessages.push({ type: 'staff', ...msgSnapshot.val() });
-                });
-
-                // Sort all messages chronologically
+            let allMessages = [];
+            // Detach any previous listeners to prevent memory leaks
+            userMessagesRef.off();
+            adminMessagesRef.off();
+            
+            const render = () => {
                 allMessages.sort((a, b) => a.timestamp - b.timestamp);
-
-                chatMessages.innerHTML = ''; // Clear loading spinner
+                chatMessages.innerHTML = '';
                 if(allMessages.length === 0){
-                    chatMessages.innerHTML = '<div class="loading">No messages in this conversation yet.</div>';
-                    return;
+                    chatMessages.innerHTML = '<div class="loading">No messages yet. Send one to start the conversation!</div>';
+                } else {
+                    allMessages.forEach(msg => {
+                        chatMessages.appendChild(createMessageElement(msg, msg.type));
+                    });
                 }
-
-                allMessages.forEach(msg => {
-                    const messageElement = createMessageElement(msg, msg.type);
-                    chatMessages.appendChild(messageElement);
-                });
-                
                 updateScroll();
-            }).catch(error => {
-                console.error("Error loading messages:", error);
-                chatMessages.innerHTML = '<div class="error-message">Could not load messages.</div>';
+            };
+
+            userMessagesRef.on('child_added', snapshot => {
+                allMessages.push({ type: 'user', ...snapshot.val() });
+                render();
+            });
+
+            adminMessagesRef.on('child_added', snapshot => {
+                allMessages.push({ type: 'staff', ...snapshot.val() });
+                render();
             });
         }
-
         function logNotification(device, message) {
             if (!device) {
                 console.error('Device is undefined');
