@@ -666,6 +666,7 @@
             background-color: #f5f8fa;
             border-radius: 10px;
             box-shadow: inset 0 0 8px rgba(0, 0, 0, .1);
+            -webkit-overflow-scrolling: touch;
         }
 
         .notification-input-container input {
@@ -1903,31 +1904,22 @@
                 }
             }
         }
-                function sendMessage() {
+        function sendMessage() {
             const inputField = document.getElementById('notificationInput');
             const message = inputField.value.trim();
             const currentUser = auth.currentUser;
 
             if (message && currentUser) {
-                // NEW: Reference the user's personal message thread in userMessages
                 const userMessagesRef = firebase.database().ref(`userMessages/${currentUser.uid}`);
-                
+                const username = localStorage.getItem('username') || 'Anonymous'; // Get username from storage
+
                 userMessagesRef.push({
                     timestamp: firebase.database.ServerValue.TIMESTAMP,
                     type: 'user',
-                    message: message
+                    message: message,
+                    username: username // Add username for admin convenience
                 }).then(() => {
-                    // Visually add the user's own message to their chat window immediately
-                    const notificationHistory = document.getElementById('notificationHistory');
-                    const historyItem = document.createElement('div');
-                    historyItem.className = 'notification-message';
-                    const bubble = document.createElement('div');
-                    bubble.className = 'notification-bubble user';
-                    bubble.innerText = message;
-                    historyItem.appendChild(bubble);
-                    notificationHistory.appendChild(historyItem);
-                    inputField.value = '';
-                    notificationHistory.scrollTop = notificationHistory.scrollHeight;
+                    inputField.value = ''; // Clear input *after* successful send
                 }).catch(error => {
                     console.error("Message send failed:", error);
                     alert("Your message could not be sent. Please try again.");
@@ -2702,25 +2694,34 @@
         }
 
         function saveDetailsAndPlaceOrder() {
-    const loginUsername = document.getElementById('loginUsername').value;
-    const loginPhone = document.getElementById('loginPhone').value;
-    const loginPart2 = document.getElementById('bharatpurWard').value;
-    const loginPart3 = document.getElementById('loginPart3').value;
+            const loginUsername = document.getElementById('loginUsername').value;
+            const loginPhone = document.getElementById('loginPhone').value;
+            const loginPart2 = document.getElementById('bharatpurWard').value;
+            const loginPart3 = document.getElementById('loginPart3').value;
 
-    if (!loginUsername || !/^9\d{9}$/.test(loginPhone) || !loginPart2 || !loginPart3) {
-        alert('Please fill in all fields correctly. Phone number must be 10 digits starting with 9.');
-        return;
-    }
+            if (!loginUsername || !/^9\d{9}$/.test(loginPhone) || !loginPart2 || !loginPart3) {
+                alert('Please fill in all fields correctly. Phone number must be 10 digits starting with 9.');
+                return;
+            }
 
-    // Save the details to localStorage
-    localStorage.setItem('username', loginUsername);
-    localStorage.setItem('phone', loginPhone);
-    localStorage.setItem('address', `${loginPart2}, ${loginPart3}`);
+            // Save the details to localStorage for quick access
+            localStorage.setItem('username', loginUsername);
+            localStorage.setItem('phone', loginPhone);
+            localStorage.setItem('address', `Bharatpur-${loginPart2}, ${loginPart3}`);
 
-    // Update the UI
-    displayStoredAddress();
-    closeLoginOverlay();
-}
+            // --- NEW: Save user info to the database ---
+            const currentUser = auth.currentUser;
+            if (currentUser) {
+                const userRef = firebase.database().ref(`users/${currentUser.uid}`);
+                userRef.set({
+                    username: loginUsername,
+                    phone: loginPhone,
+                    uid: currentUser.uid // Storing uid is good practice
+                }).catch(error => console.error("Could not save user data:", error));
+            }
+            displayStoredAddress();
+            closeLoginOverlay();
+        }
 
         document.addEventListener('DOMContentLoaded', function () {
             setupLoginInputs(); // Initialize phone input formatting
