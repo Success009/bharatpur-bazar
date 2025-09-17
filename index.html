@@ -1722,21 +1722,52 @@
         const notificationsRef = firebase.database().ref('notifications');
         
         function fetchNotifications() {
-            setInterval(() => {
-                notificationsRef.once('value', snapshot => {
-                    snapshot.forEach(childSnapshot => {
-                        const notification = childSnapshot.val();
-                        const device = getDeviceId();
-                        if (notification.device === device) {
-                            const predefinedMessages = ["Predefined message 1", "Predefined message 2", "Predefined message 3"];
-                            if (!predefinedMessages.includes(notification.message)) {
-                                showNotification(notification.message, 'user');
-                            }
-                            childSnapshot.ref.remove();
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    // Once the user is signed in, set up listeners for their chat threads.
+                    const userUid = user.uid;
+                    const userMessagesRef = firebase.database().ref(`userMessages/${userUid}`);
+                    const adminMessagesRef = firebase.database().ref(`adminMessages/${userUid}`);
+                    
+                    const allMessages = [];
+                    const notificationHistory = document.getElementById('notificationHistory');
+
+                    // Function to render all messages sorted by time
+                    const renderMessages = () => {
+                        allMessages.sort((a, b) => a.timestamp - b.timestamp);
+                        notificationHistory.innerHTML = ''; // Clear before rendering
+                        allMessages.forEach(msg => {
+                            const historyItem = document.createElement('div');
+                            historyItem.className = 'notification-message';
+                            const bubble = document.createElement('div');
+                            // Use 'staff' for admin messages, 'user' for user-sent messages
+                            bubble.className = `notification-bubble ${msg.type === 'admin' ? 'staff' : 'user'}`;
+                            bubble.innerText = msg.message;
+                            historyItem.appendChild(bubble);
+                            notificationHistory.appendChild(historyItem);
+                        });
+                        notificationHistory.scrollTop = notificationHistory.scrollHeight;
+                    };
+
+                    // Listen for the user's own sent messages
+                    userMessagesRef.on('child_added', snapshot => {
+                        allMessages.push(snapshot.val());
+                        renderMessages();
+                    });
+
+                    // Listen for new messages FROM the admin
+                    adminMessagesRef.on('child_added', snapshot => {
+                        allMessages.push({ type: 'admin', ...snapshot.val() }); // Add 'type' property
+                        renderMessages();
+
+                        // If the chat window is closed, show a visual notification
+                        const notificationWindow = document.getElementById('notificationWindow');
+                        if (notificationWindow.style.display === 'none' || !notificationWindow.style.display) {
+                           showCartFeedback("New message from staff!", "success");
                         }
                     });
-                });
-            }, 1000);
+                }
+            });
         }
         function toggleCartWindow() {
             const cartWindow = document.getElementById('cartWindow');
@@ -1872,31 +1903,34 @@
                 }
             }
         }
-        function sendMessage() {
+                function sendMessage() {
             const inputField = document.getElementById('notificationInput');
             const message = inputField.value.trim();
             const currentUser = auth.currentUser;
 
-            if (message && currentUser) { // Only send if logged in
-                // KEY CHANGE: Save message under the user's unique ID
+            if (message && currentUser) {
+                // NEW: Reference the user's personal message thread in userMessages
                 const userMessagesRef = firebase.database().ref(`userMessages/${currentUser.uid}`);
+                
                 userMessagesRef.push({
                     timestamp: firebase.database.ServerValue.TIMESTAMP,
                     type: 'user',
                     message: message
-                }, error => {
-                    if (!error) {
-                        const notificationHistory = document.getElementById('notificationHistory');
-                        const historyItem = document.createElement('div');
-                        historyItem.className = 'notification-message';
-                        const bubble = document.createElement('div');
-                        bubble.className = `notification-bubble user`;
-                        bubble.innerText = message;
-                        historyItem.appendChild(bubble);
-                        notificationHistory.appendChild(historyItem);
-                        inputField.value = '';
-                        notificationHistory.scrollTop = notificationHistory.scrollHeight;
-                    }
+                }).then(() => {
+                    // Visually add the user's own message to their chat window immediately
+                    const notificationHistory = document.getElementById('notificationHistory');
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'notification-message';
+                    const bubble = document.createElement('div');
+                    bubble.className = 'notification-bubble user';
+                    bubble.innerText = message;
+                    historyItem.appendChild(bubble);
+                    notificationHistory.appendChild(historyItem);
+                    inputField.value = '';
+                    notificationHistory.scrollTop = notificationHistory.scrollHeight;
+                }).catch(error => {
+                    console.error("Message send failed:", error);
+                    alert("Your message could not be sent. Please try again.");
                 });
             }
         }
