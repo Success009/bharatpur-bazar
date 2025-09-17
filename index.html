@@ -1495,6 +1495,36 @@
                 animation: slideIn 0.3s ease;
             }
         }
+.menu-item.out-of-stock {
+    opacity: 0.5;
+    background-color: #f0f0f0;
+}
+.menu-item.out-of-stock .menu-item-content {
+    pointer-events: none;
+}
+.menu-item.out-of-stock button {
+    background: var(--secondary);
+    cursor: not-allowed;
+}
+.discount-badge {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: linear-gradient(135deg, #f72585, #b5179e);
+    color: white;
+    padding: 6px 10px;
+    border-radius: 15px 0 15px 0;
+    font-size: 0.8em;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transform: rotate(10deg);
+}
+.original-price {
+    text-decoration: line-through;
+    color: #999;
+    font-size: 0.9em;
+    font-weight: normal;
+}
     </style>
 </head>
 
@@ -2045,15 +2075,16 @@
                 });
             }
 
-            menuRef.once('value', (snapshot) => {
+            // USE .on() INSTEAD OF .once() FOR REAL-TIME UPDATES
+            menuRef.on('value', (snapshot) => {
                 const menuSection = document.getElementById('menuSection');
                 menuSection.innerHTML = '';
                 const categories = {};
                 const typesSet = new Set();
 
                 snapshot.forEach((childSnapshot) => {
-                    const menuItem = childSnapshot.val();
-                    const {type = 'other', category, price, profit = 0, unit = 'Item', startingValue = 1, rarity = 'Basic'} = menuItem;
+                    const menuItem = { id: childSnapshot.key, ...childSnapshot.val() };
+                    const {type = 'other', category, price, profit = 0, unit = 'Item', startingValue = 1} = menuItem;
                     typesSet.add(type);
 
                     if (currentTab === 'all' || currentTab === type) {
@@ -2067,72 +2098,78 @@
                 createTypeTabs(Array.from(typesSet));
 
                 Object.keys(categories).sort().forEach(category => {
+                    // NEW: Sort items to show specials first and out of stock last
                     categories[category].sort((a, b) => {
-                        const rarityOrder = {'Premium': 2, 'Limited Edition': 1, 'Basic': 0};
-                        return rarityOrder[b.rarity] !== rarityOrder[a.rarity] ? rarityOrder[b.rarity] - rarityOrder[a.rarity] : b.totalPrice - a.totalPrice;
+                        const aIsOutOfStock = a.status === 'out_of_stock';
+                        const bIsOutOfStock = b.status === 'out_of_stock';
+                        const aHasDiscount = a.discountPrice && new Date(a.discountExpiry) > new Date();
+                        const bHasDiscount = b.discountPrice && new Date(b.discountExpiry) > new Date();
+
+                        if (aIsOutOfStock !== bIsOutOfStock) return aIsOutOfStock ? 1 : -1;
+                        if (aHasDiscount !== bHasDiscount) return aHasDiscount ? -1 : 1;
+                        return 0;
                     });
 
+                    const itemsHTML = categories[category].map(menuItem => {
+                        const menuItemId = `menu-item-${menuItem.name.replace(/\s+/g, '-')}`;
+                        const isOutOfStock = menuItem.status === 'out_of_stock';
+                        const hasActiveDiscount = menuItem.discountPrice && new Date(menuItem.discountExpiry) > new Date();
+                        
+                        let finalPrice = menuItem.totalPrice;
+                        let priceHTML = `<p>Rs ${menuItem.totalPrice.toFixed(2)} ${menuItem.startingValue !== 1 ? 'per ' + menuItem.startingValue + ' ' : 'per '}${menuItem.displayUnit}</p>`;
+                        let discountBadgeHTML = '';
+
+                        if (hasActiveDiscount) {
+                            finalPrice = menuItem.discountPrice + menuItem.profit;
+                            priceHTML = `<p class="original-price">Rs ${menuItem.totalPrice.toFixed(2)}</p>
+                                         <p>Rs ${finalPrice.toFixed(2)} ${menuItem.startingValue !== 1 ? 'per ' + menuItem.startingValue + ' ' : 'per '}${menuItem.displayUnit}</p>`;
+                            discountBadgeHTML = `<div class="discount-badge">SALE!</div>`;
+                        }
+
+                        const savedState = cartItemsState[menuItemId];
+                        let controlsHtml = '';
+                        if (isOutOfStock) {
+                            controlsHtml = `<button disabled>Out of Stock</button>`;
+                        } else if (savedState && savedState.hasQuantityControl) {
+                            controlsHtml = `<div class="quantity-control">
+                                <button onclick="decreaseQuantity('${menuItem.name}', ${finalPrice}, '${menuItem.displayUnit}', ${menuItem.startingValue}, ${menuItem.profit})">-</button>
+                                <div class="quantity-display">${savedState.quantity}</div>
+                                <button onclick="increaseQuantity('${menuItem.name}', ${finalPrice}, '${menuItem.displayUnit}', ${menuItem.startingValue}, ${menuItem.profit})">+</button>
+                            </div>`;
+                        } else {
+                            controlsHtml = `<button onclick="addToCart('${menuItem.name}', ${finalPrice}, '${menuItem.displayUnit}', ${menuItem.startingValue}, ${menuItem.profit})">Add to Cart</button>`;
+                        }
+
+                        let itemContent = `
+                            <div class="menu-item-content">
+                                <h3>${menuItem.name}</h3>
+                                ${priceHTML}
+                                <div class="item-controls" id="controls-${menuItemId}">${controlsHtml}</div>
+                            </div>`;
+
+                        const itemClass = `menu-item ${isOutOfStock ? 'out-of_stock' : ''}`;
+                        const imageName = `${menuItem.name.replace(/\s+/g, '')}.jpg`;
+                        const storageRef = storage.ref().child(`images/${imageName}`);
+                        
+                        // We build the placeholder first, then load the image
+                        const placeholderHTML = `${menuItem.rarity ? `<div class="rarity-label">${menuItem.rarity}</div>` : ''}${discountBadgeHTML}<div class="menu-item-placeholder" style="height: 150px; background: #eee;">No Image</div>${itemContent}`;
+                        
+                        // Asynchronously load the image
+                        storageRef.getDownloadURL()
+                            .then(url => {
+                                const element = document.getElementById(menuItemId);
+                                if (element) element.innerHTML = `${menuItem.rarity ? `<div class="rarity-label">${menuItem.rarity}</div>` : ''}${discountBadgeHTML}<img src="${url}" alt="${menuItem.name}" class="menu-item-image">${itemContent}`;
+                            });
+
+                        return `<div class="${itemClass}" id="${menuItemId}">${placeholderHTML}</div>`;
+                    }).join('');
+                    
                     menuSection.innerHTML += `
                         <div class="menu-category">
                             <h2>${category}</h2>
-                            <div class="menu-items">
-                                ${categories[category].map(menuItem => {
-                                    const menuItemId = `menu-item-${menuItem.name.replace(/\s+/g, '-')}`;
-                                    const savedState = cartItemsState[menuItemId];
-                                    const controlsHtml = savedState && savedState.hasQuantityControl ?
-                                        `<div class="quantity-control">
-                                            <button onclick="decreaseQuantity('${menuItem.name}', ${menuItem.totalPrice}, '${menuItem.displayUnit}', ${menuItem.startingValue}, ${menuItem.profit})">-</button>
-                                            <div class="quantity-display">${savedState.quantity}</div>
-                                            <button onclick="increaseQuantity('${menuItem.name}', ${menuItem.totalPrice}, '${menuItem.displayUnit}', ${menuItem.startingValue}, ${menuItem.profit})">+</button>
-                                        </div>` :
-                                        `<button onclick="addToCart('${menuItem.name}', ${menuItem.totalPrice}, '${menuItem.displayUnit}', ${menuItem.startingValue}, ${menuItem.profit})">Add to Cart</button>`;
-
-                                    // Rarity label HTML with proper styling classes
-                                    let rarityLabel = '';
-                                    if (menuItem.rarity === 'Premium') {
-                                        rarityLabel = `<div class="rarity-label premium">Premium</div>`;
-                                    } else if (menuItem.rarity === 'Limited Edition') {
-                                        rarityLabel = `<div class="rarity-label limited">Limited</div>`;
-                                    }
-
-                                    const imageName = `${menuItem.name.replace(/\s+/g, '')}.jpg`;
-                                    const storageRef = storage.ref().child(`images/${imageName}`);
-
-                                    // Content structure for better organization
-                                    let itemContent = `
-                                        <div class="menu-item-content">
-                                            <h3>${menuItem.name}</h3>
-                                            <p>Rs ${menuItem.totalPrice.toFixed(2)} ${menuItem.startingValue !== 1 ? 'per ' + menuItem.startingValue + ' ' : 'per '}${menuItem.displayUnit}</p>
-                                            <div class="item-controls" id="controls-${menuItemId}">
-                                                ${controlsHtml}
-                                            </div>
-                                        </div>
-                                    `;
-
-                                    // Load image and update content
-                                    storageRef.getDownloadURL()
-                                        .then(url => {
-                                            document.getElementById(menuItemId).innerHTML = `
-                                                ${rarityLabel}
-                                                <img src="${url}" alt="${menuItem.name}" class="menu-item-image">
-                                                ${itemContent}
-                                            `;
-                                        }).catch(() => {
-                                            // Fallback with placeholder or just content without image
-                                            document.getElementById(menuItemId).innerHTML = `
-                                                ${rarityLabel}
-                                                <div class="menu-item-placeholder" style="height: 150px; background: linear-gradient(135deg, #ecf0f1, #bdc3c7); display: flex; align-items: center; justify-content: center; color: #7f8c8d; font-size: 0.9em; border-radius: 15px 15px 0 0;">No Image</div>
-                                                ${itemContent}
-                                            `;
-                                        });
-
-                                    return `<div class="menu-item" id="${menuItemId}"></div>`;
-                                }).join('')}
-                            </div>
-                        </div>
-                    `;
+                            <div class="menu-items">${itemsHTML}</div>
+                        </div>`;
                 });
-
                 adjustSpacerHeight();
             });
         }
