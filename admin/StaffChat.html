@@ -422,10 +422,8 @@
             return div;
         }
 
-        function loadUsers() {
+        async function loadUsers() {
             const usersRef = firebase.database().ref('users');
-            const userMessagesRef = firebase.database().ref('userMessages');
-            const adminMessagesRef = firebase.database().ref('adminMessages');
             const usersList = document.getElementById('usersList');
             
             usersRef.on('value', async (usersSnapshot) => {
@@ -439,21 +437,22 @@
                     userProfiles.push(userSnap.val());
                 });
 
-                // For each user, find their last message timestamp
+                // Asynchronously fetch the last message time for each user
                 for (const user of userProfiles) {
-                    const userMsgSnap = await userMessagesRef.child(user.uid).orderByChild('timestamp').limitToLast(1).once('value');
-                    const adminMsgSnap = await adminMessagesRef.child(user.uid).orderByChild('timestamp').limitToLast(1).once('value');
+                    const userMsgRef = firebase.database().ref(`userMessages/${user.uid}`).orderByChild('timestamp').limitToLast(1);
+                    const adminMsgRef = firebase.database().ref(`adminMessages/${user.uid}`).orderByChild('timestamp').limitToLast(1);
+
+                    const [userMsgSnap, adminMsgSnap] = await Promise.all([userMsgRef.once('value'), adminMsgRef.once('value')]);
 
                     let lastUserTimestamp = 0;
-                    let lastAdminTimestamp = 0;
-
                     if (userMsgSnap.exists()) userMsgSnap.forEach(s => lastUserTimestamp = s.val().timestamp);
+                    
+                    let lastAdminTimestamp = 0;
                     if (adminMsgSnap.exists()) adminMsgSnap.forEach(s => lastAdminTimestamp = s.val().timestamp);
 
                     user.lastMessageTimestamp = Math.max(lastUserTimestamp, lastAdminTimestamp);
                 }
 
-                // Sort users by the most recent message timestamp
                 userProfiles.sort((a, b) => b.lastMessageTimestamp - a.lastMessageTimestamp);
                 
                 usersList.innerHTML = '';
@@ -463,15 +462,12 @@
                 });
             });
         }
-
         function createUserElement(user) {
             const div = document.createElement('div');
             div.className = `user-item ${selectedUserId === user.uid ? 'active' : ''}`;
-            div.dataset.userId = user.uid; // Use dataset for modern attribute handling
+            div.dataset.userId = user.uid;
             div.dataset.userName = user.username;
-            
             div.onclick = () => selectUser(user.uid, user.username);
-
             div.innerHTML = `
                 <div class="user-header">
                     <div class="user-avatar">${user.username.slice(0, 2).toUpperCase()}</div>
@@ -479,11 +475,9 @@
                         <div class="user-name">${user.username}</div>
                         <div class="user-status">${user.phone || 'No phone number'}</div>
                     </div>
-                </div>
-            `;
+                </div>`;
             return div;
         }
-
         function selectUser(userId, userName) {
             if (selectedUserId === userId) return; // Don't reload if already selected
             selectedUserId = userId;
@@ -510,19 +504,17 @@
             const adminMessagesRef = firebase.database().ref(`adminMessages/${userId}`);
 
             let allMessages = [];
-            // Detach any previous listeners to prevent memory leaks
+            // Detach any previous listeners to prevent duplicates when switching users
             userMessagesRef.off();
             adminMessagesRef.off();
             
             const render = () => {
                 allMessages.sort((a, b) => a.timestamp - b.timestamp);
                 chatMessages.innerHTML = '';
-                if(allMessages.length === 0){
-                    chatMessages.innerHTML = '<div class="loading">No messages yet. Send one to start the conversation!</div>';
+                if (allMessages.length === 0) {
+                    chatMessages.innerHTML = '<div class="loading">No messages yet. Send one to start!</div>';
                 } else {
-                    allMessages.forEach(msg => {
-                        chatMessages.appendChild(createMessageElement(msg, msg.type));
-                    });
+                    allMessages.forEach(msg => chatMessages.appendChild(createMessageElement(msg, msg.type)));
                 }
                 updateScroll();
             };
