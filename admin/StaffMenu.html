@@ -418,6 +418,19 @@ input:checked + .slider:before { transform: translateX(20px); }
     font-weight: bold;
     font-size: 0.9rem;
 }
+.discount-display {
+    background-color: var(--danger);
+    color: white;
+    font-size: 0.8rem;
+    padding: 3px 8px;
+    border-radius: 5px;
+    margin-top: 5px;
+    display: inline-block;
+}
+.discount-expiry {
+    font-size: 0.75rem;
+    color: var(--gray);
+}
         @media (max-width: 768px) {
             .menu-items {
                 grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -583,11 +596,11 @@ input:checked + .slider:before { transform: translateX(20px); }
                 </select>
             </div>
             <div class="form-group">
-                <label class="form-label" for="editDiscountPrice">Discount Price (Rs) (Optional)</label>
-                <input type="number" id="editDiscountPrice" class="form-control" placeholder="e.g., 150. Leave empty to remove discount.">
+                <label class="form-label" for="editDiscountPercent">Discount Percentage (%)</label>
+                <input type="number" id="editDiscountPercent" class="form-control" placeholder="e.g., 10 for 10%. Leave empty for no discount.">
             </div>
             <div class="form-group">
-                <label class="form-label" for="editDiscountExpiry">Discount Expiry (Optional)</label>
+                <label class="form-label" for="editDiscountExpiry">Discount Expiry</label>
                 <input type="datetime-local" id="editDiscountExpiry" class="form-control">
             </div>
             <div class="form-actions">
@@ -701,7 +714,7 @@ input:checked + .slider:before { transform: translateX(20px); }
             document.getElementById('deleteConfirmation').style.display = 'none';
         }
 
-        function openEditItemModal(itemId) {
+                function openEditItemModal(itemId) {
             const itemRef = menuRef.child(itemId);
             itemRef.once('value', (snapshot) => {
                 if (snapshot.exists()) {
@@ -718,19 +731,16 @@ input:checked + .slider:before { transform: translateX(20px); }
                             editCategorySelect.appendChild(option);
                         });
 
+                        document.getElementById('editItemCategory').value = item.category;
                         document.getElementById('editItemId').value = itemId;
                         document.getElementById('editItemName').value = item.name;
                         document.getElementById('editItemPrice').value = item.price;
                         document.getElementById('editItemProfit').value = item.profit || 0;
                         document.getElementById('editStartingValue').value = item.startingValue || 1;
-                        document.getElementById('editItemCategory').value = item.category;
                         document.getElementById('editItemRarity').value = item.rarity || 'Basic';
                         document.getElementById('editItemUnit').value = item.unit || 'Amount';
                         document.getElementById('editItemType').value = item.type || 'Hotel';
-                        
-                        // NEW: Populate discount fields
-                        document.getElementById('editDiscountPrice').value = item.discountPrice || '';
-                        // Correctly format the date for the datetime-local input
+                        document.getElementById('editDiscountPercent').value = item.discountPercent || '';
                         document.getElementById('editDiscountExpiry').value = item.discountExpiry ? item.discountExpiry.slice(0, 16) : '';
                         
                         openModal('editItemModal');
@@ -743,7 +753,7 @@ input:checked + .slider:before { transform: translateX(20px); }
 
         function updateMenuItem() {
             const itemId = document.getElementById('editItemId').value;
-            const discountPrice = parseFloat(document.getElementById('editDiscountPrice').value);
+            const discountPercent = parseFloat(document.getElementById('editDiscountPercent').value);
             const discountExpiry = document.getElementById('editDiscountExpiry').value;
             
             const updatedItem = {
@@ -757,19 +767,16 @@ input:checked + .slider:before { transform: translateX(20px); }
                 type: document.getElementById('editItemType').value
             };
 
-            // NEW: Handle discount logic
-            if (!isNaN(discountPrice) && discountPrice > 0 && discountExpiry) {
-                updatedItem.discountPrice = discountPrice;
+            // NEW: Handle percentage-based discount logic
+            if (!isNaN(discountPercent) && discountPercent > 0 && discountExpiry) {
+                updatedItem.discountPercent = discountPercent;
                 updatedItem.discountExpiry = new Date(discountExpiry).toISOString();
             } else {
-                // If fields are empty/invalid, remove discount by setting to null
-                updatedItem.discountPrice = null;
+                updatedItem.discountPercent = null;
                 updatedItem.discountExpiry = null;
             }
 
-            if (updatedItem.unit === 'Amount') {
-                delete updatedItem.unit;
-            }
+            if (updatedItem.unit === 'Amount') delete updatedItem.unit;
 
             menuRef.child(itemId).update(updatedItem)
                 .then(() => {
@@ -777,10 +784,7 @@ input:checked + .slider:before { transform: translateX(20px); }
                     closeModal('editItemModal');
                     fetchMenuItems();
                 })
-                .catch((error) => {
-                    showToast('Error updating item', 'error');
-                    console.error("Error updating item: ", error);
-                });
+                .catch((error) => showToast('Error updating item', 'error'));
         }
         
         function confirmDelete() {
@@ -943,15 +947,17 @@ input:checked + .slider:before { transform: translateX(20px); }
         }
 
         function fetchMenuItems() {
-            menuRef.once('value', (snapshot) => {
+            // Use .on() for real-time updates from the database
+            menuRef.on('value', (snapshot) => {
                 const menuSection = document.getElementById('menuSection');
+                const scrollPosition = menuSection.scrollTop; // Save scroll position
                 menuSection.innerHTML = '';
                 const categories = {};
 
                 snapshot.forEach((childSnapshot) => {
-                    const menuItem = childSnapshot.val();
-                    const menuItemId = childSnapshot.key;
-
+                    // Important: Add the unique key from Firebase to the item object
+                    const menuItem = { id: childSnapshot.key, ...childSnapshot.val() };
+                    
                     if (currentTab !== 'all' && menuItem.type && menuItem.type.toLowerCase() !== currentTab) {
                         return;
                     }
@@ -959,9 +965,7 @@ input:checked + .slider:before { transform: translateX(20px); }
                     if (!categories[menuItem.category]) {
                         categories[menuItem.category] = [];
                     }
-                    
-                    // Add the full item object with its ID to the category array
-                    categories[menuItem.category].push({ ...menuItem, id: menuItemId });
+                    categories[menuItem.category].push(menuItem);
                 });
 
                 const sortedCategories = Object.keys(categories).sort();
@@ -969,17 +973,18 @@ input:checked + .slider:before { transform: translateX(20px); }
                 sortedCategories.forEach((category, index) => {
                     const delay = index * 100;
                     
+                    // --- THIS IS THE NEW LOGIC BLOCK YOU PROVIDED, INTEGRATED CORRECTLY ---
                     const itemsHTML = categories[category].map(menuItem => {
                         const isOutOfStock = menuItem.status === 'out_of_stock';
-                        const hasActiveDiscount = menuItem.discountPrice && new Date(menuItem.discountExpiry) > new Date();
+                        const hasActiveDiscount = menuItem.discountPercent && new Date(menuItem.discountExpiry) > new Date();
                         let rarityClass = menuItem.rarity ? menuItem.rarity.replace(' Edition', '') : 'Basic';
                         
-                        let priceHTML = '';
+                        let priceHTML = `<p class="item-price">Price: Rs ${menuItem.price.toFixed(2)}</p>`;
                         if (hasActiveDiscount) {
+                            const discountedPrice = menuItem.price * (1 - menuItem.discountPercent / 100);
                             priceHTML = `<p class="item-price" style="text-decoration: line-through;">Price: Rs ${menuItem.price.toFixed(2)}</p>
-                                         <p class="discount-info">Discount: Rs ${parseFloat(menuItem.discountPrice).toFixed(2)}</p>`;
-                        } else {
-                            priceHTML = `<p class="item-price">Price: Rs ${menuItem.price.toFixed(2)}</p>`;
+                                         <div class="discount-display">${menuItem.discountPercent}% OFF! (New Price: Rs ${discountedPrice.toFixed(2)})</div>
+                                         <div class="discount-expiry">Expires: ${new Date(menuItem.discountExpiry).toLocaleString()}</div>`;
                         }
 
                         return `
@@ -1022,6 +1027,8 @@ input:checked + .slider:before { transform: translateX(20px); }
                     `;
                     menuSection.innerHTML += menuItemHTML;
                 });
+
+                menuSection.scrollTop = scrollPosition; // Restore scroll position after render
             });
         }
         // Close modals when clicking outside
