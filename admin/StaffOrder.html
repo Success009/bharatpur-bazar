@@ -477,13 +477,8 @@
         function processOrder(userUid, orderId) {
             if (confirm('Are you accepting this order?')) {
                 const orderRef = ordersRef.child(userUid).child(orderId);
-                orderRef.once('value').then(snapshot => {
-                    const order = snapshot.val();
-                    if (order && order.device) {
-                        orderRef.update({ accepted: true }).then(() => {
-                            logNotification(order.device, 'process');
-                        });
-                    }
+                orderRef.update({ accepted: true }).then(() => {
+                    sendAdminMessage(userUid, `Your order #${orderId.slice(-6)} has been accepted and is on the way!`);
                 });
             }
         }
@@ -493,14 +488,13 @@
                 const orderRef = ordersRef.child(userUid).child(orderId);
                 orderRef.once('value').then(snapshot => {
                     const order = snapshot.val();
-                    if (order && order.device) {
+                    if (order) {
                         const totalOrdersRef = firebase.database().ref('totalorders');
-                        totalOrdersRef.child(orderId).set(order)
-                            .then(() => {
-                                orderRef.remove().then(() => {
-                                    logNotification(order.device, 'complete');
-                                });
+                        totalOrdersRef.child(orderId).set(order).then(() => {
+                            orderRef.remove().then(() => {
+                                sendAdminMessage(userUid, `Your order #${orderId.slice(-6)} has been delivered. Thank you for choosing Bharatpur Bazar!`);
                             });
+                        });
                     }
                 });
             }
@@ -509,13 +503,8 @@
         function cancelOrder(userUid, orderId) {
             if (confirm('Are you sure you want to cancel this order?')) {
                 const orderRef = ordersRef.child(userUid).child(orderId);
-                orderRef.once('value').then(snapshot => {
-                    const order = snapshot.val();
-                    if (order && order.device) {
-                        orderRef.remove().then(() => {
-                            logNotification(order.device, 'cancel');
-                        });
-                    }
+                orderRef.remove().then(() => {
+                    sendAdminMessage(userUid, `Unfortunately, your order #${orderId.slice(-6)} has been canceled. Please contact us for more details.`);
                 });
             }
         }
@@ -523,62 +512,30 @@
         function verifyPayment(userUid, orderId) {
             if (confirm('Do you confirm that payment has been received?')) {
                 const orderRef = ordersRef.child(userUid).child(orderId);
-                orderRef.once('value').then(snapshot => {
-                    const order = snapshot.val();
-                    if (order && order.device) {
-                        orderRef.update({ paymentVerified: true }).then(() => {
-                            logNotification(order.device, 'custom', 'Your payment has been verified. Your order is on its way.');
-                        });
-                    }
+                orderRef.update({ paymentVerified: true }).then(() => {
+                    sendAdminMessage(userUid, `Your payment for order #${orderId.slice(-6)} has been verified. Thank you!`);
                 });
             }
         }
 
         function outOfIngredient(userUid, orderId) {
-            if (confirm('Is it really not available or are you being lazy?')) {
-                const orderRef = ordersRef.child(userUid).child(orderId);
-                orderRef.once('value').then(snapshot => {
-                    const order = snapshot.val();
-                    if (order && order.device) {
-                        logNotification(order.device, 'outOfIngredient');
-                        // Provide feedback to the admin that the action was successful
-                        alert('"Out of Stock" notification sent to the user.');
-                    }
-                });
+            if (confirm('Is an item in this order out of stock?')) {
+                sendAdminMessage(userUid, `We apologize, but an item in your order #${orderId.slice(-6)} is currently out of stock. Please contact us to adjust your order.`);
+                alert('"Out of Stock" message sent to the user.');
             }
         }
 
-
-        function logNotification(device, action, customMessage) {
-            if (device) {
-                let message = '';
-                switch (action) {
-                    case 'process':
-                        message = `We have received your order. Your order is on the way. You may get call by one of our delivery person.`;
-                        break;
-                    case 'complete':
-                        message = `Your order has been completed. Thanks for using Bharatpur Bazar`;
-                        break;
-                    case 'cancel':
-                        message = `Your order has been cancelled by the staff. Please contact our staff for the reason.`;
-                        break;
-                    case 'outOfIngredient':
-                        message = `Sorry your order cannot be proceeded. We're out of stock.`;
-                        break;
-                    case 'custom':
-                        message = customMessage;
-                        break;
-                    default:
-                        console.error('Invalid action.');
-                        return;
-                }
-
-                const newNotificationRef = notificationsRef.push();
-                newNotificationRef.set({
-                    device: device,
-                    message: message
-                });
+        function sendAdminMessage(userUid, message) {
+            if (!userUid || !message) {
+                console.error('User UID or message is missing.');
+                return;
             }
+            const adminMessagesRef = firebase.database().ref(`adminMessages/${userUid}`);
+            adminMessagesRef.push({
+                message: message,
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                type: 'admin'
+            }).catch(error => console.error('Error sending admin message:', error));
         }
         function initializeApp() {
     // This function will call the correct startup function based on which page is loaded.
