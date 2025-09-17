@@ -452,8 +452,6 @@
           100% { transform: scale(1); }
         }
 
-
-        .notification-window,
         .order-history-window,
         .cart-window {
           position: fixed;
@@ -580,27 +578,18 @@
             border-radius: 5px;
             z-index: 1000;
         }
-
+        
         .notification-window {
-            height: 450px;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
+            /* This is now just a container for positioning */
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             width: 90%;
             max-width: 420px;
-            max-height: 85vh;
-            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-            border: none;
-            border-radius: 20px;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            max-height: 85vh; /* Limit overall height */
             display: none; /* Initially hidden */
             z-index: 1001;
-            padding: 0;
-            animation: cartSlideIn 0.3s ease-out;
         }
 
         .order-history-window {
@@ -665,20 +654,45 @@
             border-left: 0;
         }
 
-        .notification-input-container {
-            padding: 10px 15px;
-            border-top: 1px solid #e0e0e0;
-            background-color: var(--white);
-            box-sizing: border-box;
-            flex-shrink: 0; 
+        .notification-window {
+            /* This is now just a container for positioning */
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 420px;
+            max-height: 85vh; /* Limit overall height */
+            display: none; /* Initially hidden */
+            z-index: 1001;
         }
 
+        .chat-container {
+            /* This is the new flex layout container */
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            max-height: 85vh; /* Ensure it respects the parent's max-height */
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            overflow: hidden; /* Important for containing children */
+        }
+        
         .notification-history {
-            flex: 1; 
-            overflow-y: auto;
+            flex-grow: 1; /* This makes the history take all available space */
+            overflow-y: auto; /* Makes ONLY this section scrollable */
             padding: 15px;
             background-color: #f5f8fa;
             -webkit-overflow-scrolling: touch;
+        }
+
+        .notification-input-container {
+            flex-shrink: 0; /* Prevents this container from shrinking */
+            padding: 10px 15px;
+            border-top: 1px solid #e0e0e0;
+            background-color: white;
         }
 
         .notification-input-container input {
@@ -1506,25 +1520,25 @@
     background: var(--secondary);
     cursor: not-allowed;
 }
-.discount-badge {
-    position: absolute;
-    top: -10px;
-    right: -10px;
-    background: linear-gradient(135deg, #f72585, #b5179e);
-    color: white;
-    padding: 6px 10px;
-    border-radius: 15px 0 15px 0;
-    font-size: 0.8em;
-    font-weight: bold;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    transform: rotate(10deg);
-}
-.original-price {
-    text-decoration: line-through;
-    color: #999;
-    font-size: 0.9em;
-    font-weight: normal;
-}
+        .discount-badge {
+            position: absolute;
+            top: 10px;
+            right: -15px; /* Position it slightly off the card */
+            background: linear-gradient(135deg, #f72585, #b5179e);
+            color: white;
+            padding: 5px 25px;
+            font-size: 0.9em;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transform: rotate(45deg); /* THE TILT */
+            z-index: 2;
+        }
+        .original-price {
+            text-decoration: line-through;
+            color: #999;
+            font-size: 0.9em;
+            font-weight: normal;
+        }
     </style>
 </head>
 
@@ -1559,14 +1573,16 @@
         </div>
     </div>
     <div class="notification-window" id="notificationWindow">
-        <div class="window-header">
-            <h3>Chat</h3>
-            <button class="close-button" onclick="toggleNotificationWindow()">✕</button>
-        </div>
-        <div id="notificationHistory" class="notification-history"></div>
-        <div class="notification-input-container">
-            <input type="text" id="notificationInput" placeholder="Type a message...">
-            <button onclick="sendMessage()">Send</button>
+        <div class="chat-container"> <!-- NEW WRAPPER -->
+            <div class="window-header">
+                <h3>Chat</h3>
+                <button class="close-button" onclick="toggleNotificationWindow()">✕</button>
+            </div>
+            <div id="notificationHistory" class="notification-history"></div>
+            <div class="notification-input-container">
+                <input type="text" id="notificationInput" placeholder="Type a message...">
+                <button onclick="sendMessage()">Send</button>
+            </div>
         </div>
     </div>
     <div class="order-history-window" id="orderHistoryWindow">
@@ -2075,20 +2091,22 @@
                 });
             }
 
-            // USE .on() INSTEAD OF .once() FOR REAL-TIME UPDATES
+            // Use .on() for real-time updates when staff changes stock or discounts
             menuRef.on('value', (snapshot) => {
                 const menuSection = document.getElementById('menuSection');
+                // Preserve scroll position during real-time updates
+                const scrollPosition = menuSection.scrollTop; 
                 menuSection.innerHTML = '';
                 const categories = {};
                 const typesSet = new Set();
 
                 snapshot.forEach((childSnapshot) => {
-                    const menuItem = { id: childSnapshot.key, ...childSnapshot.val() };
+                    const menuItem = { id: childSnapshot.key, ...childSnapshot.val() }; // Include the key/id
                     const {type = 'other', category, price, profit = 0, unit = 'Item', startingValue = 1} = menuItem;
                     typesSet.add(type);
 
                     if (currentTab === 'all' || currentTab === type) {
-                        const totalPrice = price + profit;
+                        const totalPrice = price + (profit || 0);
                         const displayUnit = unit || 'Item';
                         if (!categories[category]) categories[category] = [];
                         categories[category].push({...menuItem, totalPrice, displayUnit});
@@ -2097,13 +2115,13 @@
 
                 createTypeTabs(Array.from(typesSet));
 
+                // --- THIS IS THE NEW LOGIC BLOCK YOU PROVIDED ---
                 Object.keys(categories).sort().forEach(category => {
-                    // NEW: Sort items to show specials first and out of stock last
                     categories[category].sort((a, b) => {
                         const aIsOutOfStock = a.status === 'out_of_stock';
                         const bIsOutOfStock = b.status === 'out_of_stock';
-                        const aHasDiscount = a.discountPrice && new Date(a.discountExpiry) > new Date();
-                        const bHasDiscount = b.discountPrice && new Date(b.discountExpiry) > new Date();
+                        const aHasDiscount = a.discountPercent && new Date(a.discountExpiry) > new Date();
+                        const bHasDiscount = b.discountPercent && new Date(b.discountExpiry) > new Date();
 
                         if (aIsOutOfStock !== bIsOutOfStock) return aIsOutOfStock ? 1 : -1;
                         if (aHasDiscount !== bHasDiscount) return aHasDiscount ? -1 : 1;
@@ -2113,17 +2131,19 @@
                     const itemsHTML = categories[category].map(menuItem => {
                         const menuItemId = `menu-item-${menuItem.name.replace(/\s+/g, '-')}`;
                         const isOutOfStock = menuItem.status === 'out_of_stock';
-                        const hasActiveDiscount = menuItem.discountPrice && new Date(menuItem.discountExpiry) > new Date();
+                        const hasActiveDiscount = menuItem.discountPercent && new Date(menuItem.discountExpiry) > new Date();
                         
-                        let finalPrice = menuItem.totalPrice;
-                        let priceHTML = `<p>Rs ${menuItem.totalPrice.toFixed(2)} ${menuItem.startingValue !== 1 ? 'per ' + menuItem.startingValue + ' ' : 'per '}${menuItem.displayUnit}</p>`;
+                        let priceWithProfit = menuItem.price + (menuItem.profit || 0);
+                        let finalPrice = priceWithProfit;
+                        let priceHTML = `<p>Rs ${priceWithProfit.toFixed(2)} ${menuItem.startingValue !== 1 ? 'per ' + menuItem.startingValue + ' ' : 'per '}${menuItem.displayUnit}</p>`;
                         let discountBadgeHTML = '';
 
                         if (hasActiveDiscount) {
-                            finalPrice = menuItem.discountPrice + menuItem.profit;
-                            priceHTML = `<p class="original-price">Rs ${menuItem.totalPrice.toFixed(2)}</p>
-                                         <p>Rs ${finalPrice.toFixed(2)} ${menuItem.startingValue !== 1 ? 'per ' + menuItem.startingValue + ' ' : 'per '}${menuItem.displayUnit}</p>`;
-                            discountBadgeHTML = `<div class="discount-badge">SALE!</div>`;
+                            const discountedBasePrice = menuItem.price * (1 - menuItem.discountPercent / 100);
+                            finalPrice = discountedBasePrice + (menuItem.profit || 0);
+                            priceHTML = `<p class="original-price">Rs ${priceWithProfit.toFixed(2)}</p>
+                                            <p>Rs ${finalPrice.toFixed(2)} ${menuItem.startingValue !== 1 ? 'per ' + menuItem.startingValue + ' ' : 'per '}${menuItem.displayUnit}</p>`;
+                            discountBadgeHTML = `<div class="discount-badge">${menuItem.discountPercent}% OFF</div>`;
                         }
 
                         const savedState = cartItemsState[menuItemId];
@@ -2147,19 +2167,22 @@
                                 <div class="item-controls" id="controls-${menuItemId}">${controlsHtml}</div>
                             </div>`;
 
-                        const itemClass = `menu-item ${isOutOfStock ? 'out-of_stock' : ''}`;
+                        const itemClass = `menu-item ${isOutOfStock ? 'out-of-stock' : ''}`;
                         const imageName = `${menuItem.name.replace(/\s+/g, '')}.jpg`;
                         const storageRef = storage.ref().child(`images/${imageName}`);
                         
-                        // We build the placeholder first, then load the image
-                        const placeholderHTML = `${menuItem.rarity ? `<div class="rarity-label">${menuItem.rarity}</div>` : ''}${discountBadgeHTML}<div class="menu-item-placeholder" style="height: 150px; background: #eee;">No Image</div>${itemContent}`;
+                        const placeholderHTML = `${discountBadgeHTML}${menuItem.rarity ? `<div class="rarity-label">${menuItem.rarity}</div>` : ''}<div class="menu-item-placeholder" style="height: 150px; background: #eee;">No Image</div>${itemContent}`;
                         
-                        // Asynchronously load the image
-                        storageRef.getDownloadURL()
-                            .then(url => {
-                                const element = document.getElementById(menuItemId);
-                                if (element) element.innerHTML = `${menuItem.rarity ? `<div class="rarity-label">${menuItem.rarity}</div>` : ''}${discountBadgeHTML}<img src="${url}" alt="${menuItem.name}" class="menu-item-image">${itemContent}`;
-                            });
+                        // Asynchronously load the image AFTER the element is in the DOM
+                        setTimeout(() => {
+                             storageRef.getDownloadURL()
+                                .then(url => {
+                                    const element = document.getElementById(menuItemId);
+                                    if (element) element.innerHTML = `${discountBadgeHTML}${menuItem.rarity ? `<div class="rarity-label">${menuItem.rarity}</div>` : ''}<img src="${url}" alt="${menuItem.name}" class="menu-item-image">${itemContent}`;
+                                }).catch(()=>{
+                                    // The placeholder is already there, so no action is needed on error
+                                });
+                        }, 0);
 
                         return `<div class="${itemClass}" id="${menuItemId}">${placeholderHTML}</div>`;
                     }).join('');
@@ -2170,7 +2193,9 @@
                             <div class="menu-items">${itemsHTML}</div>
                         </div>`;
                 });
+
                 adjustSpacerHeight();
+                menuSection.scrollTop = scrollPosition; // Restore scroll position
             });
         }
         let totalPrice = 0;
