@@ -1722,26 +1722,22 @@
 });
         const notificationsRef = firebase.database().ref('notifications');
         
-        function fetchNotifications() {
+        function initializeChat() {
             auth.onAuthStateChanged(user => {
                 if (user) {
-                    // Once the user is signed in, set up listeners for their chat threads.
                     const userUid = user.uid;
                     const userMessagesRef = firebase.database().ref(`userMessages/${userUid}`);
                     const adminMessagesRef = firebase.database().ref(`adminMessages/${userUid}`);
-                    
-                    const allMessages = [];
                     const notificationHistory = document.getElementById('notificationHistory');
+                    let allMessages = [];
 
-                    // Function to render all messages sorted by time
                     const renderMessages = () => {
                         allMessages.sort((a, b) => a.timestamp - b.timestamp);
-                        notificationHistory.innerHTML = ''; // Clear before rendering
+                        notificationHistory.innerHTML = '';
                         allMessages.forEach(msg => {
                             const historyItem = document.createElement('div');
                             historyItem.className = 'notification-message';
                             const bubble = document.createElement('div');
-                            // Use 'staff' for admin messages, 'user' for user-sent messages
                             bubble.className = `notification-bubble ${msg.type === 'admin' ? 'staff' : 'user'}`;
                             bubble.innerText = msg.message;
                             historyItem.appendChild(bubble);
@@ -1750,21 +1746,21 @@
                         notificationHistory.scrollTop = notificationHistory.scrollHeight;
                     };
 
-                    // Listen for the user's own sent messages
                     userMessagesRef.on('child_added', snapshot => {
-                        allMessages.push(snapshot.val());
+                        allMessages.push({ ...snapshot.val() });
                         renderMessages();
                     });
 
-                    // Listen for new messages FROM the admin
                     adminMessagesRef.on('child_added', snapshot => {
-                        allMessages.push({ type: 'admin', ...snapshot.val() }); // Add 'type' property
+                        const adminMessage = { type: 'admin', ...snapshot.val() };
+                        allMessages.push(adminMessage);
                         renderMessages();
 
-                        // If the chat window is closed, show a visual notification
                         const notificationWindow = document.getElementById('notificationWindow');
                         if (notificationWindow.style.display === 'none' || !notificationWindow.style.display) {
                            showCartFeedback("New message from staff!", "success");
+                           // SMART FEATURE: Open the chat window automatically on new staff message
+                           toggleNotificationWindow();
                         }
                     });
                 }
@@ -1911,7 +1907,7 @@
 
             if (message && currentUser) {
                 const userMessagesRef = firebase.database().ref(`userMessages/${currentUser.uid}`);
-                const username = localStorage.getItem('username') || 'Anonymous'; // Get username from storage
+                const username = localStorage.getItem('username') || 'Customer';
 
                 userMessagesRef.push({
                     timestamp: firebase.database.ServerValue.TIMESTAMP,
@@ -1919,7 +1915,7 @@
                     message: message,
                     username: username // Add username for admin convenience
                 }).then(() => {
-                    inputField.value = ''; // Clear input *after* successful send
+                    inputField.value = ''; // Clear input only on successful send
                 }).catch(error => {
                     console.error("Message send failed:", error);
                     alert("Your message could not be sent. Please try again.");
@@ -1929,7 +1925,6 @@
         function dismissNotification() {
             document.getElementById('notification').style.display = 'none';
         }
-        fetchNotifications();
         function toggleOrderHistoryWindow() {
             const orderHistoryWindow = document.getElementById('orderHistoryWindow');
             const notificationWindow = document.getElementById('notificationWindow');
@@ -2704,25 +2699,25 @@
                 return;
             }
 
-            // Save the details to localStorage for quick access
             localStorage.setItem('username', loginUsername);
             localStorage.setItem('phone', loginPhone);
             localStorage.setItem('address', `Bharatpur-${loginPart2}, ${loginPart3}`);
 
-            // --- NEW: Save user info to the database ---
+            // --- NEW: Save user info to the database for the chat system ---
             const currentUser = auth.currentUser;
             if (currentUser) {
                 const userRef = firebase.database().ref(`users/${currentUser.uid}`);
                 userRef.set({
                     username: loginUsername,
                     phone: loginPhone,
-                    uid: currentUser.uid // Storing uid is good practice
+                    uid: currentUser.uid
                 }).catch(error => console.error("Could not save user data:", error));
             }
+            // --- END NEW PART ---
+
             displayStoredAddress();
             closeLoginOverlay();
         }
-
         document.addEventListener('DOMContentLoaded', function () {
             setupLoginInputs(); // Initialize phone input formatting
 
@@ -2850,6 +2845,7 @@
         document.addEventListener('DOMContentLoaded', userData);
         displayStoredAddress();
         fetchMenuItems();
+        initializeChat();
     </script>
 </body>
 </html>
