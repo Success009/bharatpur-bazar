@@ -359,7 +359,8 @@
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>     
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDlnzH1D7D7Q663eWE086ng_1KdP46MZEs",
@@ -373,6 +374,7 @@
         };
 
         firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
         
         let selectedUserId = null;
         let lastMessageTime = null;
@@ -421,42 +423,49 @@
         }
 
         function loadUsers() {
-            const messagesRef = firebase.database().ref('userMessages');
-            messagesRef.on('value', (snapshot) => {
-                usersList.innerHTML = '';
-                if (!snapshot.exists()) {
-                    usersList.innerHTML = '<div class="loading">No users found</div>';
-                    return;
+            const userMessagesRef = firebase.database().ref('userMessages');
+            const adminMessagesRef = firebase.database().ref('adminMessages');
+            const usersList = document.getElementById('usersList');
+            
+            const users = new Map();
+
+            // Function to process a message and update the user map
+            const processMessage = (userId, message) => {
+                const existingUser = users.get(userId) || { id: userId, name: 'Unknown User', lastMessageTimestamp: 0 };
+                if (message.timestamp > existingUser.lastMessageTimestamp) {
+                    existingUser.lastMessageTimestamp = message.timestamp;
+                    // Attempt to get a real name if available from the message
+                    if(message.username) existingUser.name = message.username;
                 }
+                users.set(userId, existingUser);
+            };
 
-                const users = new Map();
-                snapshot.forEach((userSnapshot) => {
-                    const userId = userSnapshot.key;
-                    let lastMessage = { timestamp: 0 };
-                    let username = 'Unknown User';
-
-                    userSnapshot.forEach((messageSnapshot) => {
-                        const message = messageSnapshot.val();
-                        if (message.timestamp > lastMessage.timestamp) {
-                            lastMessage = message;
-                            username = message.username || username;
-                        }
+            // Listen to both nodes
+            userMessagesRef.on('value', userMessagesSnapshot => {
+                adminMessagesRef.on('value', adminMessagesSnapshot => {
+                    users.clear(); // Clear the map to rebuild it with fresh data
+                    
+                    userMessagesSnapshot.forEach(userSnapshot => {
+                        userSnapshot.forEach(msgSnapshot => processMessage(userSnapshot.key, msgSnapshot.val()));
                     });
 
-                    users.set(userId, {
-                        id: userId,
-                        name: username,
-                        lastMessage
+                    adminMessagesSnapshot.forEach(userSnapshot => {
+                        userSnapshot.forEach(msgSnapshot => processMessage(userSnapshot.key, msgSnapshot.val()));
                     });
-                });
 
-                // Sort users by last message timestamp
-                const sortedUsers = Array.from(users.values())
-                    .sort((a, b) => b.lastMessage.timestamp - a.lastMessage.timestamp);
+                    if (users.size === 0) {
+                        usersList.innerHTML = '<div class="loading">No user chats found.</div>';
+                        return;
+                    }
 
-                sortedUsers.forEach(user => {
-                    const div = createUserElement(user);
-                    usersList.appendChild(div);
+                    // Sort users by the most recent message timestamp
+                    const sortedUsers = Array.from(users.values()).sort((a, b) => b.lastMessageTimestamp - a.lastMessageTimestamp);
+                    
+                    usersList.innerHTML = '';
+                    sortedUsers.forEach(user => {
+                        const userElement = createUserElement(user);
+                        if (userElement) usersList.appendChild(userElement);
+                    });
                 });
             });
         }
@@ -508,86 +517,62 @@
         }
 
         function selectUser(userId, userName) {
-            try {
-                selectedUserId = userId;
-                
-                // Get device ID from orders
-                ordersRef.once('value', (snapshot) => {
-                    let deviceId = null;
-                    snapshot.forEach((orderSnapshot) => {
-                        const order = orderSnapshot.val();
-                        if (order && order.device && order.username === userName) {
-                            deviceId = order.device;
-                        }
-                    });
-                    
-                    if (!deviceId) {
-                        console.error('No device ID found for user:', userName);
-                        return;
-                    }
-                    
-                    // Update active state for user items
-                    document.querySelectorAll('.user-item').forEach(item => item.classList.remove('active'));
-                    const selectedItem = document.querySelector(`[onclick="selectUser('${userId}', '${userName}')"]`);
-                    if (selectedItem) {
-                        selectedItem.classList.add('active');
-                    }
-                    
-                    // Update chat header information
-                    const avatarElement = document.getElementById('selectedUserAvatar');
-                    const nameElement = document.getElementById('selectedUserName');
-                    const statusElement = document.getElementById('selectedUserStatus');
-                    
-                    if (avatarElement && nameElement && statusElement) {
-                        avatarElement.textContent = userName.slice(0, 2).toUpperCase();
-                        nameElement.textContent = userName;
-                        statusElement.textContent = deviceId;
-                    }
-                    
-                    // Enable input controls
-                    if (messageInput && sendButton) {
-                        messageInput.disabled = false;
-                        sendButton.disabled = false;
-                    }
-                    
-                    // Load messages for selected user with device ID
-                    loadMessages(deviceId);
-                });
-            } catch (error) {
-                console.error('Error in selectUser:', error);
-                showError('Failed to select user. Please try again.');
-            }
-        }
-
-        function loadMessages(userId) {
-            chatMessages.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading messages...</div>';
+            selectedUserId = userId;
             
-            const messagesRef = firebase.database().ref(`userMessages/${userId}`);
-            messagesRef.on('value', (snapshot) => {
-                chatMessages.innerHTML = '';
-                
-                if (!snapshot.exists()) {
-                    chatMessages.innerHTML = '<div class="loading">No messages yet</div>';
+            // Update UI to show who is selected
+            document.querySelectorAll('.user-item').forEach(item => item.classList.remove('active'));
+            const userElement = document.querySelector(`.user-item[data-user-id="${userId}"]`);
+            if (userElement) userElement.classList.add('active');
+
+            document.getElementById('selectedUserAvatar').textContent = userName.slice(0, 2).toUpperCase();
+            document.getElementById('selectedUserName').textContent = userName;
+            document.getElementById('selectedUserStatus').textContent = `User ID: ${userId.slice(0, 8)}...`; // Show partial UID
+            
+            messageInput.disabled = false;
+            sendButton.disabled = false;
+            
+            loadMessages(userId);
+        }
+                function loadMessages(userId) {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading conversation...</div>';
+
+            const userMessagesRef = firebase.database().ref(`userMessages/${userId}`);
+            const adminMessagesRef = firebase.database().ref(`adminMessages/${userId}`);
+
+            // Use Promise.all to fetch from both locations
+            Promise.all([
+                userMessagesRef.once('value'),
+                adminMessagesRef.once('value')
+            ]).then(([userSnapshot, adminSnapshot]) => {
+                const allMessages = [];
+
+                userSnapshot.forEach(msgSnapshot => {
+                    allMessages.push({ type: 'user', ...msgSnapshot.val() });
+                });
+
+                adminSnapshot.forEach(msgSnapshot => {
+                    allMessages.push({ type: 'staff', ...msgSnapshot.val() });
+                });
+
+                // Sort all messages chronologically
+                allMessages.sort((a, b) => a.timestamp - b.timestamp);
+
+                chatMessages.innerHTML = ''; // Clear loading spinner
+                if(allMessages.length === 0){
+                    chatMessages.innerHTML = '<div class="loading">No messages in this conversation yet.</div>';
                     return;
                 }
 
-                const messages = [];
-                snapshot.forEach((messageSnapshot) => {
-                    messages.push({
-                        id: messageSnapshot.key,
-                        ...messageSnapshot.val()
-                    });
-                });
-
-                messages.sort((a, b) => a.timestamp - b.timestamp);
-                
-                messages.forEach((message) => {
-                    const messageElement = createMessageElement(message, message.type);
+                allMessages.forEach(msg => {
+                    const messageElement = createMessageElement(msg, msg.type);
                     chatMessages.appendChild(messageElement);
                 });
-
+                
                 updateScroll();
-                lastMessageTime = messages[messages.length - 1].timestamp;
+            }).catch(error => {
+                console.error("Error loading messages:", error);
+                chatMessages.innerHTML = '<div class="error-message">Could not load messages.</div>';
             });
         }
 
@@ -609,31 +594,38 @@
             });
         }
 
-        function sendMessage() {
+                function sendMessage() {
             if (!selectedUserId || !messageInput.value.trim()) return;
 
-            const message = messageInput.value.trim();
+            const messageText = messageInput.value.trim();
             messageInput.value = '';
+            messageInput.focus();
             messageInput.style.height = 'auto';
 
-            const messagesRef = firebase.database().ref(`userMessages/${selectedUserId}`);
-            const newMessage = {
-                message: message,
-                timestamp: Date.now(),
-                type: 'staff'
-            };
+            // NEW: Reference the admin's message thread for this user
+            const adminMessagesRef = firebase.database().ref(`adminMessages/${selectedUserId}`);
             
-            messagesRef.push(newMessage)
+            const newMessage = {
+                message: messageText,
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                type: 'admin' // Mark this as a message from the admin/staff
+            };
+
+            adminMessagesRef.push(newMessage)
                 .then(() => {
-                    // Also send as notification so it appears in the user's notification panel
-                    logNotification(selectedUserId, message);
+                    console.log('Admin message sent successfully.');
+                    // Manually add the sent message to the UI for instant feedback
+                    const tempMessage = { ...newMessage, timestamp: Date.now() }; // Use local time for instant display
+                    const messageElement = createMessageElement(tempMessage, 'staff');
+                    chatMessages.appendChild(messageElement);
+                    updateScroll();
                 })
                 .catch(error => {
                     showError('Failed to send message. Please try again.');
-                    console.error('Error sending message:', error);
+                    console.error('Error sending admin message:', error);
+                    messageInput.value = messageText; // Restore text on failure
                 });
         }
-
         function searchUsers(query) {
             const items = usersList.getElementsByClassName('user-item');
             query = query.toLowerCase();
@@ -661,8 +653,46 @@
         // Search functionality
         searchInput.addEventListener('input', () => searchUsers(searchInput.value));
 
-        // Initialize
-        loadUsers();
+        function initializeApp() {
+            console.log("Admin verified. Initializing Chat Application...");
+            loadUsers(); // This is the original startup function
+        }
+        function handleAdminVerification(user) {
+            const adminRef = firebase.database().ref('admins/' + user.uid);
+            
+            adminRef.once('value', snapshot => {
+                if (snapshot.exists() && snapshot.val() === true) {
+                    console.log("Admin access granted for:", user.email);
+                    initializeApp(); 
+                } else {
+                    auth.signOut();
+                    document.body.innerHTML = '<h1>Access Denied</h1><p>You do not have permission to view this page.</p>';
+                }
+            });
+        }
+
+        // This is the main listener that controls access to the page.
+        auth.onAuthStateChanged(user => {
+            if (user && !user.isAnonymous) {
+                handleAdminVerification(user);
+            } else {
+                if (user && user.isAnonymous) {
+                    auth.signOut();
+                    return;
+                }
+                const password = prompt("Admin Access Required. Please enter the password:");
+                if (password) {
+                    const email = "bharatpurbazar@gmail.com";
+                    auth.signInWithEmailAndPassword(email, password)
+                        .catch(error => {
+                            alert(`Login Failed: Incorrect password or user not found.`);
+                            window.location.reload();
+                        });
+                } else {
+                     document.body.innerHTML = '<h1>Login Canceled</h1>';
+                }
+            }
+        });
     </script>
 </body>
 </html>
