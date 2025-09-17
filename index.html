@@ -653,19 +653,17 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            padding: 10px;
-            border-top: 1px solid #343a40;
-            background-color: #f8f9fa;
+            padding: 10px 15px; /* Adjusted padding */
+            border-top: 1px solid #e0e0e0; /* Softer border */
+            background-color: var(--white); /* Cleaner background */
             box-sizing: border-box;
         }
 
         .notification-history {
-            height: calc(100% - 100px);
+            height: calc(100% - 130px); /* Approx 70px for header + 60px for input */
             overflow-y: auto;
             padding: 15px;
             background-color: #f5f8fa;
-            border-radius: 10px;
-            box-shadow: inset 0 0 8px rgba(0, 0, 0, .1);
             -webkit-overflow-scrolling: touch;
         }
 
@@ -1722,6 +1720,7 @@
 });
         const notificationsRef = firebase.database().ref('notifications');
         
+        // START: REPLACE WITH THIS NEW FUNCTION
         function initializeChat() {
             auth.onAuthStateChanged(user => {
                 if (user) {
@@ -1731,9 +1730,12 @@
                     const notificationHistory = document.getElementById('notificationHistory');
                     let allMessages = [];
 
+                    // Get the timestamp of the last seen admin message from local storage
+                    let lastSeenAdminTimestamp = parseInt(localStorage.getItem('lastSeenAdminTimestamp') || '0');
+
                     const renderMessages = () => {
                         allMessages.sort((a, b) => a.timestamp - b.timestamp);
-                        notificationHistory.innerHTML = '';
+                        notificationHistory.innerHTML = ''; // Clear before rendering
                         allMessages.forEach(msg => {
                             const historyItem = document.createElement('div');
                             historyItem.className = 'notification-message';
@@ -1743,24 +1745,36 @@
                             historyItem.appendChild(bubble);
                             notificationHistory.appendChild(historyItem);
                         });
-                        notificationHistory.scrollTop = notificationHistory.scrollHeight;
+                        // Scroll to the bottom only if the window is already open
+                        if (notificationWindow.style.display === 'block') {
+                            notificationHistory.scrollTop = notificationHistory.scrollHeight;
+                        }
                     };
 
+                    // Listener for the user's own sent messages
                     userMessagesRef.on('child_added', snapshot => {
                         allMessages.push({ ...snapshot.val() });
                         renderMessages();
                     });
 
+                    // Listener for new messages FROM the admin
                     adminMessagesRef.on('child_added', snapshot => {
                         const adminMessage = { type: 'admin', ...snapshot.val() };
                         allMessages.push(adminMessage);
                         renderMessages();
 
-                        const notificationWindow = document.getElementById('notificationWindow');
-                        if (notificationWindow.style.display === 'none' || !notificationWindow.style.display) {
-                           showCartFeedback("New message from staff!", "success");
-                           // SMART FEATURE: Open the chat window automatically on new staff message
-                           toggleNotificationWindow();
+                        // --- THE NEW SMART LOGIC ---
+                        if (adminMessage.timestamp > lastSeenAdminTimestamp) {
+                            // This is a genuinely new message the user hasn't seen.
+                            lastSeenAdminTimestamp = adminMessage.timestamp;
+                            localStorage.setItem('lastSeenAdminTimestamp', lastSeenAdminTimestamp.toString());
+                            
+                            const notificationWindow = document.getElementById('notificationWindow');
+                            // Only open the window if it's currently closed.
+                            if (notificationWindow.style.display !== 'block') {
+                                showCartFeedback("New message from staff!", "success");
+                                toggleNotificationWindow(); // Pop open the chat
+                            }
                         }
                     });
                 }
@@ -1823,11 +1837,18 @@
                 cartWindow.style.display = 'none';
             }
         });
-        function toggleNotificationWindow() {
+                function toggleNotificationWindow() {
             const notificationWindow = document.getElementById('notificationWindow');
             const orderHistoryWindow = document.getElementById('orderHistoryWindow');
             if (notificationWindow.style.display === 'none' || !notificationWindow.style.display) {
                 notificationWindow.style.display = 'block';
+                const notificationHistory = document.getElementById('notificationHistory');
+                notificationHistory.scrollTop = notificationHistory.scrollHeight;
+                const lastAdminMessage = Array.from(notificationHistory.querySelectorAll('.notification-bubble.staff')).pop();
+                if (lastAdminMessage) {
+                    const nowTimestamp = Date.now();
+                    localStorage.setItem('lastSeenAdminTimestamp', nowTimestamp.toString());
+                }
                 if (orderHistoryWindow.style.display === 'block') {
                     orderHistoryWindow.style.display = 'none';
                 }
