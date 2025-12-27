@@ -11,8 +11,7 @@
             --accent: #4f46e5;
             --success: #22c55e;
             --danger: #ef4444;
-            --warning: #f59e0b;
-            --bg: #f1f5f9;
+            --bg: #f8fafc;
             --card: #ffffff;
             --text: #0f172a;
             --text-muted: #64748b;
@@ -27,78 +26,100 @@
         @keyframes spin { to { transform: rotate(360deg); } }
 
         /* Layout */
-        header { background: var(--primary); color: white; padding: 1rem; text-align: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .logo-placeholder { height: 60px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; background: var(--accent); width: 60px; margin: 10px auto; border-radius: 12px; }
+        header { background: var(--primary); color: white; padding: 1.5rem 1rem; text-align: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .logo-container { width: 80px; height: 80px; margin: 0 auto 0.5rem; display: flex; align-items: center; justify-content: center; background: white; border-radius: 15px; overflow: hidden; }
+        .logo-container img { width: 100%; height: 100%; object-fit: contain; }
+        .header-title { font-size: 1.1rem; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; }
         
-        .nav-sticky { position: sticky; top: 60px; background: white; z-index: 900; padding: 10px; border-bottom: 1px solid #e2e8f0; }
-        .search-container { position: relative; max-width: 600px; margin: 0 auto; }
-        .search-input { width: 100%; padding: 12px 12px 12px 40px; border-radius: 100px; border: 1px solid #cbd5e0; font-size: 1rem; }
-        .search-container i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+        .nav-sticky { position: sticky; top: 145px; background: white; z-index: 900; padding: 12px; border-bottom: 1px solid #e2e8f0; }
+        @media (max-width: 600px) { .nav-sticky { top: 135px; } }
 
-        .tabs { display: flex; overflow-x: auto; gap: 8px; padding: 10px 0; scrollbar-width: none; }
-        .tab-btn { padding: 8px 16px; border-radius: 100px; border: 1px solid #e2e8f0; background: white; white-space: nowrap; font-weight: 600; cursor: pointer; }
-        .tab-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+        .search-container { position: relative; max-width: 600px; margin: 0 auto; }
+        .search-input { width: 100%; padding: 12px 12px 12px 42px; border-radius: 100px; border: 1px solid #cbd5e0; font-size: 1rem; background: #f8fafc; transition: all 0.3s; }
+        .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); background: white; }
+        .search-container i { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+
+        .tabs { display: flex; overflow-x: auto; gap: 8px; padding: 12px 0 4px; scrollbar-width: none; }
+        .tabs::-webkit-scrollbar { display: none; }
+        .tab-btn { padding: 8px 20px; border-radius: 100px; border: 1px solid #e2e8f0; background: white; white-space: nowrap; font-weight: 700; cursor: pointer; transition: all 0.2s; color: var(--text-muted); }
+        .tab-btn.active { background: var(--accent); color: white; border-color: var(--accent); transform: scale(1.05); }
 
         /* Grid */
         main { max-width: 1200px; margin: 0 auto; padding: 1rem 1rem 120px; }
-        .category-block { margin-bottom: 2rem; }
-        .category-title { font-size: 1.25rem; font-weight: 800; border-left: 4px solid var(--accent); padding-left: 10px; margin-bottom: 1rem; }
-        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; }
+        .category-block { margin-bottom: 2.5rem; }
+        .category-title { font-size: 1.4rem; font-weight: 800; border-left: 5px solid var(--accent); padding-left: 12px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1.25rem; }
 
-        .card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column; transition: transform 0.2s; position: relative; border: 1px solid #f1f5f9; }
-        .card:active { transform: scale(0.98); }
-        .img-container { padding-top: 100%; background: #f8fafc; position: relative; }
-        .img-container img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-        .img-fallback { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #cbd5e1; }
-        .discount-badge { position: absolute; top: 10px; right: -25px; background: var(--danger); color: white; padding: 4px 30px; transform: rotate(45deg); font-size: 0.7rem; font-weight: 800; z-index: 2; }
-
-        .card-body { padding: 12px; flex: 1; display: flex; flex-direction: column; }
-        .p-name { font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 2.6rem; }
-        .p-price { color: var(--success); font-weight: 800; font-size: 1.1rem; }
-        .p-unit { font-size: 0.75rem; color: var(--text-muted); }
+        .card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); display: flex; flex-direction: column; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; border: 1px solid #f1f5f9; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
         
-        .btn-add { width: 100%; padding: 10px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: auto; }
-        .qty-controls { display: flex; align-items: center; justify-content: space-between; background: #f1f5f9; border-radius: 8px; padding: 4px; margin-top: auto; }
-        .qty-btn { width: 32px; height: 32px; border: none; background: white; border-radius: 6px; font-weight: 900; cursor: pointer; }
+        .img-container { padding-top: 100%; background: #f1f5f9; position: relative; overflow: hidden; }
+        .img-container img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+        .card:hover .img-container img { transform: scale(1.1); }
+        .img-fallback { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #cbd5e1; background: #f8fafc; }
+        
+        .discount-badge { position: absolute; top: 12px; right: -30px; background: var(--danger); color: white; padding: 6px 35px; transform: rotate(45deg); font-size: 0.75rem; font-weight: 900; z-index: 2; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+
+        .card-body { padding: 1rem; flex: 1; display: flex; flex-direction: column; }
+        .p-name { font-weight: 700; font-size: 1rem; margin-bottom: 8px; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 2.8rem; line-height: 1.4; }
+        .p-price { color: var(--success); font-weight: 800; font-size: 1.25rem; margin-bottom: 2px; }
+        .p-unit { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem; font-weight: 600; }
+        
+        .btn-add { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; margin-top: auto; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-add:hover { background: var(--accent); }
+        .btn-add:active { transform: scale(0.95); }
+
+        .qty-controls { display: flex; align-items: center; justify-content: space-between; background: #f1f5f9; border-radius: 12px; padding: 6px; margin-top: auto; }
+        .qty-btn { width: 36px; height: 36px; border: none; background: white; border-radius: 10px; font-weight: 900; cursor: pointer; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
         /* Floating Nav */
-        .bottom-bar { position: fixed; bottom: 1rem; left: 1rem; right: 1rem; max-width: 500px; margin: 0 auto; background: var(--primary); color: white; border-radius: 20px; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 1100; }
+        .bottom-bar { position: fixed; bottom: 1.5rem; left: 1rem; right: 1rem; max-width: 500px; margin: 0 auto; background: var(--primary); color: white; border-radius: 25px; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); z-index: 1100; border: 1px solid rgba(255,255,255,0.1); }
         .total-info { cursor: pointer; }
-        .total-info .label { font-size: 0.6rem; text-transform: uppercase; opacity: 0.7; }
-        .total-info .val { font-size: 1.25rem; font-weight: 800; }
-        .action-icons { display: flex; gap: 12px; }
-        .action-btn { position: relative; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1); cursor: pointer; }
-        .badge { position: absolute; top: -5px; right: -5px; background: var(--danger); min-width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 800; border: 2px solid var(--primary); }
+        .total-info .label { font-size: 0.65rem; text-transform: uppercase; opacity: 0.7; font-weight: 800; letter-spacing: 0.5px; }
+        .total-info .val { font-size: 1.4rem; font-weight: 900; }
+        .action-icons { display: flex; gap: 15px; }
+        .action-btn { position: relative; width: 48px; height: 48px; border-radius: 15px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1); cursor: pointer; transition: all 0.2s; font-size: 1.2rem; }
+        .action-btn:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
+        .badge { position: absolute; top: -6px; right: -6px; background: var(--danger); min-width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 900; border: 2px solid var(--primary); }
 
-        /* Drawers */
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: none; }
-        .drawer { position: fixed; bottom: 0; left: 0; right: 0; background: white; z-index: 2100; border-radius: 24px 24px 0 0; max-height: 90vh; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; }
-        .drawer.active { transform: translateY(0); }
-        .drawer-header { padding: 20px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
-        .drawer-body { padding: 20px; overflow-y: auto; flex: 1; }
-        .drawer-footer { padding: 20px; border-top: 1px solid #f1f5f9; background: #f8fafc; }
+        /* Drawers - FIXED STATE */
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 2000; display: none; opacity: 0; transition: opacity 0.3s; }
+        .drawer { 
+            position: fixed; bottom: 0; left: 0; right: 0; background: white; z-index: 2100; 
+            border-radius: 30px 30px 0 0; max-height: 85vh; transform: translateY(105%); 
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; 
+            opacity: 0; visibility: hidden; pointer-events: none;
+        }
+        .drawer.active { transform: translateY(0); opacity: 1; visibility: visible; pointer-events: auto; }
+        
+        .drawer-header { padding: 24px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+        .drawer-header h3 { margin: 0; font-size: 1.3rem; font-weight: 800; color: var(--primary); }
+        .drawer-body { padding: 24px; overflow-y: auto; flex: 1; }
+        .drawer-footer { padding: 24px; border-top: 1px solid #f1f5f9; background: #f8fafc; border-radius: 0 0 0 0; }
 
-        .input-group { margin-bottom: 1rem; }
-        .input-group label { display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 5px; color: var(--text-muted); }
-        .input-box { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 1rem; }
+        .input-group { margin-bottom: 1.25rem; }
+        .input-group label { display: block; font-size: 0.85rem; font-weight: 800; margin-bottom: 8px; color: var(--text-muted); text-transform: uppercase; }
+        .input-box { width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; font-weight: 600; transition: border-color 0.2s; }
+        .input-box:focus { border-color: var(--accent); outline: none; }
 
         @media (min-width: 768px) {
-            .drawer { left: 50%; right: auto; width: 450px; transform: translate(-50%, 100%); bottom: 50%; border-radius: 24px; }
-            .drawer.active { transform: translate(-50%, 50%); }
+            .drawer { left: 50%; right: auto; width: 450px; transform: translate(-50%, 105%); bottom: 50px; border-radius: 30px; }
+            .drawer.active { transform: translate(-50%, 0); }
         }
     </style>
 </head>
 <body>
 
     <div id="loader">
-        <div class="logo-placeholder">B</div>
-        <div class="spinner"></div>
-        <p style="margin-top: 15px; font-size: 0.8rem;">Initializing Store...</p>
+        <div class="logo-placeholder" style="background: white; color: var(--primary);">BB</div>
+        <div class="spinner" style="margin-top: 20px;"></div>
     </div>
 
     <header>
-        <div class="logo-placeholder" id="mainLogo">B</div>
-        <div style="font-weight: 800; letter-spacing: 1px;">BHARATPUR BAZAR</div>
+        <div class="logo-container">
+            <img src="logoForceSmall.jpg" alt="Logo" id="logoImg" onerror="this.parentElement.innerHTML='<div style=\'font-weight:900; color:var(--primary); font-size:1.5rem\'>BB</div>'">
+        </div>
+        <div class="header-title">Bharatpur Bazar</div>
     </header>
 
     <div class="nav-sticky">
@@ -115,13 +136,13 @@
 
     <div class="bottom-bar">
         <div class="total-info" onclick="toggleDrawer('cartDrawer')">
-            <div class="label">Total Payable</div>
+            <div class="label">Total Amount</div>
             <div class="val">Rs <span id="mainTotal">0.00</span></div>
         </div>
         <div class="action-icons">
             <div class="action-btn" onclick="toggleDrawer('historyDrawer')"><i class="fas fa-receipt"></i></div>
             <div class="action-btn" onclick="toggleDrawer('chatDrawer')">
-                <i class="fas fa-comments"></i>
+                <i class="fas fa-comment-dots"></i>
                 <div id="chatDot" class="badge" style="display:none; background:var(--accent);">!</div>
             </div>
             <div class="action-btn" style="background: var(--accent);" onclick="toggleDrawer('cartDrawer')">
@@ -135,71 +156,73 @@
 
     <!-- Cart Drawer -->
     <div id="cartDrawer" class="drawer">
-        <div class="drawer-header"><h3>Your Basket</h3><button onclick="closeAll()" style="border:none; background:none; font-size:1.5rem;">&times;</button></div>
+        <div class="drawer-header"><h3>Your Basket</h3><button onclick="closeAll()" style="border:none; background:#f1f5f9; width:40px; height:40px; border-radius:50%; cursor:pointer; font-size:1.2rem;">&times;</button></div>
         <div class="drawer-body" id="cartList"></div>
         <div class="drawer-footer">
-            <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>Subtotal</span><span id="cartSubtotal">Rs 0.00</span></div>
-            <div style="display:flex; justify-content:space-between; margin-bottom:15px; color:var(--danger); font-weight:700;"><span>Delivery Fee</span><span id="cartDelivery">Rs 0.00</span></div>
-            <button class="btn-add" style="background:var(--success); height: 50px;" onclick="checkRegistration()">CHECKOUT</button>
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-weight:600;"><span>Subtotal</span><span id="cartSubtotal">Rs 0.00</span></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:20px; color:var(--danger); font-weight:800; font-size:1.1rem;"><span>Delivery Fee</span><span id="cartDelivery">Rs 0.00</span></div>
+            <button class="btn-add" style="background:var(--success); height: 55px; font-size:1.1rem;" onclick="checkRegistration()">PLACE ORDER NOW</button>
         </div>
     </div>
 
     <!-- Registration -->
     <div id="regDrawer" class="drawer">
-        <div class="drawer-header"><h3>Delivery Address</h3></div>
+        <div class="drawer-header"><h3>Delivery Info</h3><button onclick="closeAll()" style="border:none; background:#f1f5f9; width:40px; height:40px; border-radius:50%; cursor:pointer;">&times;</button></div>
         <div class="drawer-body">
             <div class="input-group"><label>Full Name</label><input type="text" id="regName" class="input-box" placeholder="e.g. Ram Kumar"></div>
             <div class="input-group"><label>Mobile Number</label><input type="tel" id="regPhone" class="input-box" placeholder="98XXXXXXXX"></div>
             <div class="input-group"><label>Bharatpur Ward</label><select id="regWard" class="input-box"></select></div>
-            <div class="input-group"><label>Nearest Landmark (Chowk)</label><input type="text" id="regChowk" class="input-box" placeholder="e.g. Hakim Chowk"></div>
+            <div class="input-group"><label>Nearest Chowk</label><input type="text" id="regChowk" class="input-box" placeholder="e.g. Hakim Chowk"></div>
         </div>
-        <div class="drawer-footer"><button class="btn-add" onclick="saveReg()">SAVE & CONTINUE</button></div>
+        <div class="drawer-footer"><button class="btn-add" style="height:55px;" onclick="saveReg()">CONFIRM ADDRESS</button></div>
+    </div>
+
+    <!-- History -->
+    <div id="historyDrawer" class="drawer">
+        <div class="drawer-header"><h3>My Orders</h3><button onclick="closeAll()" style="border:none; background:#f1f5f9; width:40px; height:40px; border-radius:50%; cursor:pointer;">&times;</button></div>
+        <div class="drawer-body" id="historyStream"></div>
+        <div class="drawer-footer">
+            <button class="btn-add" style="background:var(--danger); height:50px;" onclick="localStorage.clear(); location.reload();">LOGOUT / RESET</button>
+        </div>
     </div>
 
     <!-- Payment -->
     <div id="payDrawer" class="drawer">
-        <div class="drawer-header"><h3>Select Payment</h3></div>
+        <div class="drawer-header"><h3>Payment Method</h3><button onclick="closeAll()" style="border:none; background:#f1f5f9; width:40px; height:40px; border-radius:50%; cursor:pointer;">&times;</button></div>
         <div class="drawer-body">
-            <div style="padding:15px; border:1px solid #ddd; border-radius:12px; margin-bottom:12px; cursor:pointer;" onclick="finalizeOrder('cod')">
-                <i class="fas fa-money-bill-wave" style="color:var(--success)"></i> Cash on Delivery
+            <div style="padding:20px; border:2px solid #f1f5f9; border-radius:15px; margin-bottom:15px; cursor:pointer; display:flex; align-items:center; gap:15px;" onclick="finalizeOrder('cod')">
+                <div style="width:50px; height:50px; background:#eefdf4; color:var(--success); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.5rem;"><i class="fas fa-hand-holding-dollar"></i></div>
+                <div><div style="font-weight:800;">Cash on Delivery</div><div style="font-size:0.8rem; color:var(--text-muted);">Pay when you receive</div></div>
             </div>
-            <div style="padding:15px; border:1px solid #ddd; border-radius:12px; cursor:pointer;" onclick="toggleDrawer('qrDrawer')">
-                <i class="fas fa-qrcode" style="color:var(--accent)"></i> Online (FonePay/QR)
+            <div style="padding:20px; border:2px solid #f1f5f9; border-radius:15px; cursor:pointer; display:flex; align-items:center; gap:15px;" onclick="toggleDrawer('qrDrawer')">
+                <div style="width:50px; height:50px; background:#eff6ff; color:var(--accent); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.5rem;"><i class="fas fa-qrcode"></i></div>
+                <div><div style="font-weight:800;">Online Payment</div><div style="font-size:0.8rem; color:var(--text-muted);">Scan QR code now</div></div>
             </div>
         </div>
     </div>
 
     <!-- QR Screen -->
     <div id="qrDrawer" class="drawer">
-        <div class="drawer-header"><h3>Scan to Pay</h3></div>
+        <div class="drawer-header"><h3>Scan & Pay</h3><button onclick="closeAll()" style="border:none; background:#f1f5f9; width:40px; height:40px; border-radius:50%; cursor:pointer;">&times;</button></div>
         <div class="drawer-body" style="text-align:center;">
-            <div id="qrTarget" style="margin: 20px auto; padding: 15px; background:white; border:2px dashed #ddd; display:inline-block; border-radius:15px;">
-                <i class="fas fa-qrcode fa-6x" style="opacity:0.1"></i>
+            <div id="qrTarget" style="margin: 0 auto 20px; padding: 20px; background:white; border:3px dashed #e2e8f0; display:inline-block; border-radius:20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                <i class="fas fa-qrcode fa-6x" style="opacity:0.2"></i>
             </div>
-            <p style="font-weight:700; color:var(--accent);">Amount: Rs <span id="qrAmount">0.00</span></p>
-            <p style="font-size:0.7rem; color:var(--text-muted);">Please mention your phone number in remarks.</p>
+            <div style="font-size:1.5rem; font-weight:900; color:var(--accent); margin-bottom:5px;">Rs <span id="qrAmount">0.00</span></div>
+            <p style="font-size:0.85rem; color:var(--text-muted); font-weight:600;">Please mention your registered phone number in the payment remarks.</p>
         </div>
-        <div class="drawer-footer"><button class="btn-add" onclick="finalizeOrder('online')">I HAVE COMPLETED PAYMENT</button></div>
+        <div class="drawer-footer"><button class="btn-add" style="background:var(--success); height:55px;" onclick="finalizeOrder('online')">I HAVE COMPLETED PAYMENT</button></div>
     </div>
 
     <!-- Chat -->
     <div id="chatDrawer" class="drawer">
-        <div class="drawer-header"><h3>Chat with Staff</h3></div>
-        <div class="drawer-body" id="chatStream" style="display:flex; flex-direction:column; gap:8px;"></div>
+        <div class="drawer-header"><h3>Staff Support</h3><button onclick="closeAll()" style="border:none; background:#f1f5f9; width:40px; height:40px; border-radius:50%; cursor:pointer;">&times;</button></div>
+        <div class="drawer-body" id="chatStream" style="display:flex; flex-direction:column; gap:12px; background:#f8fafc; border-radius:20px; margin: 10px; padding: 15px;"></div>
         <div class="drawer-footer">
-            <div style="display:flex; gap:8px;">
-                <input type="text" id="chatInput" class="input-box" style="margin:0" placeholder="Type message...">
-                <button class="btn-add" style="width:50px; margin:0;" onclick="sendMsg()"><i class="fas fa-paper-plane"></i></button>
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="chatInput" class="input-box" style="margin:0" placeholder="Type a message...">
+                <button class="btn-add" style="width:55px; margin:0; border-radius:50%;" onclick="sendMsg()"><i class="fas fa-paper-plane"></i></button>
             </div>
-        </div>
-    </div>
-
-    <!-- History -->
-    <div id="historyDrawer" class="drawer">
-        <div class="drawer-header"><h3>My Orders</h3></div>
-        <div class="drawer-body" id="historyStream"></div>
-        <div class="drawer-footer">
-            <button class="btn-add" style="background:var(--danger);" onclick="localStorage.clear(); location.reload();">LOGOUT / RESET</button>
         </div>
     </div>
 
@@ -214,7 +237,10 @@
         let menuItems = [], cart = [], curTab = 'All';
 
         function initApp() {
-            setTimeout(() => document.getElementById('loader').style.display='none', 2500);
+            // Safety forcing drawers closed on start
+            closeAll();
+
+            setTimeout(() => document.getElementById('loader').style.display='none', 2000);
             
             try {
                 firebase.initializeApp(fConfig);
@@ -222,43 +248,45 @@
                 const db = firebase.database();
 
                 auth.onAuthStateChanged(user => {
-                    document.getElementById('loader').style.display='none';
                     if(!user) {
-                        auth.signInAnonymously().catch(() => console.warn("Auth Blocked - Continuing as Guest"));
+                        auth.signInAnonymously().catch(() => console.warn("Guest access enabled"));
                     }
                     startListeners(db);
                 });
             } catch (e) {
                 document.getElementById('loader').style.display='none';
-                console.error("Init Error", e);
             }
 
-            // Populate Wards
             const w = document.getElementById('regWard');
-            for(let i=1; i<=29; i++) w.innerHTML += `<option value="${i}">Ward ${i}</option>`;
+            for(let i=1; i<=29; i++) w.innerHTML += `<option value="${i}">Bharatpur Ward ${i}</option>`;
 
-            // Logo Fallback
-            const logoImg = new Image(); logoImg.src = 'logoForceSmall.jpg';
-            logoImg.onload = () => document.getElementById('mainLogo').innerHTML = `<img src="logoForceSmall.jpg" style="height:100%; border-radius:inherit">`;
-            
-            // QR Fallback
+            // QR & Logo loading
             const qrImg = new Image(); qrImg.src = 'qr-code.png';
-            qrImg.onload = () => document.getElementById('qrTarget').innerHTML = `<img src="qr-code.png" style="width:200px">`;
+            qrImg.onload = () => document.getElementById('qrTarget').innerHTML = `<img src="qr-code.png" style="width:220px; display:block; margin:0 auto;">`;
         }
 
         function toggleDrawer(id) {
-            closeAll();
-            document.getElementById('overlay').style.display = 'block';
-            document.getElementById(id).classList.add('active');
+            const drawer = document.getElementById(id);
+            const overlay = document.getElementById('overlay');
+            
+            if(drawer.classList.contains('active')) {
+                closeAll();
+            } else {
+                closeAll(); // Close others first
+                overlay.style.display = 'block';
+                setTimeout(() => overlay.style.opacity = '1', 10);
+                drawer.classList.add('active');
+            }
         }
 
         function closeAll() {
             document.querySelectorAll('.drawer').forEach(d => d.classList.remove('active'));
-            document.getElementById('overlay').style.display = 'none';
+            const overlay = document.getElementById('overlay');
+            overlay.style.opacity = '0';
+            setTimeout(() => overlay.style.display = 'none', 300);
         }
 
         function startListeners(db) {
-            // Menu
             db.ref('menu').on('value', snap => {
                 menuItems = [];
                 const cats = new Set(['All']);
@@ -273,25 +301,25 @@
                 renderItems();
             });
 
-            const uid = firebase.auth().currentUser ? firebase.auth().currentUser.uid : 'guest';
-            if(uid === 'guest') return;
+            const user = firebase.auth().currentUser;
+            const uid = user ? user.uid : null;
+            if(!uid) return;
 
-            // Chat
             db.ref(`adminMessages/${uid}`).on('child_added', s => renderChat(s.val(), 'staff'));
             db.ref(`userMessages/${uid}`).on('child_added', s => renderChat(s.val(), 'user'));
 
-            // Orders
             db.ref(`orders/grocery/${uid}`).on('value', s => {
                 const list = document.getElementById('historyStream');
-                list.innerHTML = s.exists() ? '' : '<p style="text-align:center; opacity:0.5;">No active orders</p>';
+                list.innerHTML = s.exists() ? '' : '<div style="text-align:center; opacity:0.3; padding:3rem;"><i class="fas fa-box-open fa-3x" style="margin-bottom:1rem;"></i><br>No active orders</div>';
                 s.forEach(o => {
                     const data = o.val();
-                    list.innerHTML += `<div style="padding:15px; border:1px solid #e2e8f0; border-radius:12px; margin-bottom:10px;">
-                        <div style="display:flex; justify-content:space-between; font-weight:700;">
-                            <span>#${o.key.slice(-4)}</span><span style="color:var(--accent)">${data.status || 'Pending'}</span>
+                    list.innerHTML += `<div style="padding:20px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:18px; margin-bottom:12px;">
+                        <div style="display:flex; justify-content:space-between; font-weight:800; margin-bottom:8px;">
+                            <span style="color:var(--text-muted)">Order #${o.key.slice(-4)}</span>
+                            <span style="color:var(--accent); background:rgba(79,70,229,0.1); padding:4px 10px; border-radius:8px; font-size:0.75rem;">${data.status || 'Processing'}</span>
                         </div>
-                        <div style="font-size:0.8rem; margin:5px 0;">${data.items.map(i => i.name).join(', ')}</div>
-                        <div style="font-weight:800; color:var(--success);">Rs ${data.totalPrice.toFixed(2)}</div>
+                        <div style="font-size:0.9rem; font-weight:600; color:var(--text); margin-bottom:10px;">${data.items.map(i => i.name).join(', ')}</div>
+                        <div style="font-weight:900; color:var(--success); font-size:1.1rem;">Rs ${data.totalPrice.toFixed(2)}</div>
                     </div>`;
                 });
             });
@@ -308,18 +336,18 @@
             const filtered = menuItems.filter(i => (curTab === 'All' || i.category === curTab) && i.name.toLowerCase().includes(search));
             
             grid.innerHTML = '';
-            if(!filtered.length) { grid.innerHTML = '<p style="text-align:center; padding:3rem; opacity:0.5;">No items found</p>'; return; }
+            if(!filtered.length) { grid.innerHTML = '<div style="text-align:center; padding:5rem; opacity:0.2;"><i class="fas fa-search fa-4x"></i><br>No items match your search</div>'; return; }
 
-            const cats = {};
-            filtered.forEach(i => { if(!cats[i.category]) cats[i.category] = []; cats[i.category].push(i); });
+            const categories = {};
+            filtered.forEach(i => { if(!categories[i.category]) categories[i.category] = []; categories[i.category].push(i); });
 
-            Object.keys(cats).sort().forEach(cName => {
+            Object.keys(categories).sort().forEach(cName => {
                 const section = document.createElement('div');
                 section.className = 'category-block';
                 section.innerHTML = `<div class="category-title">${cName}</div><div class="product-grid"></div>`;
                 grid.appendChild(section);
 
-                cats[cName].forEach(item => {
+                categories[cName].forEach(item => {
                     const isOut = item.status === 'out_of_stock';
                     const hasDisc = item.discountPercent && new Date(item.discountExpiry) > new Date();
                     let price = item.price + (item.profit || 0);
@@ -328,13 +356,13 @@
                     const cartItem = cart.find(ci => ci.id === item.id);
                     const card = document.createElement('div');
                     card.className = 'card';
-                    if(isOut) card.style.opacity = '0.5';
+                    if(isOut) card.style.opacity = '0.6';
 
                     card.innerHTML = `
                         ${hasDisc ? `<div class="discount-badge">${item.discountPercent}% OFF</div>` : ''}
                         <div class="img-container">
-                            <div class="img-fallback"><i class="fas fa-box-open fa-2x"></i></div>
-                            <img id="img-${item.id}" src="" onerror="this.style.display='none'">
+                            <div class="img-fallback"><i class="fas fa-leaf fa-2x"></i></div>
+                            <img id="img-${item.id}" src="" style="display:none">
                         </div>
                         <div class="card-body">
                             <div class="p-name">${item.name}</div>
@@ -344,21 +372,25 @@
                                 ${cartItem ? `
                                     <div class="qty-controls">
                                         <button class="qty-btn" onclick="updateQty('${item.id}', -1)">-</button>
-                                        <span style="font-weight:800;">${cartItem.qty.toFixed(1).replace('.0','')}</span>
+                                        <span style="font-weight:900; font-size:1.1rem;">${cartItem.qty}</span>
                                         <button class="qty-btn" onclick="updateQty('${item.id}', 1)">+</button>
                                     </div>
                                 ` : `
-                                    <button class="btn-add" ${isOut?'disabled':''} onclick="addToCart('${item.id}')">${isOut?'OUT OF STOCK':'ADD TO CART'}</button>
+                                    <button class="btn-add" ${isOut?'disabled':''} onclick="addToCart('${item.id}')">${isOut?'Out of Stock':'ADD TO CART'}</button>
                                 `}
                             </div>
                         </div>`;
                     section.querySelector('.product-grid').appendChild(card);
 
-                    // Image Async
+                    // Fetch Image from Firebase
                     const cleanName = item.name.replace(/\s+/g, '') + '.jpg';
-                    firebase.storage().ref(`images/${cleanName}`).getDownloadURL().then(url => {
+                    firebase.storage().ref('images/' + cleanName).getDownloadURL().then(url => {
                         const img = document.getElementById(`img-${item.id}`);
-                        if(img) img.src = url;
+                        if(img) {
+                            img.src = url;
+                            img.style.display = 'block';
+                            img.previousElementSibling.style.display = 'none';
+                        }
                     }).catch(() => {});
                 });
             });
@@ -387,55 +419,55 @@
         function updateCartUI() {
             let sub = 0, prof = 0;
             const list = document.getElementById('cartList');
-            list.innerHTML = cart.length ? '' : '<p style="text-align:center; opacity:0.5; padding:2rem;">Your basket is empty</p>';
+            list.innerHTML = cart.length ? '' : '<div style="text-align:center; padding:4rem; opacity:0.3;"><i class="fas fa-shopping-basket fa-4x" style="margin-bottom:1rem;"></i><br>Your basket is currently empty</div>';
             
             cart.forEach(i => {
                 const itemTotal = (i.price / i.step) * i.qty;
                 sub += itemTotal;
                 prof += (i.profit / i.step) * i.qty;
-                list.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid #f1f5f9;">
-                    <div><div style="font-weight:700;">${i.name}</div><div style="font-size:0.8rem; color:var(--success);">Rs ${itemTotal.toFixed(2)}</div></div>
-                    <div class="qty-controls" style="min-width:100px; margin:0;"><button class="qty-btn" onclick="updateQty('${i.id}',-1)">-</button><span>${i.qty}</span><button class="qty-btn" onclick="updateQty('${i.id}',1)">+</button></div>
+                list.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding:12px; background:#f8fafc; border-radius:15px;">
+                    <div style="flex:1;"><div style="font-weight:800; font-size:0.95rem;">${i.name}</div><div style="font-size:0.85rem; color:var(--success); font-weight:700;">Rs ${itemTotal.toFixed(2)}</div></div>
+                    <div class="qty-controls" style="min-width:110px; margin:0;"><button class="qty-btn" onclick="updateQty('${i.id}',-1)">-</button><span style="font-weight:900;">${i.qty}</span><button class="qty-btn" onclick="updateQty('${i.id}',1)">+</button></div>
                 </div>`;
             });
 
-            const del = cart.length ? Math.max(100 - prof, 0) : 0;
-            const total = sub + del;
+            const delCharge = cart.length ? Math.max(100 - prof, 0) : 0;
+            const finalTotal = sub + delCharge;
             document.getElementById('cartSubtotal').innerText = "Rs " + sub.toFixed(2);
-            document.getElementById('cartDelivery').innerText = "Rs " + del.toFixed(2);
-            document.getElementById('mainTotal').innerText = total.toFixed(2);
+            document.getElementById('cartDelivery').innerText = "Rs " + delCharge.toFixed(2);
+            document.getElementById('mainTotal').innerText = finalTotal.toFixed(2);
             document.getElementById('cartBadge').innerText = cart.length;
-            document.getElementById('qrAmount').innerText = total.toFixed(2);
+            document.getElementById('qrAmount').innerText = finalTotal.toFixed(2);
         }
 
         function checkRegistration() {
             if(!cart.length) return;
-            closeAll();
             if(!localStorage.getItem('address')) toggleDrawer('regDrawer');
             else toggleDrawer('payDrawer');
         }
 
         function saveReg() {
             const n = document.getElementById('regName').value, p = document.getElementById('regPhone').value, w = document.getElementById('regWard').value, c = document.getElementById('regChowk').value;
-            if(!n || !/^9\d{9}$/.test(p) || !w || !c) return alert("Fill all details correctly (10 digit phone starting with 9)");
-            localStorage.setItem('username', n); localStorage.setItem('phone', p); localStorage.setItem('address', `Bharatpur Ward ${w}, ${c}`);
+            if(!n || !/^9\d{9}$/.test(p) || !w || !c) return alert("Please fill all details correctly. Phone must start with 9.");
+            localStorage.setItem('username', n); localStorage.setItem('phone', p); localStorage.setItem('address', `Ward ${w}, ${c}`);
             toggleDrawer('payDrawer');
         }
 
         function finalizeOrder(method) {
             const user = firebase.auth().currentUser;
-            const uid = user ? user.uid : 'temp_' + Date.now();
+            if(!user) return alert("Please wait for connection...");
             const order = { username: localStorage.getItem('username'), phone: localStorage.getItem('phone'), address: localStorage.getItem('address'), items: cart, totalPrice: parseFloat(document.getElementById('mainTotal').innerText), method, status: 'Pending', timestamp: new Date().toISOString() };
             
-            firebase.database().ref(`orders/grocery/${uid}`).push(order).then(() => {
+            firebase.database().ref(`orders/grocery/${user.uid}`).push(order).then(() => {
                 alert("Order Placed Successfully!"); cart = []; updateCartUI(); renderItems(); closeAll();
-            });
+            }).catch(e => alert("Error: " + e.message));
         }
 
         function sendMsg() {
             const i = document.getElementById('chatInput'); if(!i.value.trim()) return;
-            const uid = firebase.auth().currentUser.uid;
-            firebase.database().ref(`userMessages/${uid}`).push({ message: i.value, timestamp: Date.now() });
+            const user = firebase.auth().currentUser;
+            if(!user) return;
+            firebase.database().ref(`userMessages/${user.uid}`).push({ message: i.value, timestamp: Date.now() });
             i.value = '';
         }
 
@@ -443,7 +475,7 @@
             const stream = document.getElementById('chatStream');
             const b = document.createElement('div');
             const isStaff = type === 'staff';
-            b.style.cssText = `max-width:85%; padding:10px 14px; border-radius:12px; align-self:${isStaff?'flex-start':'flex-end'}; background:${isStaff?'#e2e8f0':'var(--accent)'}; color:${isStaff?'black':'white'}; border-bottom-${isStaff?'left':'right'}-radius:2px; font-size:0.9rem;`;
+            b.style.cssText = `max-width:85%; padding:12px 16px; border-radius:18px; align-self:${isStaff?'flex-start':'flex-end'}; background:${isStaff?'white':'var(--accent)'}; color:${isStaff?'var(--text)':'white'}; border-bottom-${isStaff?'left':'right'}-radius:2px; font-size:0.95rem; font-weight:500; box-shadow:0 2px 4px rgba(0,0,0,0.05);`;
             b.innerText = m.message;
             stream.appendChild(b); stream.scrollTop = stream.scrollHeight;
             if(isStaff && !document.getElementById('chatDrawer').classList.contains('active')) document.getElementById('chatDot').style.display = 'flex';
