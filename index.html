@@ -39,18 +39,17 @@
         .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); background: white; }
         .search-container i { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
 
-        .tabs { display: flex; overflow-x: auto; gap: 8px; padding: 12px 0 4px; scrollbar-width: none; }
-        .tabs::-webkit-scrollbar { display: none; }
-        .tab-btn { padding: 8px 20px; border-radius: 100px; border: 1px solid #e2e8f0; background: white; white-space: nowrap; font-weight: 700; cursor: pointer; transition: all 0.2s; color: var(--text-muted); }
-        .tab-btn.active { background: var(--accent); color: white; border-color: var(--accent); transform: scale(1.05); }
+        .tabs { display: flex; justify-content: center; gap: 12px; padding: 12px 0 4px; }
+        .tab-btn { padding: 8px 24px; border-radius: 100px; border: 1px solid #e2e8f0; background: white; white-space: nowrap; font-weight: 700; cursor: pointer; transition: all 0.3s; color: var(--text-muted); }
+        .tab-btn.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3); }
 
         /* Grid */
         main { max-width: 1200px; margin: 0 auto; padding: 1rem 1rem 120px; }
         .category-block { margin-bottom: 2.5rem; }
-        .category-title { font-size: 1.4rem; font-weight: 800; border-left: 5px solid var(--accent); padding-left: 12px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; }
-        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1.25rem; }
+        .category-title { font-size: 1.3rem; font-weight: 800; border-left: 5px solid var(--accent); padding-left: 12px; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 10px; color: var(--primary); }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 1.25rem; }
 
-        .card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); display: flex; flex-direction: column; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; border: 1px solid #f1f5f9; }
+        .card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; border: 1px solid #f1f5f9; }
         .card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
         
         .img-container { padding-top: 100%; background: #f1f5f9; position: relative; overflow: hidden; }
@@ -61,49 +60,60 @@
         .discount-badge { position: absolute; top: 12px; right: -30px; background: var(--danger); color: white; padding: 6px 35px; transform: rotate(45deg); font-size: 0.75rem; font-weight: 900; z-index: 2; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
         .card-body { padding: 1rem; flex: 1; display: flex; flex-direction: column; }
-        .p-name { font-weight: 700; font-size: 1rem; margin-bottom: 8px; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 2.8rem; line-height: 1.4; }
-        .p-price { color: var(--success); font-weight: 800; font-size: 1.25rem; margin-bottom: 2px; }
-        .p-unit { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem; font-weight: 600; }
+        .p-name { font-weight: 700; font-size: 0.95rem; margin-bottom: 6px; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 2.7rem; line-height: 1.4; }
+        .p-price { color: var(--success); font-weight: 800; font-size: 1.2rem; margin-bottom: 2px; }
+        .p-unit { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem; font-weight: 600; }
         
-        .btn-add { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; margin-top: auto; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-add { width: 100%; padding: 10px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; margin-top: auto; transition: all 0.2s; }
         .btn-add:hover { background: var(--accent); }
         .btn-add:active { transform: scale(0.95); }
 
-        .qty-controls { display: flex; align-items: center; justify-content: space-between; background: #f1f5f9; border-radius: 12px; padding: 6px; margin-top: auto; }
-        .qty-btn { width: 36px; height: 36px; border: none; background: white; border-radius: 10px; font-weight: 900; cursor: pointer; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .qty-controls { display: flex; align-items: center; justify-content: space-between; background: #f1f5f9; border-radius: 10px; padding: 5px; margin-top: auto; }
+        .qty-btn { width: 32px; height: 32px; border: none; background: white; border-radius: 8px; font-weight: 900; cursor: pointer; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
         /* Floating Nav */
         .bottom-bar { position: fixed; bottom: 1.5rem; left: 1rem; right: 1rem; max-width: 500px; margin: 0 auto; background: var(--primary); color: white; border-radius: 25px; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); z-index: 1100; border: 1px solid rgba(255,255,255,0.1); }
         .total-info { cursor: pointer; }
-        .total-info .label { font-size: 0.65rem; text-transform: uppercase; opacity: 0.7; font-weight: 800; letter-spacing: 0.5px; }
-        .total-info .val { font-size: 1.4rem; font-weight: 900; }
-        .action-icons { display: flex; gap: 15px; }
-        .action-btn { position: relative; width: 48px; height: 48px; border-radius: 15px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1); cursor: pointer; transition: all 0.2s; font-size: 1.2rem; }
-        .action-btn:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
-        .badge { position: absolute; top: -6px; right: -6px; background: var(--danger); min-width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 900; border: 2px solid var(--primary); }
+        .total-info .label { font-size: 0.6rem; text-transform: uppercase; opacity: 0.7; font-weight: 800; letter-spacing: 0.5px; }
+        .total-info .val { font-size: 1.3rem; font-weight: 900; }
+        .action-icons { display: flex; gap: 12px; }
+        .action-btn { position: relative; width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1); cursor: pointer; transition: all 0.2s; font-size: 1.1rem; }
+        .action-btn:hover { background: rgba(255,255,255,0.2); }
+        .badge { position: absolute; top: -6px; right: -6px; background: var(--danger); min-width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 900; border: 2px solid var(--primary); }
 
-        /* Drawers - FIXED STATE */
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 2000; display: none; opacity: 0; transition: opacity 0.3s; }
+        /* Drawers - IMPROVED ANIMATIONS */
+        .overlay { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 2000; 
+            display: none; opacity: 0; transition: opacity 0.4s ease; 
+        }
         .drawer { 
             position: fixed; bottom: 0; left: 0; right: 0; background: white; z-index: 2100; 
-            border-radius: 30px 30px 0 0; max-height: 85vh; transform: translateY(105%); 
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; 
-            opacity: 0; visibility: hidden; pointer-events: none;
+            border-radius: 32px 32px 0 0; max-height: 85vh; transform: translateY(110%); 
+            transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s, visibility 0.4s; 
+            display: flex; flex-direction: column; opacity: 0; visibility: hidden; pointer-events: none;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
         }
         .drawer.active { transform: translateY(0); opacity: 1; visibility: visible; pointer-events: auto; }
         
-        .drawer-header { padding: 24px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
-        .drawer-header h3 { margin: 0; font-size: 1.3rem; font-weight: 800; color: var(--primary); }
-        .drawer-body { padding: 24px; overflow-y: auto; flex: 1; }
-        .drawer-footer { padding: 24px; border-top: 1px solid #f1f5f9; background: #f8fafc; border-radius: 0 0 0 0; }
+        .drawer-header { padding: 20px 24px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+        .drawer-header h3 { margin: 0; font-size: 1.25rem; font-weight: 800; color: var(--primary); }
+        .drawer-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+        .drawer-footer { padding: 24px; border-top: 1px solid #f1f5f9; background: #f8fafc; }
 
-        .input-group { margin-bottom: 1.25rem; }
-        .input-group label { display: block; font-size: 0.85rem; font-weight: 800; margin-bottom: 8px; color: var(--text-muted); text-transform: uppercase; }
-        .input-box { width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; font-weight: 600; transition: border-color 0.2s; }
+        /* Cart Item Styling */
+        .cart-item-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding: 12px; background: #f8fafc; border-radius: 16px; border: 1px solid #f1f5f9; }
+        .cart-item-img { width: 50px; height: 50px; border-radius: 10px; object-fit: cover; background: white; border: 1px solid #eee; }
+        .cart-item-details { flex: 1; }
+        .cart-item-name { font-weight: 700; font-size: 0.9rem; color: var(--primary); }
+        .cart-item-price { font-size: 0.8rem; color: var(--success); font-weight: 700; }
+
+        .input-group { margin-bottom: 1rem; }
+        .input-group label { display: block; font-size: 0.8rem; font-weight: 800; margin-bottom: 6px; color: var(--text-muted); text-transform: uppercase; }
+        .input-box { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; font-weight: 600; }
         .input-box:focus { border-color: var(--accent); outline: none; }
 
         @media (min-width: 768px) {
-            .drawer { left: 50%; right: auto; width: 450px; transform: translate(-50%, 105%); bottom: 50px; border-radius: 30px; }
+            .drawer { left: 50%; right: auto; width: 450px; transform: translate(-50%, 110%); bottom: 40px; border-radius: 32px; }
             .drawer.active { transform: translate(-50%, 0); }
         }
     </style>
@@ -111,7 +121,7 @@
 <body>
 
     <div id="loader">
-        <div class="logo-placeholder" style="background: white; color: var(--primary);">BB</div>
+        <div class="logo-placeholder" style="background: white; color: var(--primary); width: 60px; height: 60px; display: flex; align-items:center; justify-content:center; border-radius: 12px; font-weight: 900;">BB</div>
         <div class="spinner" style="margin-top: 20px;"></div>
     </div>
 
@@ -125,9 +135,13 @@
     <div class="nav-sticky">
         <div class="search-container">
             <i class="fas fa-search"></i>
-            <input type="text" id="searchInput" class="search-input" placeholder="Search vegetables, snacks..." oninput="renderItems()">
+            <input type="text" id="searchInput" class="search-input" placeholder="Search for products..." oninput="renderItems()">
         </div>
-        <div id="tabBar" class="tabs"></div>
+        <div id="tabBar" class="tabs">
+            <button class="tab-btn active" onclick="switchType('All')">All</button>
+            <button class="tab-btn" onclick="switchType('Grocery')">Grocery</button>
+            <button class="tab-btn" onclick="switchType('Hotel')">Hotel</button>
+        </div>
     </div>
 
     <main id="appBody">
@@ -136,7 +150,7 @@
 
     <div class="bottom-bar">
         <div class="total-info" onclick="toggleDrawer('cartDrawer')">
-            <div class="label">Total Amount</div>
+            <div class="label">Payable Amount</div>
             <div class="val">Rs <span id="mainTotal">0.00</span></div>
         </div>
         <div class="action-icons">
@@ -154,74 +168,74 @@
 
     <div id="overlay" class="overlay" onclick="closeAll()"></div>
 
-    <!-- Cart Drawer -->
+    <!-- Basket Drawer -->
     <div id="cartDrawer" class="drawer">
-        <div class="drawer-header"><h3>Your Basket</h3><button onclick="closeAll()" style="border:none; background:#f1f5f9; width:40px; height:40px; border-radius:50%; cursor:pointer; font-size:1.2rem;">&times;</button></div>
+        <div class="drawer-header"><h3>Your Basket</h3><button onclick="closeAll()" style="border:none; background:#f1f5f9; width:36px; height:36px; border-radius:50%; cursor:pointer; font-size:1.1rem;">&times;</button></div>
         <div class="drawer-body" id="cartList"></div>
         <div class="drawer-footer">
-            <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-weight:600;"><span>Subtotal</span><span id="cartSubtotal">Rs 0.00</span></div>
-            <div style="display:flex; justify-content:space-between; margin-bottom:20px; color:var(--danger); font-weight:800; font-size:1.1rem;"><span>Delivery Fee</span><span id="cartDelivery">Rs 0.00</span></div>
-            <button class="btn-add" style="background:var(--success); height: 55px; font-size:1.1rem;" onclick="checkRegistration()">PLACE ORDER NOW</button>
+            <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-weight:600;"><span>Subtotal</span><span id="cartSubtotal">Rs 0.00</span></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:18px; color:var(--danger); font-weight:800; font-size:1.05rem;"><span>Delivery Charge</span><span id="cartDelivery">Rs 0.00</span></div>
+            <button class="btn-add" style="background:var(--success); height: 52px; font-size:1.1rem;" onclick="checkRegistration()">PLACE ORDER NOW</button>
+        </div>
+    </div>
+
+    <!-- Orders Drawer -->
+    <div id="historyDrawer" class="drawer">
+        <div class="drawer-header"><h3>My Orders</h3><button onclick="closeAll()" style="border:none; background:#f1f5f9; width:36px; height:36px; border-radius:50%; cursor:pointer;">&times;</button></div>
+        <div class="drawer-body" id="historyStream"></div>
+        <div class="drawer-footer">
+            <button class="btn-add" style="background:var(--danger); height:48px;" onclick="localStorage.clear(); location.reload();">LOGOUT / RESET</button>
         </div>
     </div>
 
     <!-- Registration -->
     <div id="regDrawer" class="drawer">
-        <div class="drawer-header"><h3>Delivery Info</h3><button onclick="closeAll()" style="border:none; background:#f1f5f9; width:40px; height:40px; border-radius:50%; cursor:pointer;">&times;</button></div>
+        <div class="drawer-header"><h3>Delivery Info</h3><button onclick="closeAll()" style="border:none; background:#f1f5f9; width:36px; height:36px; border-radius:50%; cursor:pointer;">&times;</button></div>
         <div class="drawer-body">
-            <div class="input-group"><label>Full Name</label><input type="text" id="regName" class="input-box" placeholder="e.g. Ram Kumar"></div>
-            <div class="input-group"><label>Mobile Number</label><input type="tel" id="regPhone" class="input-box" placeholder="98XXXXXXXX"></div>
+            <div class="input-group"><label>Full Name</label><input type="text" id="regName" class="input-box" placeholder="Your name"></div>
+            <div class="input-group"><label>Phone Number</label><input type="tel" id="regPhone" class="input-box" placeholder="98XXXXXXXX"></div>
             <div class="input-group"><label>Bharatpur Ward</label><select id="regWard" class="input-box"></select></div>
-            <div class="input-group"><label>Nearest Chowk</label><input type="text" id="regChowk" class="input-box" placeholder="e.g. Hakim Chowk"></div>
+            <div class="input-group"><label>Nearest Chowk</label><input type="text" id="regChowk" class="input-box" placeholder="Landmark"></div>
         </div>
-        <div class="drawer-footer"><button class="btn-add" style="height:55px;" onclick="saveReg()">CONFIRM ADDRESS</button></div>
+        <div class="drawer-footer"><button class="btn-add" style="height:52px;" onclick="saveReg()">SAVE DETAILS</button></div>
     </div>
 
-    <!-- History -->
-    <div id="historyDrawer" class="drawer">
-        <div class="drawer-header"><h3>My Orders</h3><button onclick="closeAll()" style="border:none; background:#f1f5f9; width:40px; height:40px; border-radius:50%; cursor:pointer;">&times;</button></div>
-        <div class="drawer-body" id="historyStream"></div>
-        <div class="drawer-footer">
-            <button class="btn-add" style="background:var(--danger); height:50px;" onclick="localStorage.clear(); location.reload();">LOGOUT / RESET</button>
-        </div>
-    </div>
-
-    <!-- Payment -->
+    <!-- Payment Selection -->
     <div id="payDrawer" class="drawer">
-        <div class="drawer-header"><h3>Payment Method</h3><button onclick="closeAll()" style="border:none; background:#f1f5f9; width:40px; height:40px; border-radius:50%; cursor:pointer;">&times;</button></div>
+        <div class="drawer-header"><h3>Payment Method</h3><button onclick="closeAll()" style="border:none; background:#f1f5f9; width:36px; height:36px; border-radius:50%; cursor:pointer;">&times;</button></div>
         <div class="drawer-body">
-            <div style="padding:20px; border:2px solid #f1f5f9; border-radius:15px; margin-bottom:15px; cursor:pointer; display:flex; align-items:center; gap:15px;" onclick="finalizeOrder('cod')">
-                <div style="width:50px; height:50px; background:#eefdf4; color:var(--success); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.5rem;"><i class="fas fa-hand-holding-dollar"></i></div>
-                <div><div style="font-weight:800;">Cash on Delivery</div><div style="font-size:0.8rem; color:var(--text-muted);">Pay when you receive</div></div>
+            <div style="padding:16px; border:2px solid #f1f5f9; border-radius:18px; margin-bottom:12px; cursor:pointer; display:flex; align-items:center; gap:12px;" onclick="finalizeOrder('cod')">
+                <div style="width:44px; height:44px; background:#eefdf4; color:var(--success); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem;"><i class="fas fa-hand-holding-dollar"></i></div>
+                <div><div style="font-weight:800;">Cash on Delivery</div><div style="font-size:0.75rem; color:var(--text-muted);">Pay at doorstep</div></div>
             </div>
-            <div style="padding:20px; border:2px solid #f1f5f9; border-radius:15px; cursor:pointer; display:flex; align-items:center; gap:15px;" onclick="toggleDrawer('qrDrawer')">
-                <div style="width:50px; height:50px; background:#eff6ff; color:var(--accent); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.5rem;"><i class="fas fa-qrcode"></i></div>
-                <div><div style="font-weight:800;">Online Payment</div><div style="font-size:0.8rem; color:var(--text-muted);">Scan QR code now</div></div>
+            <div style="padding:16px; border:2px solid #f1f5f9; border-radius:18px; cursor:pointer; display:flex; align-items:center; gap:12px;" onclick="toggleDrawer('qrDrawer')">
+                <div style="width:44px; height:44px; background:#eff6ff; color:var(--accent); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem;"><i class="fas fa-qrcode"></i></div>
+                <div><div style="font-weight:800;">Online (eSewa/QR)</div><div style="font-size:0.75rem; color:var(--text-muted);">Scan & pay now</div></div>
             </div>
         </div>
     </div>
 
-    <!-- QR Screen -->
+    <!-- QR Payment -->
     <div id="qrDrawer" class="drawer">
-        <div class="drawer-header"><h3>Scan & Pay</h3><button onclick="closeAll()" style="border:none; background:#f1f5f9; width:40px; height:40px; border-radius:50%; cursor:pointer;">&times;</button></div>
+        <div class="drawer-header"><h3>Scan to Pay</h3><button onclick="closeAll()" style="border:none; background:#f1f5f9; width:36px; height:36px; border-radius:50%; cursor:pointer;">&times;</button></div>
         <div class="drawer-body" style="text-align:center;">
-            <div id="qrTarget" style="margin: 0 auto 20px; padding: 20px; background:white; border:3px dashed #e2e8f0; display:inline-block; border-radius:20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <div id="qrTarget" style="margin: 0 auto 15px; padding: 15px; background:white; border:3px dashed #e2e8f0; display:inline-block; border-radius:20px;">
                 <i class="fas fa-qrcode fa-6x" style="opacity:0.2"></i>
             </div>
-            <div style="font-size:1.5rem; font-weight:900; color:var(--accent); margin-bottom:5px;">Rs <span id="qrAmount">0.00</span></div>
-            <p style="font-size:0.85rem; color:var(--text-muted); font-weight:600;">Please mention your registered phone number in the payment remarks.</p>
+            <div style="font-size:1.6rem; font-weight:900; color:var(--accent); margin-bottom:4px;">Rs <span id="qrAmount">0.00</span></div>
+            <p style="font-size:0.8rem; color:var(--text-muted); font-weight:600;">Use your phone number in remarks for verification.</p>
         </div>
-        <div class="drawer-footer"><button class="btn-add" style="background:var(--success); height:55px;" onclick="finalizeOrder('online')">I HAVE COMPLETED PAYMENT</button></div>
+        <div class="drawer-footer"><button class="btn-add" style="background:var(--success); height:52px;" onclick="finalizeOrder('online')">I HAVE PAID</button></div>
     </div>
 
-    <!-- Chat -->
+    <!-- Staff Support -->
     <div id="chatDrawer" class="drawer">
-        <div class="drawer-header"><h3>Staff Support</h3><button onclick="closeAll()" style="border:none; background:#f1f5f9; width:40px; height:40px; border-radius:50%; cursor:pointer;">&times;</button></div>
-        <div class="drawer-body" id="chatStream" style="display:flex; flex-direction:column; gap:12px; background:#f8fafc; border-radius:20px; margin: 10px; padding: 15px;"></div>
+        <div class="drawer-header"><h3>Chat Support</h3><button onclick="closeAll()" style="border:none; background:#f1f5f9; width:36px; height:36px; border-radius:50%; cursor:pointer;">&times;</button></div>
+        <div class="drawer-body" id="chatStream" style="display:flex; flex-direction:column; gap:10px; background:#f8fafc; border-radius:20px; padding: 12px;"></div>
         <div class="drawer-footer">
-            <div style="display:flex; gap:10px;">
-                <input type="text" id="chatInput" class="input-box" style="margin:0" placeholder="Type a message...">
-                <button class="btn-add" style="width:55px; margin:0; border-radius:50%;" onclick="sendMsg()"><i class="fas fa-paper-plane"></i></button>
+            <div style="display:flex; gap:8px;">
+                <input type="text" id="chatInput" class="input-box" style="margin:0" placeholder="Ask something...">
+                <button class="btn-add" style="width:52px; margin:0; border-radius:14px;" onclick="sendMsg()"><i class="fas fa-paper-plane"></i></button>
             </div>
         </div>
     </div>
@@ -234,13 +248,12 @@
     <script>
         const fConfig = { apiKey: "AIzaSyDlnzH1D7D7Q663eWE086ng_1KdP46MZEs", authDomain: "deep-freehold-389006.firebaseapp.com", databaseURL: "https://deep-freehold-389006-default-rtdb.firebaseio.com", projectId: "deep-freehold-389006", storageBucket: "deep-freehold-389006.appspot.com", appId: "1:76562961838:web:4d18b2f79d7eb9fd88243f" };
         
-        let menuItems = [], cart = [], curTab = 'All';
+        let allItems = [], cart = [], currentType = 'All';
+        const imageCache = {};
 
         function initApp() {
-            // Safety forcing drawers closed on start
             closeAll();
-
-            setTimeout(() => document.getElementById('loader').style.display='none', 2000);
+            setTimeout(() => document.getElementById('loader').style.display='none', 1800);
             
             try {
                 firebase.initializeApp(fConfig);
@@ -249,7 +262,7 @@
 
                 auth.onAuthStateChanged(user => {
                     if(!user) {
-                        auth.signInAnonymously().catch(() => console.warn("Guest access enabled"));
+                        auth.signInAnonymously().catch(console.error);
                     }
                     startListeners(db);
                 });
@@ -257,86 +270,83 @@
                 document.getElementById('loader').style.display='none';
             }
 
-            const w = document.getElementById('regWard');
-            for(let i=1; i<=29; i++) w.innerHTML += `<option value="${i}">Bharatpur Ward ${i}</option>`;
+            const wSelect = document.getElementById('regWard');
+            for(let i=1; i<=29; i++) wSelect.innerHTML += `<option value="${i}">Bharatpur Ward ${i}</option>`;
 
-            // QR & Logo loading
-            const qrImg = new Image(); qrImg.src = 'qr-code.png';
-            qrImg.onload = () => document.getElementById('qrTarget').innerHTML = `<img src="qr-code.png" style="width:220px; display:block; margin:0 auto;">`;
+            const qrPlaceholder = new Image(); qrPlaceholder.src = 'qr-code.png';
+            qrPlaceholder.onload = () => document.getElementById('qrTarget').innerHTML = `<img src="qr-code.png" style="width:200px; display:block; margin:0 auto;">`;
         }
 
         function toggleDrawer(id) {
-            const drawer = document.getElementById(id);
-            const overlay = document.getElementById('overlay');
+            const dr = document.getElementById(id);
+            const ov = document.getElementById('overlay');
             
-            if(drawer.classList.contains('active')) {
+            if(dr.classList.contains('active')) {
                 closeAll();
             } else {
-                closeAll(); // Close others first
-                overlay.style.display = 'block';
-                setTimeout(() => overlay.style.opacity = '1', 10);
-                drawer.classList.add('active');
+                closeAll(); 
+                ov.style.display = 'block';
+                setTimeout(() => ov.style.opacity = '1', 10);
+                dr.classList.add('active');
             }
         }
 
         function closeAll() {
             document.querySelectorAll('.drawer').forEach(d => d.classList.remove('active'));
-            const overlay = document.getElementById('overlay');
-            overlay.style.opacity = '0';
-            setTimeout(() => overlay.style.display = 'none', 300);
+            const ov = document.getElementById('overlay');
+            ov.style.opacity = '0';
+            setTimeout(() => ov.style.display = 'none', 400);
+        }
+
+        function switchType(type) {
+            currentType = type;
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.toggle('active', b.innerText === type);
+            });
+            renderItems();
         }
 
         function startListeners(db) {
             db.ref('menu').on('value', snap => {
-                menuItems = [];
-                const cats = new Set(['All']);
+                allItems = [];
                 snap.forEach(c => {
                     const i = c.val();
-                    if(i.type === 'Grocery') {
-                        menuItems.push({id: c.key, ...i});
-                        cats.add(i.category);
-                    }
+                    allItems.push({id: c.key, ...i});
                 });
-                renderTabs(Array.from(cats).sort());
                 renderItems();
             });
 
-            const user = firebase.auth().currentUser;
-            const uid = user ? user.uid : null;
-            if(!uid) return;
+            const authUser = firebase.auth().currentUser;
+            if(!authUser) return;
+            const uid = authUser.uid;
 
             db.ref(`adminMessages/${uid}`).on('child_added', s => renderChat(s.val(), 'staff'));
             db.ref(`userMessages/${uid}`).on('child_added', s => renderChat(s.val(), 'user'));
 
             db.ref(`orders/grocery/${uid}`).on('value', s => {
-                const list = document.getElementById('historyStream');
-                list.innerHTML = s.exists() ? '' : '<div style="text-align:center; opacity:0.3; padding:3rem;"><i class="fas fa-box-open fa-3x" style="margin-bottom:1rem;"></i><br>No active orders</div>';
+                const stream = document.getElementById('historyStream');
+                stream.innerHTML = s.exists() ? '' : '<div style="text-align:center; opacity:0.3; padding:2.5rem;"><i class="fas fa-receipt fa-4x" style="margin-bottom:1rem;"></i><br>No orders yet</div>';
                 s.forEach(o => {
                     const data = o.val();
-                    list.innerHTML += `<div style="padding:20px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:18px; margin-bottom:12px;">
-                        <div style="display:flex; justify-content:space-between; font-weight:800; margin-bottom:8px;">
-                            <span style="color:var(--text-muted)">Order #${o.key.slice(-4)}</span>
-                            <span style="color:var(--accent); background:rgba(79,70,229,0.1); padding:4px 10px; border-radius:8px; font-size:0.75rem;">${data.status || 'Processing'}</span>
+                    stream.innerHTML += `<div style="padding:16px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:18px; margin-bottom:12px;">
+                        <div style="display:flex; justify-content:space-between; font-weight:800; margin-bottom:6px;">
+                            <span style="color:var(--text-muted)">#${o.key.slice(-5)}</span>
+                            <span style="color:var(--accent); background:rgba(79,70,229,0.1); padding:4px 10px; border-radius:8px; font-size:0.7rem;">${data.status || 'Pending'}</span>
                         </div>
-                        <div style="font-size:0.9rem; font-weight:600; color:var(--text); margin-bottom:10px;">${data.items.map(i => i.name).join(', ')}</div>
-                        <div style="font-weight:900; color:var(--success); font-size:1.1rem;">Rs ${data.totalPrice.toFixed(2)}</div>
+                        <div style="font-size:0.85rem; font-weight:600; color:var(--text); margin-bottom:8px;">${data.items.map(i => i.name).join(', ')}</div>
+                        <div style="font-weight:900; color:var(--success); font-size:1rem;">Rs ${data.totalPrice.toFixed(2)}</div>
                     </div>`;
                 });
             });
         }
 
-        function renderTabs(cats) {
-            const container = document.getElementById('tabBar');
-            container.innerHTML = cats.map(c => `<button class="tab-btn ${curTab===c?'active':''}" onclick="curTab='${c}'; renderTabs(['${cats.join("','")}']); renderItems();">${c}</button>`).join('');
-        }
-
         function renderItems() {
             const grid = document.getElementById('menuContent');
             const search = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = menuItems.filter(i => (curTab === 'All' || i.category === curTab) && i.name.toLowerCase().includes(search));
+            const filtered = allItems.filter(i => (currentType === 'All' || i.type === currentType) && i.name.toLowerCase().includes(search));
             
             grid.innerHTML = '';
-            if(!filtered.length) { grid.innerHTML = '<div style="text-align:center; padding:5rem; opacity:0.2;"><i class="fas fa-search fa-4x"></i><br>No items match your search</div>'; return; }
+            if(!filtered.length) { grid.innerHTML = '<div style="text-align:center; padding:4rem; opacity:0.1;"><i class="fas fa-search fa-3x"></i><br>No matching items</div>'; return; }
 
             const categories = {};
             filtered.forEach(i => { if(!categories[i.category]) categories[i.category] = []; categories[i.category].push(i); });
@@ -361,7 +371,7 @@
                     card.innerHTML = `
                         ${hasDisc ? `<div class="discount-badge">${item.discountPercent}% OFF</div>` : ''}
                         <div class="img-container">
-                            <div class="img-fallback"><i class="fas fa-leaf fa-2x"></i></div>
+                            <div class="img-fallback"><i class="fas fa-image fa-2x"></i></div>
                             <img id="img-${item.id}" src="" style="display:none">
                         </div>
                         <div class="card-body">
@@ -372,17 +382,16 @@
                                 ${cartItem ? `
                                     <div class="qty-controls">
                                         <button class="qty-btn" onclick="updateQty('${item.id}', -1)">-</button>
-                                        <span style="font-weight:900; font-size:1.1rem;">${cartItem.qty}</span>
+                                        <span style="font-weight:900; font-size:1rem;">${cartItem.qty}</span>
                                         <button class="qty-btn" onclick="updateQty('${item.id}', 1)">+</button>
                                     </div>
                                 ` : `
-                                    <button class="btn-add" ${isOut?'disabled':''} onclick="addToCart('${item.id}')">${isOut?'Out of Stock':'ADD TO CART'}</button>
+                                    <button class="btn-add" ${isOut?'disabled':''} onclick="addToCart('${item.id}')">${isOut?'Stock Out':'ADD CART'}</button>
                                 `}
                             </div>
                         </div>`;
                     section.querySelector('.product-grid').appendChild(card);
 
-                    // Fetch Image from Firebase
                     const cleanName = item.name.replace(/\s+/g, '') + '.jpg';
                     firebase.storage().ref('images/' + cleanName).getDownloadURL().then(url => {
                         const img = document.getElementById(`img-${item.id}`);
@@ -390,6 +399,7 @@
                             img.src = url;
                             img.style.display = 'block';
                             img.previousElementSibling.style.display = 'none';
+                            imageCache[item.id] = url;
                         }
                     }).catch(() => {});
                 });
@@ -397,7 +407,7 @@
         }
 
         function addToCart(id) {
-            const item = menuItems.find(i => i.id === id);
+            const item = allItems.find(i => i.id === id);
             const hasDisc = item.discountPercent && new Date(item.discountExpiry) > new Date();
             let p = item.price + (item.profit || 0);
             if(hasDisc) p = (item.price * (1 - item.discountPercent / 100)) + (item.profit || 0);
@@ -419,22 +429,35 @@
         function updateCartUI() {
             let sub = 0, prof = 0;
             const list = document.getElementById('cartList');
-            list.innerHTML = cart.length ? '' : '<div style="text-align:center; padding:4rem; opacity:0.3;"><i class="fas fa-shopping-basket fa-4x" style="margin-bottom:1rem;"></i><br>Your basket is currently empty</div>';
+            list.innerHTML = cart.length ? '' : '<div style="text-align:center; padding:4rem; opacity:0.2;"><i class="fas fa-shopping-basket fa-4x" style="margin-bottom:1rem;"></i><br>Basket is empty</div>';
             
             cart.forEach(i => {
                 const itemTotal = (i.price / i.step) * i.qty;
                 sub += itemTotal;
                 prof += (i.profit / i.step) * i.qty;
-                list.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding:12px; background:#f8fafc; border-radius:15px;">
-                    <div style="flex:1;"><div style="font-weight:800; font-size:0.95rem;">${i.name}</div><div style="font-size:0.85rem; color:var(--success); font-weight:700;">Rs ${itemTotal.toFixed(2)}</div></div>
-                    <div class="qty-controls" style="min-width:110px; margin:0;"><button class="qty-btn" onclick="updateQty('${i.id}',-1)">-</button><span style="font-weight:900;">${i.qty}</span><button class="qty-btn" onclick="updateQty('${i.id}',1)">+</button></div>
+                
+                const imgSrc = imageCache[i.id] || '';
+                const imgTag = imgSrc ? `<img src="${imgSrc}" class="cart-item-img">` : `<div class="cart-item-img" style="display:flex; align-items:center; justify-content:center;"><i class="fas fa-leaf" style="opacity:0.2;"></i></div>`;
+
+                list.innerHTML += `
+                <div class="cart-item-row">
+                    ${imgTag}
+                    <div class="cart-item-details">
+                        <div class="cart-item-name">${i.name}</div>
+                        <div class="cart-item-price">Rs ${itemTotal.toFixed(2)}</div>
+                    </div>
+                    <div class="qty-controls" style="min-width:100px; margin:0;">
+                        <button class="qty-btn" onclick="updateQty('${i.id}',-1)">-</button>
+                        <span style="font-weight:900;">${i.qty}</span>
+                        <button class="qty-btn" onclick="updateQty('${i.id}',1)">+</button>
+                    </div>
                 </div>`;
             });
 
-            const delCharge = cart.length ? Math.max(100 - prof, 0) : 0;
-            const finalTotal = sub + delCharge;
+            const delFee = cart.length ? Math.max(100 - prof, 0) : 0;
+            const finalTotal = sub + delFee;
             document.getElementById('cartSubtotal').innerText = "Rs " + sub.toFixed(2);
-            document.getElementById('cartDelivery').innerText = "Rs " + delCharge.toFixed(2);
+            document.getElementById('cartDelivery').innerText = "Rs " + delFee.toFixed(2);
             document.getElementById('mainTotal').innerText = finalTotal.toFixed(2);
             document.getElementById('cartBadge').innerText = cart.length;
             document.getElementById('qrAmount').innerText = finalTotal.toFixed(2);
@@ -448,36 +471,35 @@
 
         function saveReg() {
             const n = document.getElementById('regName').value, p = document.getElementById('regPhone').value, w = document.getElementById('regWard').value, c = document.getElementById('regChowk').value;
-            if(!n || !/^9\d{9}$/.test(p) || !w || !c) return alert("Please fill all details correctly. Phone must start with 9.");
-            localStorage.setItem('username', n); localStorage.setItem('phone', p); localStorage.setItem('address', `Ward ${w}, ${c}`);
+            if(!n || !/^9\d{9}$/.test(p) || !w || !c) return alert("Fill all details. Phone must start with 9.");
+            localStorage.setItem('username', n); localStorage.setItem('phone', p); localStorage.setItem('address', `${w}, ${c}`);
             toggleDrawer('payDrawer');
         }
 
         function finalizeOrder(method) {
             const user = firebase.auth().currentUser;
-            if(!user) return alert("Please wait for connection...");
+            if(!user) return;
             const order = { username: localStorage.getItem('username'), phone: localStorage.getItem('phone'), address: localStorage.getItem('address'), items: cart, totalPrice: parseFloat(document.getElementById('mainTotal').innerText), method, status: 'Pending', timestamp: new Date().toISOString() };
             
             firebase.database().ref(`orders/grocery/${user.uid}`).push(order).then(() => {
-                alert("Order Placed Successfully!"); cart = []; updateCartUI(); renderItems(); closeAll();
-            }).catch(e => alert("Error: " + e.message));
+                alert("Order Placed!"); cart = []; updateCartUI(); renderItems(); closeAll();
+            }).catch(console.error);
         }
 
         function sendMsg() {
-            const i = document.getElementById('chatInput'); if(!i.value.trim()) return;
-            const user = firebase.auth().currentUser;
-            if(!user) return;
-            firebase.database().ref(`userMessages/${user.uid}`).push({ message: i.value, timestamp: Date.now() });
-            i.value = '';
+            const inp = document.getElementById('chatInput'); if(!inp.value.trim()) return;
+            const user = firebase.auth().currentUser; if(!user) return;
+            firebase.database().ref(`userMessages/${user.uid}`).push({ message: inp.value, timestamp: Date.now() });
+            inp.value = '';
         }
 
         function renderChat(m, type) {
             const stream = document.getElementById('chatStream');
-            const b = document.createElement('div');
+            const box = document.createElement('div');
             const isStaff = type === 'staff';
-            b.style.cssText = `max-width:85%; padding:12px 16px; border-radius:18px; align-self:${isStaff?'flex-start':'flex-end'}; background:${isStaff?'white':'var(--accent)'}; color:${isStaff?'var(--text)':'white'}; border-bottom-${isStaff?'left':'right'}-radius:2px; font-size:0.95rem; font-weight:500; box-shadow:0 2px 4px rgba(0,0,0,0.05);`;
-            b.innerText = m.message;
-            stream.appendChild(b); stream.scrollTop = stream.scrollHeight;
+            box.style.cssText = `max-width:85%; padding:12px 16px; border-radius:20px; align-self:${isStaff?'flex-start':'flex-end'}; background:${isStaff?'white':'var(--accent)'}; color:${isStaff?'var(--text)':'white'}; border-bottom-${isStaff?'left':'right'}-radius:4px; font-size:0.95rem; font-weight:500; box-shadow:0 2px 4px rgba(0,0,0,0.05);`;
+            box.innerText = m.message;
+            stream.appendChild(box); stream.scrollTop = stream.scrollHeight;
             if(isStaff && !document.getElementById('chatDrawer').classList.contains('active')) document.getElementById('chatDot').style.display = 'flex';
         }
 
