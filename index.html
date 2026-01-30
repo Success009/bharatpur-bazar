@@ -1,605 +1,509 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="Slayer_MC_Logo.ico" type="image/x-icon">
-  <title>Ability SMP</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Minecraft&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --primary: #2ecc71; --secondary: #3498db; --danger: #e74c3c; --dark: #2c3e50; --light: #ecf0f1;
-      --bg-gradient: linear-gradient(135deg, rgba(26, 42, 108, 0.8), rgba(32, 76, 128, 0.9), rgba(0, 107, 166, 0.8));
-      --card-bg: rgba(255, 255, 255, 0.07); --card-border: rgba(255, 255, 255, 0.2);
-      --glow-shadow: 0 0 20px rgba(46, 204, 113, 0.5);
-      --transition-speed: 0.3s;
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body { font-family: 'Poppins', sans-serif; background-image: url('https://wallpapercave.com/wp/wp2586787.jpg'); background-size: cover; background-attachment: fixed; color: var(--light); overflow-x: hidden; }
-    body::-webkit-scrollbar { width: 8px; }
-    body::-webkit-scrollbar-track { background: var(--dark); }
-    body::-webkit-scrollbar-thumb { background-color: var(--primary); border-radius: 20px; }
-    body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-gradient); z-index: -1; }
-    .minecraft-font { font-family: 'Minecraft', 'Poppins', sans-serif; }
-    
-    @keyframes initial-fade-down { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes initial-fade-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes content-fade-out { to { opacity: 0; } }
-    @keyframes pulse-glow { 0% { box-shadow: 0 0 5px var(--primary); } 50% { box-shadow: 0 0 20px var(--primary), 0 0 10px #fff; } 100% { box-shadow: 0 0 5px var(--primary); } }
-    @keyframes pulse-dot { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); } 70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(46, 204, 113, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); } }
-    @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(46, 204, 113, 0); } 100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); } }
-    @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); } 100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); } }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bharatpur Bazar</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1e293b;
+            --accent: #4f46e5;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #0f172a;
+            --text-muted: #64748b;
+        }
 
-    header { background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(12px); padding: 15px 0; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid var(--card-border); animation: initial-fade-down 0.6s ease-out; }
-    .header-content { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; max-width: 1200px; margin: 0 auto; padding: 0 20px; gap: 20px; }
-    .logo-section { display: flex; justify-content: flex-start; }
-    .logo-img { height: 50px; filter: drop-shadow(0 0 5px rgba(255,255,255,0.5)); transition: transform var(--transition-speed) ease; }
-    .logo-img:hover { transform: scale(1.1) rotate(-5deg); }
-    .title-section { text-align: center; }
-    .title-section h1 { font-size: 2rem; letter-spacing: 2px; text-shadow: 0 0 10px rgba(46, 204, 113, 0.7); margin: 0; }
-    .title-section p { font-size: 0.9rem; opacity: 0.8; margin: 0; }
-    .social-links { display: flex; gap: 15px; justify-content: flex-end; }
-    .social-icon { width: 35px; height: 35px; opacity: 0.8; transition: all var(--transition-speed) ease; }
-    .social-icon:hover { opacity: 1; filter: drop-shadow(0 0 8px rgba(255,255,255,0.8)); transform: scale(1.15); }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; background: var(--bg); color: var(--text); overflow-x: hidden; }
 
-    .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; animation: initial-fade-up 0.6s ease-out; }
-    .glass-panel { background: rgba(10, 25, 47, 0.7); backdrop-filter: blur(12px); border-radius: 15px; overflow: hidden; border: 1px solid var(--card-border); box-shadow: 0 0 15px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.1); }
-    
-    .navigation { display: flex; justify-content: center; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); border-radius: 10px; margin-bottom: 30px; animation: initial-fade-up 0.6s ease-out 0.2s; animation-fill-mode: backwards; }
-    .tab { padding: 15px 30px; cursor: pointer; position: relative; text-align: center; font-weight: 600; color: rgba(255, 255, 255, 0.7); transition: color var(--transition-speed) ease; }
-    .tab::before { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 0; height: 3px; background: var(--primary); border-radius: 3px; transition: width 0.3s; }
-    .tab.selected, .tab:hover { color: white; }
-    .tab.selected::before { width: 60%; }
-    .tab:hover:not(.selected)::before { width: 30%; }
-    
-    .tab.has-new-content { color: var(--primary); text-shadow: 0 0 5px var(--primary); animation: pulse-glow 2s infinite; }
-    .tab.has-new-content::after { content: 'NEW'; position: absolute; top: 5px; right: 5px; font-size: 0.6rem; background: var(--primary); color: #000; padding: 2px 5px; border-radius: 4px; font-weight: bold; }
-    
-    .mobile-notifier { display: none; position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--primary); border-radius: 50%; z-index: 1500; align-items: center; justify-content: center; box-shadow: 0 0 15px var(--primary); cursor: pointer; animation: pulse-dot 2s infinite; }
-    .mobile-notifier i { color: #fff; font-size: 1.5rem; }
+        /* Loader */
+        #loader { position: fixed; inset: 0; background: var(--primary); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; transition: opacity 0.5s; }
+        .spinner { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.1); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-    .content-section { padding: 40px; display: none; }
-    .content-section.active { display: block; animation: initial-fade-up 0.5s ease-out; }
-    .content-section.fade-out { animation: content-fade-out 0.3s ease-out forwards; }
-    .section-title { font-size: 2.2rem; margin-bottom: 35px; text-align: center; position: relative; color: var(--primary); text-shadow: 0 0 10px rgba(46,204,113,0.3); }
-    .section-title::after { content: ''; position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); width: 80px; height: 3px; background: var(--primary); border-radius: 3px; }
-    
-    .welcome-text, .about-us-text { text-align: center; line-height: 1.8; max-width: 800px; margin: 0 auto 50px auto; font-size: 1.1rem; }
-    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; }
-    .feature-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 25px; display: flex; flex-direction: column; align-items: center; text-align: center; }
-    .feature-icon { font-size: 2.5rem; margin-bottom: 15px; color: var(--primary); }
-    .feature-title { font-size: 1.2rem; margin-bottom: 10px; font-weight: 600; }
-    
-    .abilities-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
-    .ability-card { background: rgba(0,0,0,0.5); border-radius: 10px; overflow: hidden; cursor: pointer; border: 1px solid transparent; }
-    .ability-header { background: rgba(0,0,0,0.3); padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-    .ability-title { margin: 0; display: flex; align-items: center; font-size: 1.3rem; }
-    .ability-type { background: var(--primary); color: white; font-size: 0.7rem; padding: 3px 8px; border-radius: 10px; margin-left: 10px; text-transform: uppercase; }
-    .ability-body { padding: 20px; }
-    .ability-description { font-size: 0.95rem; line-height: 1.6; }
-    
-    .rules-list { counter-reset: rule-counter; list-style-type: none; display: grid; gap: 15px; }
-    .rule-item { position: relative; padding: 20px 20px 20px 60px; background: var(--card-bg); border-radius: 8px; }
-    .rule-item::before { counter-increment: rule-counter; content: counter(rule-counter); position: absolute; left: 15px; top: 50%; transform: translateY(-50%); background: var(--primary); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-    .rule-title { font-size: 1.1rem; margin-bottom: 10px; color: var(--primary); }
-    
-    .announcement-card { background: var(--card-bg); border-radius: 10px; padding: 25px; margin-bottom: 20px; border-left: 4px solid var(--primary); position: relative; }
-    .announcement-title { font-size: 1.3rem; margin-bottom: 10px; color: var(--primary); }
-    .announcement-date { font-size: 0.8rem; opacity: 0.7; margin-bottom: 15px; }
-    .announcement-footer { margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 15px; }
-    .vote-btn { background: rgba(255,255,255,0.1); border: 1px solid transparent; color: #fff; padding: 5px 12px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: all 0.2s; font-size: 0.9rem; }
-    .vote-btn:hover { background: rgba(255,255,255,0.2); }
-    .vote-btn.active { background: var(--primary); color: #000; font-weight: 600; box-shadow: 0 0 10px var(--primary); }
-    .vote-btn.active.dislike { background: #e74c3c; box-shadow: 0 0 10px #e74c3c; color: white;}
+        /* Layout */
+        header { background: var(--primary); color: white; padding: 1.5rem 1rem; text-align: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .logo-container { width: 80px; height: 80px; margin: 0 auto 0.5rem; display: flex; align-items: center; justify-content: center; background: white; border-radius: 15px; overflow: hidden; }
+        .logo-container img { width: 100%; height: 100%; object-fit: contain; }
+        .header-title { font-size: 1.1rem; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; }
+        
+        .nav-sticky { position: sticky; top: 145px; background: white; z-index: 900; padding: 12px; border-bottom: 1px solid #e2e8f0; }
+        @media (max-width: 600px) { .nav-sticky { top: 135px; } }
 
-    .animate-on-scroll { opacity: 0; transform: translateY(20px); transition: opacity 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); transition-delay: var(--animation-delay, 0s); }
-    .animate-on-scroll.is-visible { opacity: 1; transform: translateY(0); }
-    .interactive-card { transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; }
-    .interactive-card:hover { transform: translateY(-8px) scale(1.03); box-shadow: var(--glow-shadow); }
-    .ability-card:hover { border-color: var(--primary); }
-    
-    .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(10px); }
-    .modal.show { display: flex; align-items: center; justify-content: center; animation: initial-fade-up 0.3s ease; }
-    .modal-content { background: #1e2a38; margin: 15px; padding: 0; border-radius: 15px; width: 90%; max-width: 600px; max-height: 85vh; overflow: hidden; display: flex; flex-direction: column; border: 1px solid var(--card-border); }
-    .close { color: #aaa; position: absolute; right: 20px; top: 18px; font-size: 28px; font-weight: bold; cursor: pointer; z-index: 1; transition: color 0.3s ease, transform 0.3s ease; }
-    .close:hover { color: var(--primary); transform: rotate(90deg); }
-    .modal-header { position: relative; padding: 20px 30px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255,255,255,0.05); }
-    .modal-title { font-size: 1.8rem; font-weight: 600; color: var(--primary); margin: 0; }
-    #modalBody { padding: 30px; overflow-y: auto; }
-    .video-container { margin-bottom: 20px; position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; border: 1px solid var(--card-border); }
-    .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-    .modal-section-title { font-size: 1.2rem; color: var(--primary); margin-bottom: 10px; font-weight: 600; border-left: 3px solid var(--primary); padding-left: 10px; }
-    .modal-content ul { padding-left: 20px; list-style-type: none; }
-    .modal-content li { margin-bottom: 8px; position: relative; }
-    .modal-content li::before { content: "▶"; color: var(--primary); position: absolute; left: -20px; top: 2px; font-size: 0.8em; }
+        .search-container { position: relative; max-width: 600px; margin: 0 auto; }
+        .search-input { width: 100%; padding: 12px 12px 12px 42px; border-radius: 100px; border: 1px solid #cbd5e0; font-size: 1rem; background: #f8fafc; transition: all 0.3s; }
+        .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); background: white; }
+        .search-container i { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
 
-    .minecraft-blocks { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -2; }
-    .block { position: absolute; width: 25px; height: 25px; background-size: cover; opacity: 0.4; animation: blockFloat 25s linear infinite; }
-    @keyframes blockFloat { 0% { transform: translate3d(0, 100vh, 0) rotate(0deg); } 100% { transform: translate3d(0, -100px, 0) rotate(360deg); } }
+        .tabs { display: flex; justify-content: center; gap: 12px; padding: 12px 0 4px; }
+        .tab-btn { padding: 8px 24px; border-radius: 100px; border: 1px solid #e2e8f0; background: white; white-space: nowrap; font-weight: 700; cursor: pointer; transition: all 0.3s; color: var(--text-muted); }
+        .tab-btn.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3); }
 
-    /* --- NEW LIVE BRIDGE STYLES --- */
-    .status-banner {
-        background: rgba(0,0,0,0.4); padding: 25px; border-radius: 12px; border: 1px solid var(--card-border);
-        margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between;
-        backdrop-filter: blur(5px);
-    }
-    .status-left { display: flex; align-items: center; gap: 20px; }
-    
-    .status-dot-container { position: relative; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; }
-    .status-dot { width: 12px; height: 12px; border-radius: 50%; background: #7f8c8d; z-index: 2; }
-    .status-ping { position: absolute; width: 100%; height: 100%; border-radius: 50%; background: inherit; opacity: 0.6; z-index: 1; }
-    .status-dot-container.online .status-dot { background: var(--primary); }
-    .status-dot-container.online .status-ping { background: var(--primary); animation: pulse-green 2s infinite; }
-    .status-dot-container.offline .status-dot { background: var(--danger); }
-    .status-dot-container.offline .status-ping { background: var(--danger); animation: pulse-red 2s infinite; }
-    
-    .status-info h3 { margin: 0; font-size: 1.6rem; letter-spacing: 0.5px; line-height: 1; margin-bottom: 8px; }
-    .stat-badges { display: flex; gap: 10px; transition: opacity 0.3s; }
-    .badge { background: rgba(255,255,255,0.07); padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,0.1); color: #ccc; }
-    .badge.tps-high { color: #2ecc71; border-color: rgba(46, 204, 113, 0.3); }
-    .badge.tps-med { color: #f1c40f; }
-    .badge.tps-low { color: #e74c3c; }
+        /* Grid */
+        main { max-width: 1200px; margin: 0 auto; padding: 1rem 1rem 120px; }
+        .category-block { margin-bottom: 2.5rem; }
+        .category-title { font-size: 1.3rem; font-weight: 800; border-left: 5px solid var(--accent); padding-left: 12px; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 10px; color: var(--primary); }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 1.25rem; }
 
-    .server-address-box { text-align: right; }
-    .address-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: #aaa; margin-bottom: 5px; }
-    .address-pill { background: rgba(0,0,0,0.3); padding: 8px 16px; border-radius: 8px; font-family: 'Minecraft', monospace; color: var(--secondary); border: 1px dashed var(--secondary); font-size: 1.1rem; letter-spacing: 1px; }
+        .card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; border: 1px solid #f1f5f9; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        
+        .img-container { padding-top: 100%; background: #f1f5f9; position: relative; overflow: hidden; }
+        .img-container img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+        .card:hover .img-container img { transform: scale(1.1); }
+        .img-fallback { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #cbd5e1; background: #f8fafc; }
+        
+        .discount-badge { position: absolute; top: 12px; right: -30px; background: var(--danger); color: white; padding: 6px 35px; transform: rotate(45deg); font-size: 0.75rem; font-weight: 900; z-index: 2; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
-    .bridge-container { display: grid; grid-template-columns: 280px 1fr; gap: 20px; height: 550px; }
-    
-    .player-list-panel, .chat-panel { background: rgba(16, 20, 30, 0.6); border: 1px solid var(--card-border); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; }
-    .panel-header { background: rgba(255,255,255,0.03); padding: 15px; font-weight: 600; border-bottom: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center; }
-    .player-list-content { overflow-y: auto; flex-grow: 1; padding: 10px; scrollbar-width: thin; }
-    .player-item { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.02); border: 1px solid transparent; transition: 0.2s; }
-    .player-item:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.1); transform: translateX(3px); }
-    .player-head { width: 36px; height: 36px; border-radius: 6px; background: #000; border: 2px solid rgba(255,255,255,0.1); }
-    .player-name { font-size: 0.95rem; }
+        .card-body { padding: 1rem; flex: 1; display: flex; flex-direction: column; }
+        .p-name { font-weight: 700; font-size: 0.95rem; margin-bottom: 6px; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 2.7rem; line-height: 1.4; }
+        .p-price { color: var(--success); font-weight: 800; font-size: 1.2rem; margin-bottom: 2px; }
+        .p-unit { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem; font-weight: 600; }
+        
+        .btn-add { width: 100%; padding: 10px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; margin-top: auto; transition: all 0.2s; }
+        .btn-add:hover { background: var(--accent); }
+        .btn-add:active { transform: scale(0.95); }
 
-    .chat-messages { flex-grow: 1; overflow-y: auto; padding: 20px; font-family: 'Minecraft', sans-serif; font-size: 0.95rem; line-height: 1.6; background: rgba(0, 0, 0, 0.2); scrollbar-width: thin; }
-    .chat-msg { margin-bottom: 8px; word-wrap: break-word; }
-    .tag { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-right: 8px; vertical-align: middle; display: inline-block; }
-    .tag.web { background: rgba(52, 152, 219, 0.15); color: #3498db; border: 1px solid rgba(52, 152, 219, 0.3); }
-    .tag.game { background: rgba(46, 204, 113, 0.15); color: #2ecc71; border: 1px solid rgba(46, 204, 113, 0.3); }
-    
-    .chat-input-area { padding: 15px; background: rgba(255,255,255,0.03); border-top: 1px solid var(--card-border); display: flex; gap: 10px; }
-    .chat-input { background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); color: white; padding: 12px 15px; border-radius: 8px; outline: none; transition: 0.3s; }
-    .chat-input:disabled { opacity: 0.5; cursor: not-allowed; }
-    .chat-input:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(46, 204, 113, 0.1); }
-    .send-btn { background: var(--primary); color: #fff; border: none; padding: 0 25px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; font-size: 1.1rem; }
-    .send-btn:hover { background: #27ae60; transform: translateY(-2px); }
-    
-    .link-btn { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255,255,255,0.2); color: #aaa; padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; transition: 0.3s; }
-    .link-btn:hover { background: rgba(255,255,255,0.2); color: white; }
-    .link-btn.linked { border-color: var(--primary); color: var(--primary); cursor: default; }
+        .qty-controls { display: flex; align-items: center; justify-content: space-between; background: #f1f5f9; border-radius: 10px; padding: 5px; margin-top: auto; }
+        .qty-btn { width: 32px; height: 32px; border: none; background: white; border-radius: 8px; font-weight: 900; cursor: pointer; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
-    @media (max-width: 768px) {
-      .header-content { grid-template-columns: 1fr; justify-content: center; text-align: center; }
-      .logo-section, .social-links { justify-content: center; }
-      .logo-img { height: 40px; }
-      .social-icon { width: 30px; height: 30px; }
-      .container { margin: 20px auto; padding: 0 10px; }
-      .navigation { justify-content: flex-start; overflow-x: auto; white-space: nowrap; padding: 5px; -ms-overflow-style: none; scrollbar-width: none; }
-      .tab { flex-shrink: 0; padding: 10px 20px; font-size: 0.9rem; }
-      .content-section { padding: 25px 20px; }
-      .status-banner { flex-direction: column; gap: 20px; text-align: center; }
-      .status-left { flex-direction: column; }
-      .server-address-box { text-align: center; width: 100%; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; }
-      .bridge-container { grid-template-columns: 1fr; height: auto; }
-      .player-list-panel { height: 250px; }
-      .chat-panel { height: 450px; }
-      .mobile-notifier.show { display: flex; }
-    }
-  </style>
+        /* Floating Nav */
+        .bottom-bar { position: fixed; bottom: 1.5rem; left: 1rem; right: 1rem; max-width: 500px; margin: 0 auto; background: var(--primary); color: white; border-radius: 25px; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); z-index: 1100; border: 1px solid rgba(255,255,255,0.1); }
+        .total-info { cursor: pointer; }
+        .total-info .label { font-size: 0.6rem; text-transform: uppercase; opacity: 0.7; font-weight: 800; letter-spacing: 0.5px; }
+        .total-info .val { font-size: 1.3rem; font-weight: 900; }
+        .action-icons { display: flex; gap: 12px; }
+        .action-btn { position: relative; width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1); cursor: pointer; transition: all 0.2s; font-size: 1.1rem; }
+        .action-btn:hover { background: rgba(255,255,255,0.2); }
+        .badge { position: absolute; top: -6px; right: -6px; background: var(--danger); min-width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 900; border: 2px solid var(--primary); }
+
+        /* Drawers - IMPROVED ANIMATIONS */
+        .overlay { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 2000; 
+            display: none; opacity: 0; transition: opacity 0.4s ease; 
+        }
+        .drawer { 
+            position: fixed; bottom: 0; left: 0; right: 0; background: white; z-index: 2100; 
+            border-radius: 32px 32px 0 0; max-height: 85vh; transform: translateY(110%); 
+            transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s, visibility 0.4s; 
+            display: flex; flex-direction: column; opacity: 0; visibility: hidden; pointer-events: none;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
+        }
+        .drawer.active { transform: translateY(0); opacity: 1; visibility: visible; pointer-events: auto; }
+        
+        .drawer-header { padding: 20px 24px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+        .drawer-header h3 { margin: 0; font-size: 1.25rem; font-weight: 800; color: var(--primary); }
+        .drawer-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+        .drawer-footer { padding: 24px; border-top: 1px solid #f1f5f9; background: #f8fafc; }
+
+        /* Cart Item Styling */
+        .cart-item-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding: 12px; background: #f8fafc; border-radius: 16px; border: 1px solid #f1f5f9; }
+        .cart-item-img { width: 50px; height: 50px; border-radius: 10px; object-fit: cover; background: white; border: 1px solid #eee; }
+        .cart-item-details { flex: 1; }
+        .cart-item-name { font-weight: 700; font-size: 0.9rem; color: var(--primary); }
+        .cart-item-price { font-size: 0.8rem; color: var(--success); font-weight: 700; }
+
+        .input-group { margin-bottom: 1rem; }
+        .input-group label { display: block; font-size: 0.8rem; font-weight: 800; margin-bottom: 6px; color: var(--text-muted); text-transform: uppercase; }
+        .input-box { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; font-weight: 600; }
+        .input-box:focus { border-color: var(--accent); outline: none; }
+
+        @media (min-width: 768px) {
+            .drawer { left: 50%; right: auto; width: 450px; transform: translate(-50%, 110%); bottom: 40px; border-radius: 32px; }
+            .drawer.active { transform: translate(-50%, 0); }
+        }
+    </style>
 </head>
 <body>
-  <div class="minecraft-blocks" id="minecraft-blocks"></div>
-  <div class="mobile-notifier" id="mobile-notifier"><i class="fa-solid fa-bell"></i></div>
 
-  <header>
-    <div class="header-content">
-      <div class="logo-section"><img src="Slayer_MC_Logo.png" alt="Ability SMP Logo" class="logo-img"></div>
-      <div class="title-section"><h1 class="minecraft-font">Ability SMP</h1><p>Your Ultimate Minecraft SMP Experience</p></div>
-      <div class="social-links">
-        <a href="#" target="_blank"><img src="Youtube_logo.png" alt="YouTube" class="social-icon"></a>
-        <a href="https://discord.gg/4PVS2eszVn" target="_blank"><img src="Discord_Logo.png" alt="Discord" class="social-icon"></a>
-      </div>
-    </div>
-  </header>
-
-  <div class="container">
-    <div class="navigation">
-      <div class="tab selected" data-tab="home">Home</div>
-      <div class="tab" data-tab="live">Live Bridge</div>
-      <div class="tab" data-tab="abilities">Abilities</div>
-      <div class="tab" data-tab="sub-abilities">Sub-Abilities</div>
-      <div class="tab" data-tab="rules">Rules</div>
-      <div class="tab" id="announcement-tab" data-tab="announcement">Announcements</div>
+    <div id="loader">
+        <div class="logo-placeholder" style="background: white; color: var(--primary); width: 60px; height: 60px; display: flex; align-items:center; justify-content:center; border-radius: 12px; font-weight: 900;">BB</div>
+        <div class="spinner" style="margin-top: 20px;"></div>
     </div>
 
-    <div class="glass-panel">
-      <!-- HOME SECTION -->
-      <div class="content-section active" id="home-section">
-        <h2 class="section-title">Welcome to Ability SMP</h2>
-        <div class="welcome-text"><p>Ability SMP offers a unique gameplay experience where players are granted special abilities that transform your Minecraft adventure.</p></div>
-        <div class="features-grid">
-          <div class="feature-card interactive-card animate-on-scroll"><div class="feature-icon"><i class="fas fa-magic"></i></div><h3 class="feature-title">Unique Abilities</h3><p>Choose from a variety of powerful abilities that give you special powers in the game.</p></div>
-          <div class="feature-card interactive-card animate-on-scroll"><div class="feature-icon"><i class="fas fa-users"></i></div><h3 class="feature-title">Community Focused</h3><p>Join a friendly community of players enjoying the enhanced SMP experience.</p></div>
-          <div class="feature-card interactive-card animate-on-scroll"><div class="feature-icon"><i class="fas fa-balance-scale"></i></div><h3 class="feature-title">Balanced Gameplay</h3><p>Each ability is carefully balanced to ensure fair and fun gameplay for everyone.</p></div>
-          <div class="feature-card interactive-card animate-on-scroll"><div class="feature-icon"><i class="fas fa-star"></i></div><h3 class="feature-title">Special Events</h3><p>Participate in regular events and earn unique rewards and sub-abilities.</p></div>
+    <header>
+        <div class="logo-container">
+            <img src="logoForceSmall.jpg" alt="Logo" id="logoImg" onerror="this.parentElement.innerHTML='<div style=\'font-weight:900; color:var(--primary); font-size:1.5rem\'>BB</div>'">
         </div>
-        <div class="about-us-text"><p>Here, you'll find all about Ability SMP - its abilities, rules, sub-abilities, announcements, and other essential details. Explore and get ready for an epic journey!</p></div>
-      </div>
+        <div class="header-title">Bharatpur Bazar</div>
+    </header>
 
-      <!-- LIVE BRIDGE SECTION -->
-      <div class="content-section" id="live-section">
-        <h2 class="section-title">Server Bridge</h2>
+    <div class="nav-sticky">
+        <div class="search-container">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" class="search-input" placeholder="Search for products..." oninput="renderItems()">
+        </div>
+        <div id="tabBar" class="tabs">
+            <button class="tab-btn active" onclick="switchType('All')">All</button>
+            <button class="tab-btn" onclick="switchType('Grocery')">Grocery</button>
+            <button class="tab-btn" onclick="switchType('Hotel')">Hotel</button>
+        </div>
+    </div>
+
+    <main id="appBody">
+        <div id="menuContent"></div>
+    </main>
+
+    <div class="bottom-bar">
+        <div class="total-info" onclick="toggleDrawer('cartDrawer')">
+            <div class="label">Payable Amount</div>
+            <div class="val">Rs <span id="mainTotal">0.00</span></div>
+        </div>
+        <div class="action-icons">
+            <div class="action-btn" onclick="toggleDrawer('historyDrawer')"><i class="fas fa-receipt"></i></div>
+            <div class="action-btn" onclick="toggleDrawer('chatDrawer')">
+                <i class="fas fa-comment-dots"></i>
+                <div id="chatDot" class="badge" style="display:none; background:var(--accent);">!</div>
+            </div>
+            <div class="action-btn" style="background: var(--accent);" onclick="toggleDrawer('cartDrawer')">
+                <i class="fas fa-shopping-basket"></i>
+                <div id="cartBadge" class="badge">0</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="overlay" class="overlay" onclick="closeAll()"></div>
+
+    <!-- Basket Drawer -->
+    <div id="cartDrawer" class="drawer">
+        <div class="drawer-header"><h3>Your Basket</h3><button onclick="closeAll()" style="border:none; background:#f1f5f9; width:36px; height:36px; border-radius:50%; cursor:pointer; font-size:1.1rem;">&times;</button></div>
+        <div class="drawer-body" id="cartList"></div>
+        <div class="drawer-footer">
+            <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-weight:600;"><span>Subtotal</span><span id="cartSubtotal">Rs 0.00</span></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:18px; color:var(--danger); font-weight:800; font-size:1.05rem;"><span>Delivery Charge</span><span id="cartDelivery">Rs 0.00</span></div>
+            <button class="btn-add" style="background:var(--success); height: 52px; font-size:1.1rem;" onclick="checkRegistration()">PLACE ORDER NOW</button>
+        </div>
+    </div>
+
+    <!-- Orders Drawer -->
+    <div id="historyDrawer" class="drawer">
+        <div class="drawer-header"><h3>My Orders</h3><button onclick="closeAll()" style="border:none; background:#f1f5f9; width:36px; height:36px; border-radius:50%; cursor:pointer;">&times;</button></div>
+        <div class="drawer-body" id="historyStream"></div>
+        <div class="drawer-footer">
+            <button class="btn-add" style="background:var(--danger); height:48px;" onclick="localStorage.clear(); location.reload();">LOGOUT / RESET</button>
+        </div>
+    </div>
+
+    <!-- Registration -->
+    <div id="regDrawer" class="drawer">
+        <div class="drawer-header"><h3>Delivery Info</h3><button onclick="closeAll()" style="border:none; background:#f1f5f9; width:36px; height:36px; border-radius:50%; cursor:pointer;">&times;</button></div>
+        <div class="drawer-body">
+            <div class="input-group"><label>Full Name</label><input type="text" id="regName" class="input-box" placeholder="Your name"></div>
+            <div class="input-group"><label>Phone Number</label><input type="tel" id="regPhone" class="input-box" placeholder="98XXXXXXXX"></div>
+            <div class="input-group"><label>Bharatpur Ward</label><select id="regWard" class="input-box"></select></div>
+            <div class="input-group"><label>Nearest Chowk</label><input type="text" id="regChowk" class="input-box" placeholder="Landmark"></div>
+        </div>
+        <div class="drawer-footer"><button class="btn-add" style="height:52px;" onclick="saveReg()">SAVE DETAILS</button></div>
+    </div>
+
+    <!-- Payment Selection -->
+    <div id="payDrawer" class="drawer">
+        <div class="drawer-header"><h3>Payment Method</h3><button onclick="closeAll()" style="border:none; background:#f1f5f9; width:36px; height:36px; border-radius:50%; cursor:pointer;">&times;</button></div>
+        <div class="drawer-body">
+            <div style="padding:16px; border:2px solid #f1f5f9; border-radius:18px; margin-bottom:12px; cursor:pointer; display:flex; align-items:center; gap:12px;" onclick="finalizeOrder('cod')">
+                <div style="width:44px; height:44px; background:#eefdf4; color:var(--success); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem;"><i class="fas fa-hand-holding-dollar"></i></div>
+                <div><div style="font-weight:800;">Cash on Delivery</div><div style="font-size:0.75rem; color:var(--text-muted);">Pay at doorstep</div></div>
+            </div>
+            <div style="padding:16px; border:2px solid #f1f5f9; border-radius:18px; cursor:pointer; display:flex; align-items:center; gap:12px;" onclick="toggleDrawer('qrDrawer')">
+                <div style="width:44px; height:44px; background:#eff6ff; color:var(--accent); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem;"><i class="fas fa-qrcode"></i></div>
+                <div><div style="font-weight:800;">Online (eSewa/QR)</div><div style="font-size:0.75rem; color:var(--text-muted);">Scan & pay now</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Payment -->
+    <div id="qrDrawer" class="drawer">
+        <div class="drawer-header"><h3>Scan to Pay</h3><button onclick="closeAll()" style="border:none; background:#f1f5f9; width:36px; height:36px; border-radius:50%; cursor:pointer;">&times;</button></div>
+        <div class="drawer-body" style="text-align:center;">
+            <div id="qrTarget" style="margin: 0 auto 15px; padding: 15px; background:white; border:3px dashed #e2e8f0; display:inline-block; border-radius:20px;">
+                <i class="fas fa-qrcode fa-6x" style="opacity:0.2"></i>
+            </div>
+            <div style="font-size:1.6rem; font-weight:900; color:var(--accent); margin-bottom:4px;">Rs <span id="qrAmount">0.00</span></div>
+            <p style="font-size:0.8rem; color:var(--text-muted); font-weight:600;">Use your phone number in remarks for verification.</p>
+        </div>
+        <div class="drawer-footer"><button class="btn-add" style="background:var(--success); height:52px;" onclick="finalizeOrder('online')">I HAVE PAID</button></div>
+    </div>
+
+    <!-- Staff Support -->
+    <div id="chatDrawer" class="drawer">
+        <div class="drawer-header"><h3>Chat Support</h3><button onclick="closeAll()" style="border:none; background:#f1f5f9; width:36px; height:36px; border-radius:50%; cursor:pointer;">&times;</button></div>
+        <div class="drawer-body" id="chatStream" style="display:flex; flex-direction:column; gap:10px; background:#f8fafc; border-radius:20px; padding: 12px;"></div>
+        <div class="drawer-footer">
+            <div style="display:flex; gap:8px;">
+                <input type="text" id="chatInput" class="input-box" style="margin:0" placeholder="Ask something...">
+                <button class="btn-add" style="width:52px; margin:0; border-radius:14px;" onclick="sendMsg()"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
+
+    <script>
+        const fConfig = { apiKey: "AIzaSyDlnzH1D7D7Q663eWE086ng_1KdP46MZEs", authDomain: "deep-freehold-389006.firebaseapp.com", databaseURL: "https://deep-freehold-389006-default-rtdb.firebaseio.com", projectId: "deep-freehold-389006", storageBucket: "deep-freehold-389006.appspot.com", appId: "1:76562961838:web:4d18b2f79d7eb9fd88243f" };
         
-        <div class="status-banner">
-            <div class="status-left">
-                <div id="status-container" class="status-dot-container offline">
-                    <div class="status-ping"></div>
-                    <div class="status-dot"></div>
-                </div>
-                <div class="status-info">
-                    <h3 id="status-text-label" style="color: var(--danger)">OFFLINE</h3>
-                    <div id="stat-badges" class="stat-badges" style="opacity: 0;">
-                        <div class="badge"><i class="fas fa-users"></i> <span id="stat-players">0</span></div>
-                        <div class="badge" id="badge-tps"><i class="fas fa-tachometer-alt"></i> <span id="stat-tps">0.0</span> TPS</div>
-                    </div>
-                </div>
-            </div>
-            <div class="server-address-box">
-                <div class="address-label">Server IP</div>
-                <div class="address-pill">just.ask.owner</div>
-            </div>
-        </div>
+        let allItems = [], cart = [], currentType = 'All';
+        const imageCache = {};
 
-        <div class="bridge-container">
-            <div class="player-list-panel">
-                <div class="panel-header">
-                    <span>Online</span>
-                    <span style="background:var(--primary); padding:2px 8px; border-radius:10px; font-size:0.8rem; color:#000;" id="player-count-badge">0</span>
-                </div>
-                <div class="player-list-content" id="player-list-container">
-                    <div style="text-align: center; padding: 20px; color: #aaa;">Offline</div>
-                </div>
-            </div>
-
-            <div class="chat-panel">
-                <div class="panel-header">
-                    <span><i class="fas fa-comments"></i> Server Chat</span>
-                    <button id="link-account-btn" class="link-btn" onclick="openLinkModal()">Link Account</button>
-                </div>
-                <div class="chat-messages" id="chat-messages">
-                    <div style="text-align:center; color:#555; margin-top:20px;">Connecting...</div>
-                </div>
-                <div class="chat-input-area">
-                    <input type="text" id="web-username" class="chat-input" placeholder="Name" style="width: 30%;" disabled value="Loading...">
-                    <input type="text" id="web-message" class="chat-input" placeholder="Message..." style="flex-grow: 1;">
-                    <button class="send-btn" onclick="sendToMinecraft()"><i class="fas fa-paper-plane"></i></button>
-                </div>
-            </div>
-        </div>
-      </div>
-
-      <!-- OTHER SECTIONS -->
-      <div class="content-section" id="abilities-section"><h2 class="section-title">Abilities</h2><div class="abilities-container" id="abilities-container"></div></div>
-      <div class="content-section" id="sub-abilities-section"><h2 class="section-title">Sub-Abilities</h2><div class="abilities-container" id="sub-abilities-container"></div></div>
-      <div class="content-section" id="rules-section"><h2 class="section-title">Server Rules</h2><ul class="rules-list" id="rules-list-container"></ul></div>
-      <div class="content-section" id="announcement-section"><h2 class="section-title">Announcements</h2><div id="announcements-container"></div></div>
-    </div>
-  </div>
-
-  <!-- Link Modal -->
-  <div id="linkModal" class="modal">
-    <div class="modal-content" style="max-width:400px; text-align:center;">
-        <div class="modal-header" style="border:none;"><span class="close" onclick="closeLinkModal()">&times;</span></div>
-        <h2 style="margin:0 0 10px 0; color:white;">Link Minecraft Account</h2>
-        <p style="color:#aaa; font-size:0.9rem; margin-bottom:20px;">Type <code style="color:var(--primary); background:rgba(255,255,255,0.1); padding:2px 5px; border-radius:4px;">/link</code> in-game to get your code.</p>
-        <input type="text" id="link-code-input" placeholder="Enter 6-digit code" style="width:100%; padding:12px; border-radius:8px; border:1px solid #444; background:#111; color:white; font-size:1.2rem; letter-spacing:2px; text-align:center; margin-bottom:20px;">
-        <button onclick="submitLinkCode()" style="background:var(--primary); color:white; border:none; padding:10px 30px; border-radius:8px; font-weight:bold; cursor:pointer; width:100%;">VERIFY</button>
-        <p id="link-status" style="margin-top:15px; font-size:0.9rem; height:20px;"></p>
-    </div>
-  </div>
-
-  <div id="abilityModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header"><span class="close">&times;</span><h2 class="modal-title" id="modalTitle"></h2><span class="ability-type" id="modalType"></span></div>
-      <div id="modalBody"></div>
-    </div>
-  </div>
-
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
-  
-  <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyA6sANvYoAkXHYG8MjbZl6Pyq23CNdBuzA", authDomain: "community-canvas-255fa.firebaseapp.com",
-        databaseURL: "https://community-canvas-255fa-default-rtdb.firebaseio.com", projectId: "community-canvas-255fa",
-        storageBucket: "community-canvas-255fa.appspot.com", messagingSenderId: "729445267995", appId: "1:729445267995:web:05da6756d66c58b9ccd6be"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    const auth = firebase.auth();
-    const abilityRef = db.ref('Ability');
-
-    // --- AUTH & LINKING ---
-    let currentUserIGN = null, currentUserUID = null;
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            currentUserUID = user.uid;
-            db.ref(`Ability/security/users/${user.uid}`).on('value', snap => {
-                const nameInput = document.getElementById('web-username');
-                const linkBtn = document.getElementById('link-account-btn');
-                if (snap.exists()) {
-                    currentUserIGN = snap.val().ign;
-                    nameInput.value = currentUserIGN;
-                    nameInput.style.color = "var(--primary)";
-                    nameInput.style.borderColor = "var(--primary)";
-                    linkBtn.innerText = "Linked ✓";
-                    linkBtn.classList.add("linked");
-                    linkBtn.onclick = null;
-                } else {
-                    currentUserIGN = null;
-                    nameInput.value = "Anonymous";
-                    nameInput.style.color = "#aaa";
-                    nameInput.style.borderColor = "#444";
-                    linkBtn.innerText = "Link Account";
-                    linkBtn.classList.remove("linked");
-                    linkBtn.onclick = openLinkModal;
-                }
-                nameInput.disabled = true;
-            });
-        } else {
-            auth.signInAnonymously().catch(console.error);
-        }
-    });
-
-    function openLinkModal() { document.getElementById('linkModal').classList.add('show'); }
-    function closeLinkModal() { document.getElementById('linkModal').classList.remove('show'); }
-    
-    function submitLinkCode() {
-        const code = document.getElementById('link-code-input').value.trim();
-        const status = document.getElementById('link-status');
-        if (code.length !== 6) { status.innerText = "Invalid code length."; status.style.color = "var(--danger)"; return; }
-        status.innerText = "Verifying..."; status.style.color = "#aaa";
-        db.ref(`Ability/security/link_requests/${currentUserUID}`).set(code)
-            .then(() => { status.innerText = "Request sent! Check game chat."; status.style.color = "var(--primary)"; setTimeout(closeLinkModal, 2000); })
-            .catch(e => { status.innerText = "Error: " + e.message; status.style.color = "var(--danger)"; });
-    }
-
-    // --- BRIDGE LOGIC ---
-    const MC_PATHS = { root: 'Ability/minecraft', status: 'status', chat: 'chatLogs', players: 'onlinePlayers' };
-    const mcRef = db.ref(MC_PATHS.root);
-
-    function initServerMonitor() {
-        mcRef.child(MC_PATHS.status).on('value', snapshot => {
-            const data = snapshot.val();
-            const container = document.getElementById('status-container');
-            const label = document.getElementById('status-text-label');
-            const badges = document.getElementById('stat-badges');
-            const plStat = document.getElementById('stat-players');
-            const tpsStat = document.getElementById('stat-tps');
-            const tpsBadge = document.getElementById('badge-tps');
-            const now = Date.now();
-            const lastUpdate = data ? (data.timestamp || 0) : 0;
-            const isOnline = data && data.online && (now - lastUpdate < 45000);
-
-            if (isOnline) {
-                container.className = 'status-dot-container online';
-                label.innerText = "ONLINE"; label.style.color = "var(--primary)";
-                badges.style.opacity = "1";
-                plStat.innerText = `${data.onlinePlayers || 0}/${data.maxPlayers || 0}`;
-                tpsStat.innerText = data.tps || "20.0";
-                const tps = parseFloat(data.tps);
-                if (tps >= 18) tpsBadge.className = 'badge tps-high';
-                else if (tps >= 15) tpsBadge.className = 'badge tps-med';
-                else tpsBadge.className = 'badge tps-low';
-            } else {
-                container.className = 'status-dot-container offline';
-                label.innerText = "OFFLINE"; label.style.color = "var(--danger)";
-                badges.style.opacity = "0";
-                document.getElementById('player-count-badge').innerText = "0";
-                document.getElementById('player-list-container').innerHTML = '<div style="text-align: center; padding: 20px; color: #aaa;">Server is Offline</div>';
-            }
-        });
-    }
-
-    function initPlayerList() {
-        mcRef.child(MC_PATHS.players).on('value', snapshot => {
-            const data = snapshot.val();
-            const container = document.getElementById('player-list-container');
-            const countBadge = document.getElementById('player-count-badge');
-            if (!data) return;
-            const players = [];
-            Object.keys(data).forEach(key => { if (key !== 'count' && key !== 'timestamp') players.push({ uuid: key, ...data[key] }); });
-            countBadge.innerText = players.length;
-            container.innerHTML = '';
-            if (players.length === 0) { container.innerHTML = '<div style="text-align: center; padding: 20px; color: #aaa; font-size: 0.9rem;">No players online</div>'; return; }
-            players.forEach(p => {
-                const row = document.createElement('div'); row.className = 'player-item';
-                row.innerHTML = `<img src="https://crafatar.com/avatars/${p.uuid}?size=32&overlay" class="player-head" onerror="this.src='https://crafatar.com/avatars/Steve?size=32'"><div class="player-name" style="color:${p.op ? '#e74c3c' : 'white'}">${p.name}</div>`;
-                container.appendChild(row);
-            });
-        });
-    }
-
-    function initChat() {
-        const container = document.getElementById('chat-messages');
-        mcRef.child(MC_PATHS.chat).limitToLast(50).on('child_added', snapshot => {
-            const msg = snapshot.val(); if (!msg) return;
-            if (container.children.length > 0 && container.children[0].innerText.includes('Connecting')) container.innerHTML = '';
-            const div = document.createElement('div'); div.className = 'chat-msg';
-            const safeUser = escapeHtml(msg.player || 'Unknown');
-            const safeMsg = escapeHtml(msg.message || '');
-            if (msg.source === 'WEB') div.innerHTML = `<span class="tag web">WEB</span> <span class="msg-user" style="color:#3498db">${safeUser}</span> <span class="msg-content">${safeMsg}</span>`;
-            else div.innerHTML = `<span class="tag game">GAME</span> <span class="msg-user" style="color:#2ecc71">${safeUser}</span> <span class="msg-content">${safeMsg}</span>`;
-            container.appendChild(div);
-            container.scrollTop = container.scrollHeight;
-        });
-    }
-
-    window.sendToMinecraft = function() {
-        const msgIn = document.getElementById('web-message');
-        const msg = msgIn.value.trim();
-        if (!msg) return;
-        const senderName = currentUserIGN || "Anonymous";
-        mcRef.child(MC_PATHS.chat).push({ player: senderName, message: msg, source: "WEB", timestamp: firebase.database.ServerValue.TIMESTAMP })
-            .catch(error => { alert("Error sending message: " + error.message); });
-        msgIn.value = '';
-    };
-
-    function escapeHtml(text) { return text ? text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : ''; }
-
-    // --- GENERIC CONTENT ---
-    let userIP = null;
-    async function fetchUserIP() {
-        try { const r = await fetch('https://api.ipify.org?format=json'); const d = await r.json(); userIP = d.ip.replace(/\./g, '-').replace(/:/g, '_'); }
-        catch { if(!localStorage.getItem('fallback_uid')) localStorage.setItem('fallback_uid', 'user_'+Math.random().toString(36).substr(2,9)); userIP = localStorage.getItem('fallback_uid'); }
-    }
-    fetchUserIP();
-
-    const handleVote = (key, type) => {
-        if (!userIP) return alert("Connecting...");
-        db.ref(`Ability/announcements/${key}/votes/${userIP}`).transaction(cur => cur === type ? null : type);
-    };
-
-    const modal = document.getElementById('abilityModal');
-    const linkModal = document.getElementById('linkModal');
-    document.querySelector('.close').onclick = () => modal.classList.remove('show');
-    window.onclick = (e) => { 
-        if (e.target == modal) modal.classList.remove('show');
-        if (e.target == linkModal) linkModal.classList.remove('show');
-    };
-
-    function getYoutubeId(url) {
-        if(!url) return null;
-        const match = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/);
-        return (match && match[2].length === 11) ? match[2] : null;
-    }
-
-    function openDynamicModal(item) {
-        document.getElementById('modalTitle').textContent = item.name;
-        document.getElementById('modalTitle').style.color = item.color || 'var(--primary)';
-        document.getElementById('modalType').textContent = item.rarity ? `${item.type} - ${item.rarity}` : item.type;
-        const modalBody = document.getElementById('modalBody');
-        modalBody.innerHTML = '';
-        if (item.videoUrl) {
-            const ytid = getYoutubeId(item.videoUrl);
-            if (ytid) modalBody.innerHTML += `<div class="video-container"><iframe src="https://www.youtube.com/embed/${ytid}" frameborder="0" allowfullscreen></iframe></div>`;
-        }
-        const ignored = ['name', 'color', 'type', 'rarity', 'id', 'order', 'key', 'votes', 'videoUrl'];
-        const formatTitle = (k) => k.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
-        for (const k in item) {
-            if (!ignored.includes(k) && item.hasOwnProperty(k)) {
-                let html = '';
-                if (typeof item[k] === 'string' && item[k].trim()) html = `<p>${item[k]}</p>`;
-                else if (Array.isArray(item[k]) && item[k].length) html = `<ul>${item[k].map(i => `<li>${i}</li>`).join('')}</ul>`;
-                if(html) modalBody.innerHTML += `<div class="modal-section"><h3 class="modal-section-title">${formatTitle(k)}</h3>${html}</div>`;
-            }
-        }
-        modal.classList.add('show');
-    }
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('is-visible'); observer.unobserve(entry.target); } });
-    }, { threshold: 0.1 });
-
-    const loadData = (node, contId, renderFn, rev=false) => {
-        abilityRef.child(node).orderByChild(node==='announcements'?'timestamp':'id').on('value', snap => {
-            const cont = document.getElementById(contId);
-            cont.innerHTML = '';
-            if(!snap.exists()) { cont.innerHTML = '<p style="text-align:center">No items.</p>'; return; }
-            const items = [];
-            snap.forEach(c => { const v = c.val(); if(node==='announcements' && v.status==='draft') return; items.push({key: c.key, ...v}); });
+        function initApp() {
+            closeAll();
+            setTimeout(() => document.getElementById('loader').style.display='none', 1800);
             
-            if(node === 'announcements' && items.length) {
-                const latest = items[items.length-1].timestamp;
-                const lastSeen = localStorage.getItem('lastSeenAnnouncement') || 0;
-                if(latest > lastSeen) {
-                    if(!document.getElementById('announcement-tab').classList.contains('selected')) {
-                        document.getElementById('announcement-tab').classList.add('has-new-content');
-                        document.getElementById('mobile-notifier').classList.add('show');
-                    } else localStorage.setItem('lastSeenAnnouncement', latest);
-                }
+            try {
+                firebase.initializeApp(fConfig);
+                const auth = firebase.auth();
+                const db = firebase.database();
+
+                auth.onAuthStateChanged(user => {
+                    if(!user) {
+                        auth.signInAnonymously().catch(console.error);
+                    }
+                    startListeners(db);
+                });
+            } catch (e) {
+                document.getElementById('loader').style.display='none';
             }
 
-            if(rev) items.reverse();
-            items.forEach((item, i) => {
-                const el = renderFn(item);
-                el.classList.add('animate-on-scroll');
-                el.style.setProperty('--animation-delay', `${i*50}ms`);
-                cont.appendChild(el);
-                observer.observe(el);
+            const wSelect = document.getElementById('regWard');
+            for(let i=1; i<=29; i++) wSelect.innerHTML += `<option value="${i}">Bharatpur Ward ${i}</option>`;
+
+            const qrPlaceholder = new Image(); qrPlaceholder.src = 'qr-code.png';
+            qrPlaceholder.onload = () => document.getElementById('qrTarget').innerHTML = `<img src="qr-code.png" style="width:200px; display:block; margin:0 auto;">`;
+        }
+
+        function toggleDrawer(id) {
+            const dr = document.getElementById(id);
+            const ov = document.getElementById('overlay');
+            
+            if(dr.classList.contains('active')) {
+                closeAll();
+            } else {
+                closeAll(); 
+                ov.style.display = 'block';
+                setTimeout(() => ov.style.opacity = '1', 10);
+                dr.classList.add('active');
+            }
+        }
+
+        function closeAll() {
+            document.querySelectorAll('.drawer').forEach(d => d.classList.remove('active'));
+            const ov = document.getElementById('overlay');
+            ov.style.opacity = '0';
+            setTimeout(() => ov.style.display = 'none', 400);
+        }
+
+        function switchType(type) {
+            currentType = type;
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.toggle('active', b.innerText === type);
             });
-        });
-    };
-
-    const renderAbil = (d) => {
-        const div = document.createElement('div'); div.className = 'ability-card interactive-card'; div.onclick = () => openDynamicModal(d);
-        div.innerHTML = `<div class="ability-header"><h3 class="ability-title"><span style="color: ${d.color}">${d.name}</span><span class="ability-type">${d.type}</span></h3></div><div class="ability-body"><p class="ability-description">${d.description}</p></div>`;
-        return div;
-    };
-    const renderSub = (d) => {
-        const div = document.createElement('div'); div.className = 'ability-card interactive-card'; div.onclick = () => openDynamicModal(d);
-        div.innerHTML = `<div class="ability-header"><h3 class="ability-title"><span style="color: ${d.color}">${d.name}</span><span class="ability-type">${d.type}</span></h3></div><div class="ability-body"><p><strong>Rarity:</strong> ${d.rarity}</p><p class="ability-description">${d.description}</p></div>`;
-        return div;
-    };
-    const renderRule = (d) => {
-        const li = document.createElement('li'); li.className = 'rule-item interactive-card';
-        li.innerHTML = `<h3 class="rule-title">${d.title}</h3><p>${d.description}</p>`;
-        return li;
-    };
-    const renderAnn = (d) => {
-        const div = document.createElement('div'); div.className = 'announcement-card interactive-card';
-        let l=0, dl=0, uv=null;
-        if(d.votes) Object.entries(d.votes).forEach(([ip, v]) => { if(v==='like') l++; if(v==='dislike') dl++; if(ip===userIP) uv=v; });
-        div.innerHTML = `<h3 class="announcement-title">${d.title}</h3><div class="announcement-date">Posted on ${new Date(d.timestamp).toLocaleDateString()}</div><div class="announcement-content">${d.content}</div><div class="announcement-footer"><button class="vote-btn ${uv==='like'?'active':''}" onclick="handleVote('${d.key}','like')"><i class="fa-solid fa-thumbs-up"></i> ${l}</button><button class="vote-btn dislike ${uv==='dislike'?'active':''}" onclick="handleVote('${d.key}','dislike')"><i class="fa-solid fa-thumbs-down"></i> ${dl}</button></div>`;
-        return div;
-    };
-
-    function createMinecraftBlocks() {
-        const container = document.getElementById('minecraft-blocks');
-        const types = ['https://minecraft.wiki/images/Grass_Block_JE6.png', 'https://minecraft.wiki/images/Diamond_Ore_JE6_BE6.png', 'https://minecraft.wiki/images/Stone_JE4_BE2.png'];
-        if (!container) return;
-        for (let i = 0; i < 15; i++) {
-            const block = document.createElement('div'); block.className = 'block';
-            block.style.cssText = `background-image: url(${types[Math.floor(Math.random()*types.length)]}); left: ${Math.random()*100}%; animation-duration: ${20+Math.random()*20}s; animation-delay: ${Math.random()*15}s;`;
-            container.appendChild(block);
+            renderItems();
         }
-    }
 
-    document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('selected'));
-        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active', 'fade-out'));
-        tab.classList.add('selected');
-        const target = document.getElementById(`${tab.dataset.tab}-section`);
-        if(tab.id === 'announcement-tab') {
-            document.getElementById('announcement-tab').classList.remove('has-new-content');
-            document.getElementById('mobile-notifier').classList.remove('show');
-            localStorage.setItem('lastSeenAnnouncement', Date.now());
+        function startListeners(db) {
+            db.ref('menu').on('value', snap => {
+                allItems = [];
+                snap.forEach(c => {
+                    const i = c.val();
+                    allItems.push({id: c.key, ...i});
+                });
+                renderItems();
+            });
+
+            const authUser = firebase.auth().currentUser;
+            if(!authUser) return;
+            const uid = authUser.uid;
+
+            db.ref(`adminMessages/${uid}`).on('child_added', s => renderChat(s.val(), 'staff'));
+            db.ref(`userMessages/${uid}`).on('child_added', s => renderChat(s.val(), 'user'));
+
+            db.ref(`orders/grocery/${uid}`).on('value', s => {
+                const stream = document.getElementById('historyStream');
+                stream.innerHTML = s.exists() ? '' : '<div style="text-align:center; opacity:0.3; padding:2.5rem;"><i class="fas fa-receipt fa-4x" style="margin-bottom:1rem;"></i><br>No orders yet</div>';
+                s.forEach(o => {
+                    const data = o.val();
+                    stream.innerHTML += `<div style="padding:16px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:18px; margin-bottom:12px;">
+                        <div style="display:flex; justify-content:space-between; font-weight:800; margin-bottom:6px;">
+                            <span style="color:var(--text-muted)">#${o.key.slice(-5)}</span>
+                            <span style="color:var(--accent); background:rgba(79,70,229,0.1); padding:4px 10px; border-radius:8px; font-size:0.7rem;">${data.status || 'Pending'}</span>
+                        </div>
+                        <div style="font-size:0.85rem; font-weight:600; color:var(--text); margin-bottom:8px;">${data.items.map(i => i.name).join(', ')}</div>
+                        <div style="font-weight:900; color:var(--success); font-size:1rem;">Rs ${data.totalPrice.toFixed(2)}</div>
+                    </div>`;
+                });
+            });
         }
-        target.classList.add('active');
-    }));
 
-    document.getElementById('mobile-notifier').addEventListener('click', () => {
-        const t = document.querySelector('.tab[data-tab="announcement"]');
-        if(t) t.click();
-    });
+        function renderItems() {
+            const grid = document.getElementById('menuContent');
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allItems.filter(i => (currentType === 'All' || i.type === currentType) && i.name.toLowerCase().includes(search));
+            
+            grid.innerHTML = '';
+            if(!filtered.length) { grid.innerHTML = '<div style="text-align:center; padding:4rem; opacity:0.1;"><i class="fas fa-search fa-3x"></i><br>No matching items</div>'; return; }
 
-    window.addEventListener('DOMContentLoaded', () => {
-        createMinecraftBlocks();
-        initServerMonitor();
-        initPlayerList();
-        initChat();
-        loadData('abilities', 'abilities-container', renderAbil);
-        loadData('subAbilities', 'sub-abilities-container', renderSub);
-        loadData('rules', 'rules-list-container', renderRule);
-        loadData('announcements', 'announcements-container', renderAnn, true);
-        document.getElementById('web-message').addEventListener('keypress', (e) => { if(e.key==='Enter') sendToMinecraft(); });
-    });
-  </script>
+            const categories = {};
+            filtered.forEach(i => { if(!categories[i.category]) categories[i.category] = []; categories[i.category].push(i); });
+
+            Object.keys(categories).sort().forEach(cName => {
+                const section = document.createElement('div');
+                section.className = 'category-block';
+                section.innerHTML = `<div class="category-title">${cName}</div><div class="product-grid"></div>`;
+                grid.appendChild(section);
+
+                categories[cName].forEach(item => {
+                    const isOut = item.status === 'out_of_stock';
+                    const hasDisc = item.discountPercent && new Date(item.discountExpiry) > new Date();
+                    let price = item.price + (item.profit || 0);
+                    if(hasDisc) price = (item.price * (1 - item.discountPercent / 100)) + (item.profit || 0);
+
+                    const cartItem = cart.find(ci => ci.id === item.id);
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    if(isOut) card.style.opacity = '0.6';
+
+                    card.innerHTML = `
+                        ${hasDisc ? `<div class="discount-badge">${item.discountPercent}% OFF</div>` : ''}
+                        <div class="img-container">
+                            <div class="img-fallback"><i class="fas fa-image fa-2x"></i></div>
+                            <img id="img-${item.id}" src="" style="display:none">
+                        </div>
+                        <div class="card-body">
+                            <div class="p-name">${item.name}</div>
+                            <div class="p-price">Rs ${price.toFixed(2)}</div>
+                            <div class="p-unit">per ${item.startingValue || 1} ${item.unit || ''}</div>
+                            <div id="ctrl-${item.id}" style="margin-top:auto;">
+                                ${cartItem ? `
+                                    <div class="qty-controls">
+                                        <button class="qty-btn" onclick="updateQty('${item.id}', -1)">-</button>
+                                        <span style="font-weight:900; font-size:1rem;">${cartItem.qty}</span>
+                                        <button class="qty-btn" onclick="updateQty('${item.id}', 1)">+</button>
+                                    </div>
+                                ` : `
+                                    <button class="btn-add" ${isOut?'disabled':''} onclick="addToCart('${item.id}')">${isOut?'Stock Out':'ADD CART'}</button>
+                                `}
+                            </div>
+                        </div>`;
+                    section.querySelector('.product-grid').appendChild(card);
+
+                    const cleanName = item.name.replace(/\s+/g, '') + '.jpg';
+                    firebase.storage().ref('images/' + cleanName).getDownloadURL().then(url => {
+                        const img = document.getElementById(`img-${item.id}`);
+                        if(img) {
+                            img.src = url;
+                            img.style.display = 'block';
+                            img.previousElementSibling.style.display = 'none';
+                            imageCache[item.id] = url;
+                        }
+                    }).catch(() => {});
+                });
+            });
+        }
+
+        function addToCart(id) {
+            const item = allItems.find(i => i.id === id);
+            const hasDisc = item.discountPercent && new Date(item.discountExpiry) > new Date();
+            let p = item.price + (item.profit || 0);
+            if(hasDisc) p = (item.price * (1 - item.discountPercent / 100)) + (item.profit || 0);
+            
+            cart.push({ id, name: item.name, price: p, profit: item.profit || 0, qty: item.startingValue || 1, step: item.startingValue || 1 });
+            updateCartUI();
+            renderItems();
+        }
+
+        function updateQty(id, dir) {
+            const idx = cart.findIndex(c => c.id === id);
+            if(idx === -1) return;
+            cart[idx].qty += (cart[idx].step * dir);
+            if(cart[idx].qty <= 0) cart.splice(idx, 1);
+            updateCartUI();
+            renderItems();
+        }
+
+        function updateCartUI() {
+            let sub = 0, prof = 0;
+            const list = document.getElementById('cartList');
+            list.innerHTML = cart.length ? '' : '<div style="text-align:center; padding:4rem; opacity:0.2;"><i class="fas fa-shopping-basket fa-4x" style="margin-bottom:1rem;"></i><br>Basket is empty</div>';
+            
+            cart.forEach(i => {
+                const itemTotal = (i.price / i.step) * i.qty;
+                sub += itemTotal;
+                prof += (i.profit / i.step) * i.qty;
+                
+                const imgSrc = imageCache[i.id] || '';
+                const imgTag = imgSrc ? `<img src="${imgSrc}" class="cart-item-img">` : `<div class="cart-item-img" style="display:flex; align-items:center; justify-content:center;"><i class="fas fa-leaf" style="opacity:0.2;"></i></div>`;
+
+                list.innerHTML += `
+                <div class="cart-item-row">
+                    ${imgTag}
+                    <div class="cart-item-details">
+                        <div class="cart-item-name">${i.name}</div>
+                        <div class="cart-item-price">Rs ${itemTotal.toFixed(2)}</div>
+                    </div>
+                    <div class="qty-controls" style="min-width:100px; margin:0;">
+                        <button class="qty-btn" onclick="updateQty('${i.id}',-1)">-</button>
+                        <span style="font-weight:900;">${i.qty}</span>
+                        <button class="qty-btn" onclick="updateQty('${i.id}',1)">+</button>
+                    </div>
+                </div>`;
+            });
+
+            const delFee = cart.length ? Math.max(100 - prof, 0) : 0;
+            const finalTotal = sub + delFee;
+            document.getElementById('cartSubtotal').innerText = "Rs " + sub.toFixed(2);
+            document.getElementById('cartDelivery').innerText = "Rs " + delFee.toFixed(2);
+            document.getElementById('mainTotal').innerText = finalTotal.toFixed(2);
+            document.getElementById('cartBadge').innerText = cart.length;
+            document.getElementById('qrAmount').innerText = finalTotal.toFixed(2);
+        }
+
+        function checkRegistration() {
+            if(!cart.length) return;
+            if(!localStorage.getItem('address')) toggleDrawer('regDrawer');
+            else toggleDrawer('payDrawer');
+        }
+
+        function saveReg() {
+            const n = document.getElementById('regName').value, p = document.getElementById('regPhone').value, w = document.getElementById('regWard').value, c = document.getElementById('regChowk').value;
+            if(!n || !/^9\d{9}$/.test(p) || !w || !c) return alert("Fill all details. Phone must start with 9.");
+            localStorage.setItem('username', n); localStorage.setItem('phone', p); localStorage.setItem('address', `${w}, ${c}`);
+            toggleDrawer('payDrawer');
+        }
+
+        function finalizeOrder(method) {
+            const user = firebase.auth().currentUser;
+            if(!user) return;
+            const order = { username: localStorage.getItem('username'), phone: localStorage.getItem('phone'), address: localStorage.getItem('address'), items: cart, totalPrice: parseFloat(document.getElementById('mainTotal').innerText), method, status: 'Pending', timestamp: new Date().toISOString() };
+            
+            firebase.database().ref(`orders/grocery/${user.uid}`).push(order).then(() => {
+                alert("Order Placed!"); cart = []; updateCartUI(); renderItems(); closeAll();
+            }).catch(console.error);
+        }
+
+        function sendMsg() {
+            const inp = document.getElementById('chatInput'); if(!inp.value.trim()) return;
+            const user = firebase.auth().currentUser; if(!user) return;
+            firebase.database().ref(`userMessages/${user.uid}`).push({ message: inp.value, timestamp: Date.now() });
+            inp.value = '';
+        }
+
+        function renderChat(m, type) {
+            const stream = document.getElementById('chatStream');
+            const box = document.createElement('div');
+            const isStaff = type === 'staff';
+            box.style.cssText = `max-width:85%; padding:12px 16px; border-radius:20px; align-self:${isStaff?'flex-start':'flex-end'}; background:${isStaff?'white':'var(--accent)'}; color:${isStaff?'var(--text)':'white'}; border-bottom-${isStaff?'left':'right'}-radius:4px; font-size:0.95rem; font-weight:500; box-shadow:0 2px 4px rgba(0,0,0,0.05);`;
+            box.innerText = m.message;
+            stream.appendChild(box); stream.scrollTop = stream.scrollHeight;
+            if(isStaff && !document.getElementById('chatDrawer').classList.contains('active')) document.getElementById('chatDot').style.display = 'flex';
+        }
+
+        initApp();
+    </script>
 </body>
 </html>
