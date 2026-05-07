@@ -1,0 +1,802 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Order Management</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --success: #38b000;
+            --danger: #d90429;
+            --warning: #ffaa00;
+            --info: #4cc9f0;
+            --secondary: #6c757d;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --white: #ffffff;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --radius: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f0f2f5;
+            color: var(--dark);
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), #3a0ca3);
+            color: var(--white);
+            padding: 1.2rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            font-weight: 600;
+            font-size: 1.5rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background-color: #3051d3;
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: var(--white);
+        }
+
+        .btn-success:hover {
+            background-color: #2d9200;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: var(--white);
+        }
+
+        .btn-danger:hover {
+            background-color: #b10022;
+        }
+
+        .btn-warning {
+            background-color: var(--warning);
+            color: var(--dark);
+        }
+
+        .btn-warning:hover {
+            background-color: #e69900;
+        }
+
+        .btn-info {
+            background-color: var(--info);
+            color: var(--dark);
+        }
+
+        .btn-info:hover {
+            background-color: #3cb2d9;
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: var(--white);
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .order-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .order-card {
+            background-color: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+
+        .order-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .card-header {
+            padding: 1rem;
+            background-color: rgba(67, 97, 238, 0.1);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .timestamp {
+            font-size: 0.8rem;
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .payment-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        .payment-cod {
+            background-color: #ffeeee;
+            color: #d90429;
+            border: 1px solid #ffcccc;
+        }
+
+        .payment-online {
+            background-color: #e6f8ff;
+            color: #0077b6;
+            border: 1px solid #ccf0ff;
+        }
+
+        .payment-verified {
+            background-color: #e6ffee;
+            color: #38b000;
+            border: 1px solid #ccffdd;
+        }
+        
+        .device-id {
+            font-size: 0.9rem;
+            color: var(--info);
+            margin-top: 5px;
+            font-weight: 500;
+        }
+
+        .card-body {
+            padding: 1rem;
+        }
+
+        .order-items {
+            margin-bottom: 1rem;
+        }
+
+        .order-items h4 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .item-list {
+            list-style: none;
+            margin-left: 10px;
+        }
+
+        .item-list li {
+            padding: 0.5rem 0;
+            font-size: 0.9rem;
+            border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
+        }
+
+        .price-info {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .total-price {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .card-footer {
+            padding: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            background-color: rgba(240, 242, 245, 0.5);
+        }
+
+
+        .empty-state {
+            padding: 3rem;
+            text-align: center;
+            color: var(--secondary);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+    /* Custom Modal Styles */
+    .custom-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 2000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 400px;
+        text-align: center;
+        position: relative;
+        transform: translateY(-20px);
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+
+    .custom-modal.active .modal-content {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    .modal-icon {
+        font-size: 48px;
+        margin-bottom: 15px;
+    }
+
+    .modal-icon.success { color: var(--success); }
+    .modal-icon.warning { color: var(--warning); }
+    .modal-icon.error { color: var(--danger); }
+
+    .modal-title {
+        font-size: 1.5em;
+        margin-bottom: 10px;
+        color: var(--dark);
+    }
+
+    .modal-message {
+        margin-bottom: 20px;
+        color: var(--secondary);
+    }
+
+    .modal-actions {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .modal-btn {
+        padding: 10px 20px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .modal-btn-confirm {
+        background: var(--success);
+        color: white;
+    }
+
+    .modal-btn-cancel {
+        background: var(--danger);
+        color: white;
+    }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-title">Staff Order Management</div>
+        <div class="header-actions">
+            <button class="btn btn-warning" onclick="calibrateIP()">
+                <i class="fas fa-network-wired"></i> Calibrate IP
+            </button>
+            <button class="btn btn-info" onclick="window.location.href='StaffMenu.html'" style="margin-left: 10px;">
+                <i class="fas fa-edit"></i> Edit Menu
+            </button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="order-container" id="orderSection">
+        </div>
+    </div>
+
+    <!-- Custom Modal -->
+    <div class="custom-modal" id="customModal">
+        <div class="modal-content">
+            <i class="modal-icon fas"></i>
+            <h3 class="modal-title"></h3>
+            <p class="modal-message"></p>
+            <div class="modal-actions">
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlnzH1D7D7Q663eWE086ng_1KdP46MZEs",
+            authDomain: "deep-freehold-389006.firebaseapp.com",
+            databaseURL: "https://deep-freehold-389006-default-rtdb.firebaseio.com",
+            projectId: "deep-freehold-389006",
+            storageBucket: "deep-freehold-389006.appspot.com",
+            messagingSenderId: "76562961838",
+            appId: "1:76562961838:web:4d18b2f79d7eb9fd88243f",
+            measurementId: "G-VZC36FJC24"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const ordersRef = firebase.database().ref('orders');
+        const menuRef = firebase.database().ref('menu');
+        const notificationsRef = firebase.database().ref('notifications');
+
+        function calculateTotalProfit(orderItems) {
+            let totalProfit = 0;
+            return Promise.all(orderItems.map(item => fetchMenuItemDetails(item.name)))
+                .then(menuItems => {
+                    menuItems.forEach((menuItem, index) => {
+                        const profitPerUnit = menuItem.profit / menuItem.startingValue;
+                        totalProfit += profitPerUnit * orderItems[index].quantity;
+                    });
+                    return totalProfit;
+                });
+        }
+        function fetchOrders() {
+            const orderSection = document.getElementById('orderSection');
+            
+            // Listen to all order paths
+            const paths = ['orders/grocery', 'orders/hotel', 'orders/local'];
+            const allOrders = {};
+
+            paths.forEach(path => {
+                firebase.database().ref(path).on('value', (snapshot) => {
+                    snapshot.forEach(userSnapshot => {
+                        userSnapshot.forEach(orderSnapshot => {
+                            allOrders[orderSnapshot.key] = {
+                                ...orderSnapshot.val(),
+                                id: orderSnapshot.key,
+                                type: path.split('/')[1],
+                                userUid: userSnapshot.key
+                            };
+                        });
+                    });
+                    renderAllOrders();
+                });
+            });
+
+            function renderAllOrders() {
+                orderSection.innerHTML = '';
+                const sortedOrders = Object.values(allOrders).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                if (sortedOrders.length === 0) {
+                    orderSection.innerHTML = '<div class="empty-state"><h3>No Orders Found</h3></div>';
+                    return;
+                }
+
+                sortedOrders.forEach(order => {
+                    const orderId = order.id;
+                    const orderItems = order.items || [];
+                    let totalItemPrice = 0;
+                    let totalItemProfit = 0;
+                    Promise.all(orderItems.map(item => fetchMenuItemDetails(item.name)))
+                        .then(menuItems => {
+                            const orderItemsHTML = orderItems.map((item, index) => {
+                                const menuItem = menuItems[index];
+                                const price = menuItem.price || 0;
+                                const profit = menuItem.profit || 0;
+                                const startingValue = menuItem.startingValue || 1;
+
+                                const pricePerUnit = price / startingValue;
+                                const profitPerUnit = profit / startingValue;
+
+                                const itemTotalPrice = pricePerUnit * item.quantity;
+                                const itemTotalProfit = profitPerUnit * item.quantity;
+
+                                totalItemPrice += itemTotalPrice;
+                                totalItemProfit += itemTotalProfit;
+
+                                return `<li>${item.name} - Rs ${(pricePerUnit).toFixed(2)} × ${item.quantity} (Profit: Rs ${(profitPerUnit).toFixed(2)})</li>`;
+                            }).join('');
+
+                            const totalProfit = totalItemProfit;
+                            const finalPrice = totalItemPrice;
+                            const orderHTML = `
+                                <div class="order-card" id="${orderId}">
+                                    <div class="card-header">
+                                        <div class="card-title">
+                                            <span>${order.customerName || 'Guest'}</span>
+                                            <span style="font-size:0.7rem; color:var(--secondary); background:#eee; padding:2px 6px; border-radius:4px;">${order.type.toUpperCase()}</span>
+                                        </div>
+                                        <div class="timestamp" data-time="${order.timestamp}">
+                                            ${new Date(order.timestamp).toLocaleString()}
+                                        </div>
+                                        <div class="device-id">
+                                            ${order.phone ? `<div><i class="fas fa-phone"></i> ${order.phone}</div>` : ''}
+                                            ${order.landmark ? `<div><i class="fas fa-map-marker-alt"></i> ${order.landmark}</div>` : ''}
+                                            ${order.roomNumber ? `<div><i class="fas fa-door-open"></i> Room: ${order.roomNumber}</div>` : ''}
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="order-items">
+                                            <h4><i class="fas fa-shopping-basket"></i> Order Items</h4>
+                                            <ul class="item-list">
+                                                ${orderItemsHTML}
+                                            </ul>
+                                        </div>
+
+                                        <div class="price-info">
+                                            <div class="price-row">
+                                                <span>Item Total:</span>
+                                                <span>Rs ${totalItemPrice.toFixed(2)}</span>
+                                            </div>
+                                            <div class="price-row">
+                                                <span>Total Profit:</span>
+                                                <span>Rs ${totalProfit.toFixed(2)}</span>
+                                            </div>
+                                            <div class="price-row total-price">
+                                                <span>Total Price:</span>
+                                                <span>Rs ${finalPrice.toFixed(2)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                                                        <div class="card-footer">
+                                        ${order.status === 'Ordered' ? 
+                                            `<button class="btn btn-primary" onclick="updateOrderStatus('${order.type}', '${order.userUid}', '${orderId}', 'Accepted')">
+                                                <i class="fas fa-check-circle"></i> Accept Order
+                                            </button>` : 
+                                            `<button class="btn btn-success" onclick="updateOrderStatus('${order.type}', '${order.userUid}', '${orderId}', 'Completed')">
+                                                <i class="fas fa-flag-checkered"></i> Complete
+                                            </button>`
+                                        }
+
+                                        <button class="btn btn-danger" onclick="updateOrderStatus('${order.type}', '${order.userUid}', '${orderId}', 'Cancelled')">
+                                            <i class="fas fa-times-circle"></i> Cancel
+                                        </button>
+                                    </div>
+    
+
+                                </div>
+                            `;
+
+                            orderSection.insertAdjacentHTML('afterbegin', orderHTML);
+                        });
+                });
+
+                setInterval(updateTimeSinceOrder, 60000);
+                updateTimeSinceOrder();
+            });
+        }
+
+        function fetchMenuItemDetails(itemName) {
+            return new Promise((resolve, reject) => {
+                menuRef.once('value', (snapshot) => {
+                    let menuItem = null;
+                    snapshot.forEach(childSnapshot => {
+                        const menuEntry = childSnapshot.val();
+                        if (menuEntry.name === itemName) {
+                            menuItem = { 
+                                price: menuEntry.price || 0, 
+                                startingValue: menuEntry.startingValue || 1,
+                                profit: menuEntry.profit || 0
+                            };
+                        }
+                    });
+                    resolve(menuItem || { price: 0, startingValue: 1, profit: 0 });
+                }, (error) => {
+                    reject(error);
+                });
+            });
+        }
+        function updateTimeSinceOrder() {
+            const timestamps = document.querySelectorAll('.timestamp');
+            timestamps.forEach(element => {
+                const timestamp = new Date(element.dataset.time).getTime();
+                const now = Date.now();
+                const diff = Math.floor((now - timestamp) / 1000);
+
+                const days = Math.floor(diff / (24 * 3600));
+                const hours = Math.floor((diff % (24 * 3600)) / 3600);
+                const minutes = Math.floor((diff % 3600) / 60);
+
+                let timeAgo = '';
+
+                if (days > 0) {
+                    timeAgo = `${days}d ${hours}h ago`;
+                } else if (hours > 0) {
+                    timeAgo = `${hours}h ${minutes}m ago`;
+                } else {
+                    timeAgo = `${minutes}m ago`;
+                }
+
+                element.innerHTML = `${new Date(timestamp).toLocaleString()} <span style="color:#6c757d">(${timeAgo})</span>`;
+            });
+        }
+
+                function updateOrderStatus(type, userUid, orderId, newStatus) {
+            const path = `orders/${type}/${userUid}/${orderId}`;
+            
+            showModal(
+                'Confirm Action',
+                `Are you sure you want to mark this order as ${newStatus}?`,
+                'fa-question-circle info',[
+                    {
+                        text: 'Yes, Confirm',
+                        class: 'modal-btn-confirm',
+                        onClick: `performStatusUpdate('${path}', '${orderId}', '${newStatus}')`
+                    },
+                    {
+                        text: 'Cancel',
+                        class: 'modal-btn-cancel',
+                        onClick: 'hideModal()'
+                    }
+                ]
+            );
+        }
+
+        function performStatusUpdate(path, orderId, newStatus) {
+            firebase.database().ref(path).update({ status: newStatus })
+                .then(() => {
+                    hideModal();
+                    if (newStatus === 'Completed' || newStatus === 'Cancelled') {
+                        archiveOrder(path, orderId);
+                    }
+                })
+                .catch(err => {
+                    showModal('Error', err.message, 'fa-exclamation-circle error',[{ text: 'OK', class: 'modal-btn-confirm', onClick: 'hideModal()' }]);
+                });
+        }
+
+        function archiveOrder(path, orderId) {
+            firebase.database().ref(path).once('value').then(snap => {
+                if (snap.exists()) {
+                    firebase.database().ref('totalorders').child(orderId).set(snap.val())
+                        .then(() => firebase.database().ref(path).remove());
+                }
+            });
+        }
+    
+
+        function showModal(title, message, icon, actions) {
+            const modal = document.getElementById('customModal');
+            const modalIcon = modal.querySelector('.modal-icon');
+            const modalTitle = modal.querySelector('.modal-title');
+            const modalMessage = modal.querySelector('.modal-message');
+            const modalActions = modal.querySelector('.modal-actions');
+
+            modalIcon.className = `modal-icon fas ${icon}`;
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            modalActions.innerHTML = actions.map(action => `
+                <button class="modal-btn ${action.class}" onclick="${action.onClick}">
+                    ${action.text}
+                </button>
+            `).join('');
+
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('active'), 10);
+        }
+
+        function hideModal() {
+            const modal = document.getElementById('customModal');
+            modal.classList.remove('active');
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+
+        function calibrateIP() {
+            showModal(
+                'Calibrate IP',
+                'Are you sure you want to update the allowed IP to your current IP?',
+                'fa-network-wired warning',
+                [
+                    {
+                        text: 'Yes, Update IP',
+                        class: 'modal-btn-confirm',
+                        onClick: 'performIPCalibration()'
+                    },
+                    {
+                        text: 'Cancel',
+                        class: 'modal-btn-cancel',
+                        onClick: 'hideModal()'
+                    }
+                ]
+            );
+        }
+
+        function performIPCalibration() {
+            fetch("https://api.ipify.org?format=json")
+                    .then(res => res.json())
+                    .then(data => {
+                        const ipRef = firebase.database().ref('allowed_ips');
+                        ipRef.set({
+                            current: data.ip
+                        }).then(() => {
+                            showModal(
+                                'Success',
+                                'IP successfully updated to: ' + data.ip,
+                                'fa-check-circle success',
+                                [{
+                                    text: 'OK',
+                                    class: 'modal-btn-confirm',
+                                    onClick: 'hideModal()'
+                                }]
+                            );
+                        }).catch(error => {
+                            showModal(
+                                'Error',
+                                'Error updating IP: ' + error.message,
+                                'fa-exclamation-circle error',
+                                [{
+                                    text: 'OK',
+                                    class: 'modal-btn-confirm',
+                                    onClick: 'hideModal()'
+                                }]
+                            );
+                        });
+                    })
+                    .catch(error => {
+                        showModal(
+                            'Error',
+                            'Error fetching IP: ' + error.message,
+                            'fa-exclamation-circle error',
+                            [{
+                                text: 'OK',
+                                class: 'modal-btn-confirm',
+                                onClick: 'hideModal()'
+                            }]
+                        );
+                    });
+            }
+
+        // function processOrder removed
+                'Accept Order',
+                'Are you sure you want to accept this order?',
+                'fa-question-circle warning',
+                [
+                    {
+                        text: 'Yes, Accept',
+                        class: 'modal-btn-confirm',
+                        onClick: `acceptOrder('${orderId}')`
+                    },
+                    {
+                        text: 'Cancel',
+                        class: 'modal-btn-cancel',
+                        onClick: 'hideModal()'
+                    }
+                ]
+            );
+        }
+
+        function acceptOrder(orderId) {
+            hideModal();
+            ordersRef.child(orderId).update({ accepted: true })
+                .then(() => fetchOrders());
+        }
+
+        function completeOrder(orderId) {
+            showModal(
+                'Complete Order',
+                'Are you sure this order is completed?',
+                'fa-check-circle warning',
+                [
+                    {
+                        text: 'Yes, Complete',
+                        class: 'modal-btn-confirm',
+                        onClick: `finishOrder('${orderId}')`
+                    },
+                    {
+                        text: 'Cancel',
+                        class: 'modal-btn-cancel',
+                        onClick: 'hideModal()'
+                    }
+                ]
+            );
+        }
+
+        function finishOrder(orderId) {
+            hideModal();
+            ordersRef.child(orderId).once('value').then(snapshot => {
+                const order = snapshot.val();
+                const totalOrdersRef = firebase.database().ref('totalorders');
+                totalOrdersRef.child(orderId).set(order)
+                    .then(() => {
+                        ordersRef.child(orderId).remove()
+                            .then(() => {
+                                const orderElement = document.getElementById(orderId);
+                                if (orderElement) orderElement.remove();
+                            });
+                    });
+            });
+        }
+
+        function cancelOrder(orderId) {
+            showModal(
+                'Cancel Order',
+                'Are you sure you want to cancel this order?',
+                'fa-times-circle warning',
+                [
+                    {
+                        text: 'Yes, Cancel Order',
+                        class: 'modal-btn-confirm',
+                        onClick: `removeOrder('${orderId}')`
+                    },
+                    {
+                        text: 'No, Keep Order',
+                        class: 'modal-btn-cancel',
+                        onClick: 'hideModal()'
+                    }
+                ]
+            );
+        }
+
+        function removeOrder(orderId) {
+            hideModal();
+            ordersRef.child(orderId).remove()
+                .then(() => {
+                    const orderElement = document.getElementById(orderId);
+                    if (orderElement) orderElement.remove();
+                });
+        }
+
+        window.onload = fetchOrders;
+    </script>
+</body>
+</html>

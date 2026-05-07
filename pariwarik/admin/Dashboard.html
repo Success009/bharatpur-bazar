@@ -1,0 +1,258 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {--primary:#4361ee;--success:#38b000;--danger:#d90429;--warning:#ff9f1c;--info:#0096c7;--secondary:#6c757d;--light:#f8f9fa;--dark:#212529;--white:#ffffff;--shadow:0 4px 6px rgba(0,0,0,0.1);--radius:8px;}
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;}
+        body{background-color:#f0f2f5;color:var(--dark);}
+        header{background:linear-gradient(135deg,var(--primary),#3051d3);color:var(--white);padding:1.2rem;text-align:center;box-shadow:var(--shadow);position:sticky;top:0;z-index:1000;display:flex;justify-content:space-between;align-items:center;}
+        .header-title{font-weight:600;font-size:1.5rem;}
+        .btn{padding:0.5rem 1rem;border-radius:var(--radius);border:none;cursor:pointer;font-weight:500;transition:all 0.2s;display:inline-flex;align-items:center;gap:5px;}
+        .btn-link{background-color:rgba(255,255,255,0.2);color:var(--white);}
+        .btn-link:hover{background-color:rgba(255,255,255,0.3);}
+        .container{max-width:1400px;margin:0 auto;padding:1rem;}
+        .stats-container{background-color:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:1rem;margin-bottom:1.5rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;}
+        .stat-card{padding:1rem;border-radius:var(--radius);text-align:center;}
+        .stat-card.revenue{background-color:rgba(56,176,0,0.1);color:var(--success);}
+        .stat-card.cost{background-color:rgba(255,159,28,0.1);color:var(--warning);}
+        .stat-card.profit{background-color:rgba(67,97,238,0.1);color:var(--primary);}
+        .stat-card.inventory{background-color:rgba(0,150,199,0.1);color:var(--info);}
+        .stat-value{font-size:1.8rem;font-weight:700;margin:0.5rem 0;}
+        .stat-label{font-size:0.9rem;text-transform:uppercase;letter-spacing:1px;}
+        .view-toggle{display:flex;justify-content:center;gap:1rem;margin-bottom:1.5rem;}
+        .view-btn{background-color:var(--white);border:1px solid #ddd;color:var(--secondary);}
+        .view-btn.active{background-color:var(--primary);color:var(--white);border-color:var(--primary);}
+        .filters{display:flex;gap:1rem;margin-bottom:1rem;flex-wrap:wrap;}
+        .filter-dropdown,.search-box{padding:0.5rem;border-radius:var(--radius);border:1px solid rgba(0,0,0,0.1);background-color:var(--white);flex-grow:1;}
+        .search-box{flex-grow:2;}
+        .data-container{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:1.5rem;}
+        .data-card{background-color:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;transition:transform 0.2s ease-in-out;}
+        .data-card:hover{transform:translateY(-5px);box-shadow:0 8px 15px rgba(0,0,0,0.1);}
+        .card-header{padding:1rem;border-bottom:1px solid rgba(0,0,0,0.1);position:relative;}
+        .card-header.sales{background-color:rgba(56,176,0,0.1);color:var(--success);}
+        .card-header.imports{background-color:rgba(0,150,199,0.1);color:var(--info);}
+        .card-title{font-size:1.1rem;font-weight:600;margin-bottom:0.5rem;display:flex;justify-content:space-between;}
+        .timestamp{font-size:0.8rem;color:var(--secondary);margin-bottom:0.5rem;}
+        .card-body{padding:1rem;}
+        .item-list{list-style:none;padding:0;}
+        .item-list li{padding:0.5rem 0;font-size:0.9rem;display:flex;justify-content:space-between;}
+        .price-info{margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(0,0,0,0.1);}
+        .total-price{font-weight:700;font-size:1.1rem;display:flex;justify-content:space-between;}
+        .total-price.sales{color:var(--success);}
+        .total-price.imports{color:var(--info);}
+        .empty-state{padding:3rem;text-align:center;color:var(--secondary);grid-column:1/-1;}
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-title">Financial Dashboard</div>
+        <div class="header-actions">
+            <button class="btn btn-link" onclick="window.location.href='StaffOrder.html'"><i class="fas fa-list-alt"></i> Active Orders</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="stats-container" id="statsContainer">
+            <div class="stat-card revenue"><div class="stat-label">Total Revenue</div><div class="stat-value" id="totalRevenue">Rs 0</div></div>
+            <div class="stat-card cost"><div class="stat-label">Cost of Goods Used</div><div class="stat-value" id="costOfUsed">Rs 0</div></div>
+            <div class="stat-card profit"><div class="stat-label">Net Profit</div><div class="stat-value" id="netProfit">Rs 0</div></div>
+            <div class="stat-card inventory"><div class="stat-label">Value of Inventory</div><div class="stat-value" id="inventoryValue">Rs 0</div></div>
+        </div>
+
+        <div class="view-toggle">
+            <button class="btn view-btn active" id="viewSalesBtn" onclick="setView('sales')"><i class="fas fa-chart-line"></i> View Sales</button>
+            <button class="btn view-btn" id="viewImportsBtn" onclick="setView('imports')"><i class="fas fa-boxes"></i> View Inventory</button>
+        </div>
+
+        <div class="filters">
+            <input type="text" class="search-box" id="searchBox" placeholder="Search sales...">
+            <select class="filter-dropdown" id="timeFilter"><option value="all">All Time</option><option value="today">Today</option><option value="week">This Week</option><option value="month">This Month</option></select>
+            <select class="filter-dropdown" id="sortOrder"><option value="newest">Newest First</option><option value="oldest">Oldest First</option><option value="highest">Highest Amount</option><option value="lowest">Lowest Amount</option></select>
+        </div>
+
+        <div class="data-container" id="dataContainer"></div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlnzH1D7D7Q663eWE086ng_1KdP46MZEs",
+            authDomain: "deep-freehold-389006.firebaseapp.com",
+            databaseURL: "https://deep-freehold-389006-default-rtdb.firebaseio.com",
+            projectId: "deep-freehold-389006",
+            storageBucket: "deep-freehold-389006.appspot.com",
+            messagingSenderId: "76562961838",
+            appId: "1:76562961838:web:4d18b2f79d7eb9fd88243f",
+            measurementId: "G-VZC36FJC24"
+        };
+        firebase.initializeApp(firebaseConfig);
+        
+        const totalOrdersRef = firebase.database().ref('totalorders');
+        const importItemsRef = firebase.database().ref('import_items');
+        const usageRef = firebase.database().ref('usage_records');
+        const menuRef = firebase.database().ref('menu');
+
+        let allOrders = [], allImports = [], filteredItems = [];
+        let currentPage = 1, currentView = 'sales';
+        let usageMap = {}, menuCache = {};
+
+        const fetchAllData = async () => {
+            const [menuSnapshot, ordersSnapshot, importsSnapshot, usageSnapshot] = await Promise.all([
+                menuRef.once('value'),
+                totalOrdersRef.once('value'),
+                importItemsRef.once('value'),
+                usageRef.once('value')
+            ]);
+            
+            menuSnapshot.forEach(child => {
+                const item = child.val();
+                menuCache[item.name] = { price: item.price || 0, startingValue: item.startingValue || 1 };
+            });
+
+            let totalRevenue = 0;
+            ordersSnapshot.forEach(child => {
+                const order = child.val();
+                order.id = child.key;
+                let orderTotal = 0;
+                if(order.items) {
+                    order.items.forEach(item => {
+                        const menuItem = menuCache[item.name] || { price: 0, startingValue: 1 };
+                        orderTotal += (menuItem.price / menuItem.startingValue) * item.quantity;
+                    });
+                }
+                order.calculatedTotal = orderTotal;
+                allOrders.push(order);
+                totalRevenue += orderTotal;
+            });
+            
+            const importsMap = new Map();
+            let totalImportValue = 0;
+            importsSnapshot.forEach(child => {
+                const item = child.val();
+                item.id = child.key;
+                allImports.push(item);
+                importsMap.set(item.id, item);
+                totalImportValue += item.price;
+            });
+
+            usageSnapshot.forEach(child => {
+                const usage = child.val();
+                if (!usageMap[usage.importKey]) usageMap[usage.importKey] = 0;
+                usageMap[usage.importKey] += usage.quantityUsed;
+            });
+            
+            let costOfUsed = 0;
+            for (const [importKey, quantityUsed] of Object.entries(usageMap)) {
+                const importItem = importsMap.get(importKey);
+                if (importItem) {
+                    const pricePerUnit = importItem.price / importItem.quantity;
+                    costOfUsed += pricePerUnit * quantityUsed;
+                }
+            }
+            
+            const inventoryValue = totalImportValue - costOfUsed;
+            const netProfit = totalRevenue - costOfUsed;
+
+            updateStats({ totalRevenue, costOfUsed, netProfit, inventoryValue });
+            applyFilters();
+        };
+        
+        const updateStats = (stats) => {
+            document.getElementById('totalRevenue').textContent = `Rs ${stats.totalRevenue.toFixed(2)}`;
+            document.getElementById('costOfUsed').textContent = `Rs ${stats.costOfUsed.toFixed(2)}`;
+            document.getElementById('netProfit').textContent = `Rs ${stats.netProfit.toFixed(2)}`;
+            document.getElementById('inventoryValue').textContent = `Rs ${stats.inventoryValue.toFixed(2)}`;
+        };
+
+        const applyFilters = () => {
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+            const timeFilter = document.getElementById('timeFilter').value;
+            const sortOrder = document.getElementById('sortOrder').value;
+            
+            const sourceData = currentView === 'sales' ? allOrders : allImports;
+            const timestampField = currentView === 'sales' ? 'timestamp' : 'createdAt';
+            const amountField = currentView === 'sales' ? 'calculatedTotal' : 'price';
+
+            const now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const thisWeek = new Date(today); thisWeek.setDate(today.getDate() - today.getDay());
+            const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+            filteredItems = sourceData.filter(item => {
+                const itemDate = new Date(item[timestampField]);
+                let matchesTime = true;
+                if (timeFilter === 'today') matchesTime = itemDate >= today;
+                else if (timeFilter === 'week') matchesTime = itemDate >= thisWeek;
+                else if (timeFilter === 'month') matchesTime = itemDate >= thisMonth;
+                
+                let matchesSearch = !searchTerm || (currentView === 'sales'
+                    ? item.id.toLowerCase().includes(searchTerm) || (item.items && item.items.some(i => i.name.toLowerCase().includes(searchTerm)))
+                    : item.name.toLowerCase().includes(searchTerm) || (item.type && item.type.toLowerCase().includes(searchTerm)));
+                
+                return matchesTime && matchesSearch;
+            });
+
+            filteredItems.sort((a, b) => {
+                if (sortOrder === 'newest') return b[timestampField] - a[timestampField];
+                if (sortOrder === 'oldest') return a[timestampField] - b[timestampField];
+                if (sortOrder === 'highest') return b[amountField] - a[amountField];
+                if (sortOrder === 'lowest') return a[amountField] - b[amountField];
+            });
+            renderContent();
+        };
+
+        const renderContent = () => {
+            const container = document.getElementById('dataContainer');
+            container.innerHTML = filteredItems.length === 0 
+                ? `<div class="empty-state"><i class="fas fa-filter"></i><h3>No Items Found</h3><p>Try changing your filters or view.</p></div>`
+                : filteredItems.map(item => currentView === 'sales' ? createSaleCard(item) : createImportCard(item)).join('');
+        };
+
+        const createSaleCard = (order) => {
+            const orderItems = (order.items || []).map(item => `<li><span>${item.name}</span><span>× ${item.quantity}</span></li>`).join('');
+            return `
+                <div class="data-card">
+                    <div class="card-header sales"><div class="card-title"><span>Order #${order.id.slice(-6)}</span><i class="fas fa-receipt"></i></div><div class="timestamp">${new Date(order.timestamp).toLocaleString()}</div></div>
+                    <div class="card-body">
+                        <ul class="item-list">${orderItems || '<li>No items in this order</li>'}</ul>
+                        <div class="price-info"><div class="total-price sales"><span>Total Sale:</span><span>Rs ${order.calculatedTotal.toFixed(2)}</span></div></div>
+                    </div>
+                </div>`;
+        };
+
+        const createImportCard = (item) => {
+            const totalUsed = usageMap[item.id] || 0;
+            const remaining = item.quantity - totalUsed;
+            return `
+                <div class="data-card">
+                    <div class="card-header imports"><div class="card-title"><span>${item.name}</span><i class="fas fa-boxes"></i></div><div class="timestamp">${new Date(item.createdAt).toLocaleString()}</div></div>
+                    <div class="card-body">
+                        <ul class="item-list">
+                            <li><span>Imported:</span><strong>${item.quantity} ${item.unit}</strong></li>
+                            <li><span>Used:</span><strong>${totalUsed.toFixed(1)} ${item.unit}</strong></li>
+                            <li><span>Remaining:</span><strong>${remaining.toFixed(1)} ${item.unit}</strong></li>
+                        </ul>
+                        <div class="price-info"><div class="total-price imports"><span>Import Cost:</span><span>Rs ${item.price.toFixed(2)}</span></div></div>
+                    </div>
+                </div>`;
+        };
+        
+        const setView = (view) => {
+            currentView = view;
+            document.getElementById('viewSalesBtn').classList.toggle('active', view === 'sales');
+            document.getElementById('viewImportsBtn').classList.toggle('active', view === 'imports');
+            document.getElementById('searchBox').placeholder = view === 'sales' ? 'Search sales...' : 'Search inventory...';
+            applyFilters();
+        };
+
+        document.getElementById('searchBox').addEventListener('input', applyFilters);
+        document.getElementById('timeFilter').addEventListener('change', applyFilters);
+        document.getElementById('sortOrder').addEventListener('change', applyFilters);
+
+        window.onload = fetchAllData;
+    </script>
+</body>
+</html>

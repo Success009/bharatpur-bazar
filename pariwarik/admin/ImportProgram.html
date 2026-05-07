@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory & Stock Management</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4361ee; --secondary: #3f37c9; --danger: #f72585; --success: #38b000;
+            --light: #f8f9fa; --dark: #212529; --gray: #6c757d; --warning: #ff9f1c;
+            --border-radius: 8px; --box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --transition: all 0.2s ease;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: #f0f2f5; color: var(--dark); font-size: 0.95rem; }
+        header { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 15px; text-align: center; font-size: 1.3rem; box-shadow: var(--box-shadow); }
+        .container { max-width: 800px; margin: 20px auto; padding: 10px; }
+        .card { background-color: white; border-radius: var(--border-radius); margin-bottom: 20px; box-shadow: var(--box-shadow); overflow: hidden; }
+        .card-header { padding: 0; }
+        .view-toggle { display: flex; }
+        .view-btn { flex: 1; padding: 12px; border: none; background-color: #f1f1f1; cursor: pointer; font-size: 0.9rem; font-weight: 500; color: var(--secondary); transition: var(--transition); border-bottom: 3px solid transparent; }
+        .view-btn.active { background-color: white; color: var(--primary); border-bottom-color: var(--primary); }
+        .card-body { padding: 20px; }
+        .form-panel { display: none; } .form-panel.active { display: block; }
+        h2, .inventory-section h3 { margin-bottom: 15px; text-align: center; color: var(--dark); }
+        .inventory-section h3 { font-size: 1.1rem; margin-top: 10px; border-bottom: 2px solid #f0f2f5; padding-bottom: 8px; }
+        .form-group { margin-bottom: 15px; position: relative; }
+        .form-label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.9rem; }
+        .form-control { width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: var(--border-radius); font-size: 0.95rem; transition: var(--transition); }
+        .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.25); }
+        .btn { border: none; border-radius: var(--border-radius); padding: 10px 15px; cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.95rem; transition: var(--transition); width: 100%; }
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-danger { background-color: var(--danger); color: white; padding: 4px 8px; font-size: 0.75rem; width: auto; }
+        
+        .suggestions-container { display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ddd; border-top: none; border-radius: 0 0 var(--border-radius) var(--border-radius); z-index: 100; max-height: 250px; overflow-y: auto; box-shadow: var(--box-shadow); }
+        .suggestion-header { padding: 6px 12px; font-size: 0.75rem; font-weight: bold; color: var(--gray); background-color: #f8f9fa; border-bottom: 1px solid #eee; }
+        .suggestion-item { padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; }
+        #currentStockDisplay { margin-top: -10px; margin-bottom: 15px; text-align: center; color: var(--gray); font-size: 0.85rem; }
+        
+        .inventory-list { list-style-type: none; padding: 0; }
+        .list-item { padding: 10px; border-bottom: 1px solid #eee; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+        .list-item:last-child { border-bottom: none; }
+        .item-info { flex-grow: 1; min-width: 150px; }
+        .item-name-line { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+        .item-name { font-weight: bold; font-size: 1rem; }
+        .item-cost { font-size: 0.8rem; font-weight: 500; color: var(--secondary); background-color: #f0f2f5; padding: 2px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; }
+        .item-sub-details { font-size: 0.8rem; color: var(--gray); }
+        .item-stats { display: flex; gap: 15px; flex-shrink: 0; margin-left: auto; }
+        .inventory-stat { text-align: center; font-size: 0.8rem; line-height: 1.2; }
+        .inventory-stat span { display: block; font-weight: bold; font-size: 1.1em; }
+        .inventory-stat .remaining, .inventory-stat .available { color: var(--success); }
+        .no-results-message { text-align: center; padding: 15px; color: var(--gray); }
+
+        @media (max-width: 600px) {
+            .item-stats { width: 100%; justify-content: space-around; margin-top: 8px; padding-top: 8px; border-top: 1px dashed #ddd; margin-left: 0; }
+        }
+        .toast { position: fixed; bottom: 20px; right: 20px; z-index: 1001; }
+        .confirmation-dialog { display: none; position: fixed; top: 0; left: 0; z-index: 1000; }
+    </style>
+</head>
+
+<body>
+    <header><h1>Inventory & Stock Management</h1></header>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header"><div class="view-toggle"><button class="view-btn active" onclick="setView('add')"><i class="fas fa-plus-circle"></i> Add Inventory</button><button class="view-btn" onclick="setView('usage')"><i class="fas fa-minus-circle"></i> Record Usage</button></div></div>
+            <div class="card-body">
+                <div id="addPanel" class="form-panel active">
+                    <h2>Add Inventory</h2><form id="addForm"><input type="hidden" id="selectedItemKey_add"><input type="hidden" id="selectedItemType_add"><div class="form-group"><label class="form-label" for="itemName_add">Item Name</label><input type="text" id="itemName_add" class="form-control" placeholder="Search item or enter new raw material..." required autocomplete="off"><div id="suggestions_add" class="suggestions-container"></div></div><div id="rawMaterialFields"><div class="form-group"><label class="form-label" for="itemType">Item Type</label><input type="text" id="itemType" class="form-control" placeholder="e.g., Groceries"></div><div class="form-group"><label class="form-label" for="totalPrice">Total Price (Rs)</label><input type="number" id="totalPrice" class="form-control" placeholder="Total cost..." step="any"></div></div><div class="form-group"><label class="form-label" for="itemQuantity_add">Quantity to Add</label><div class="input-group"><input type="number" id="itemQuantity_add" class="form-control" placeholder="e.g., 10" required step="any" style="flex:2;"><select id="itemUnit" class="form-control" style="flex:1;"><option value="kg">KG</option><option value="Liter">Liter</option><option value="piece">Piece</option><option value="packet">Packet</option></select></div></div><button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Add to Inventory</button></form>
+                </div>
+                <div id="usagePanel" class="form-panel">
+                    <h2>Record Item Usage</h2><form id="itemUsageForm"><input type="hidden" id="selectedItemKey_usage"><input type="hidden" id="selectedItemType_usage"><div class="form-group"><label class="form-label" for="itemName_usage">Search Item</label><input type="text" id="itemName_usage" class="form-control" placeholder="Start typing to find an item..." required autocomplete="off"><div id="suggestions_usage" class="suggestions-container"></div></div><p id="currentStockDisplay">Current Stock: <strong>N/A</strong></p><div class="form-group"><label class="form-label" for="itemQuantity_usage">Quantity Used</label><input type="number" id="itemQuantity_usage" class="form-control" placeholder="e.g., 1.5" required step="any"></div><button type="submit" class="btn btn-primary" style="background-color: var(--warning);"><i class="fas fa-save"></i> Record Usage</button></form>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Full Inventory Overview</h2>
+            <div class="form-group" style="padding: 15px 20px 0 20px;"><input type="text" id="inventorySearch" class="form-control" placeholder="&#xf002; Search all inventory..." style="font-family: 'Segoe UI', FontAwesome;"></div>
+            <div class="card-body" style="padding-top: 0;">
+                <div id="rawMaterialsInventorySection" class="inventory-section">
+                    <h3>Raw Materials</h3>
+                    <ul id="rawMaterialsList" class="inventory-list"><p class="no-results-message">Loading raw materials...</p></ul>
+                </div>
+                <div id="menuItemsInventorySection" class="inventory-section">
+                    <h3>Menu Items Stock</h3>
+                    <ul id="menuItemsList" class="inventory-list"><p class="no-results-message">Loading menu stock...</p></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlnzH1D7D7Q663eWE086ng_1KdP46MZEs",
+            authDomain: "deep-freehold-389006.firebaseapp.com",
+            databaseURL: "https://deep-freehold-389006-default-rtdb.firebaseio.com",
+            projectId: "deep-freehold-389006",
+            storageBucket: "deep-freehold-389006.appspot.com",
+            messagingSenderId: "76562961838",
+            appId: "1:76562961838:web:4d18b2f79d7eb9fd88243f",
+            measurementId: "G-VZC36FJC24"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const importRef = firebase.database().ref('import_items'), usageRef = firebase.database().ref('usage_records'), menuRef = firebase.database().ref('menu'), menuTxRef = firebase.database().ref('menu_item_transactions');
+        let menuItemsData = {}, menuStatsMap = {}, rawMaterialsData = {}, rawUsageMap = {};
+        
+        document.body.insertAdjacentHTML('beforeend', `<style>.toast{position:fixed;bottom:20px;right:20px;background-color:white;padding:15px 20px;border-radius:var(--border-radius);box-shadow:var(--box-shadow);display:flex;align-items:center;gap:10px;z-index:1001;animation:slideIn .3s ease,fadeOut .3s ease 3.7s forwards;border-left:5px solid}.toast-success{border-color:var(--success)}.toast-error{border-color:var(--danger)}.toast-warning{border-color:var(--warning)}@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}@keyframes fadeOut{from{opacity:1}to{opacity:0}}.confirmation-dialog{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,.5);z-index:1000;justify-content:center;align-items:center}.confirmation-content{background-color:white;border-radius:var(--border-radius);padding:25px;width:90%;max-width:350px;text-align:center;box-shadow:var(--box-shadow);animation:zoomIn .3s ease}.confirmation-content h3{margin-bottom:10px}.confirmation-actions{display:flex;justify-content:center;gap:10px;margin-top:20px}.confirmation-actions .btn{width:auto;padding:10px 20px}@keyframes zoomIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}</style><div id="confirmationDialog" class="confirmation-dialog"><div class="confirmation-content"><h3 id="confirmTitle">Confirm</h3><p id="confirmMessage"></p><div class="confirmation-actions"><button id="confirmBtn" class="btn btn-danger">Confirm</button><button id="cancelBtn" class="btn" style="background-color:#eee">Cancel</button></div></div></div>`);
+        const showToast = (message, type = 'success') => { const toast = document.createElement('div'); toast.className = `toast toast-${type}`; const icons = { success: 'check-circle', error: 'times-circle', warning: 'exclamation-triangle' }; toast.innerHTML = `<i class="fas fa-${icons[type]}"></i> <span>${message}</span>`; document.body.appendChild(toast); setTimeout(() => toast.remove(), 4000); };
+        const showConfirmation = (title, message, onConfirm) => { const dialog = document.getElementById('confirmationDialog'); dialog.querySelector('#confirmTitle').textContent = title; dialog.querySelector('#confirmMessage').textContent = message; dialog.style.display = 'flex'; const confirmBtn = dialog.querySelector('#confirmBtn'), cancelBtn = dialog.querySelector('#cancelBtn'); const confirmHandler = () => { onConfirm(); closeDialog(); }; const closeDialog = () => { dialog.style.display = 'none'; confirmBtn.removeEventListener('click', confirmHandler); cancelBtn.removeEventListener('click', closeDialog); }; confirmBtn.addEventListener('click', confirmHandler); cancelBtn.addEventListener('click', closeDialog); };
+        
+        const setView = (view) => { document.getElementById('addPanel').classList.toggle('active', view === 'add'); document.getElementById('usagePanel').classList.toggle('active', view === 'usage'); document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active')); document.querySelector(`.view-btn[onclick="setView('${view}')"]`).classList.add('active'); };
+        const createSearchHandler = (inputId, suggestionsId, onSelectCallback) => {
+            const input = document.getElementById(inputId), suggestions = document.getElementById(suggestionsId);
+            const getRelevance = (itemName, query) => { const name = itemName.toLowerCase(), q = query.toLowerCase(); if (name === q) return { score: 0, len: name.length }; if (name.startsWith(q)) return { score: 1, len: name.length }; if (new RegExp('\\b' + q + '\\b').test(name)) return { score: 2, len: name.length }; return { score: 3, len: name.length }; };
+            input.addEventListener('input', () => {
+                const query = input.value.toLowerCase(); suggestions.innerHTML = ''; if (onSelectCallback) onSelectCallback(null); if (query.length < 1) return suggestions.style.display = 'none';
+                const allMatches = [];
+                Object.entries(rawMaterialsData).forEach(([key, item]) => { if (item.name.toLowerCase().includes(query)) allMatches.push({ ...item, key, type: 'raw', relevance: getRelevance(item.name, query) }); });
+                Object.entries(menuItemsData).forEach(([key, item]) => { if (item.name.toLowerCase().includes(query)) allMatches.push({ ...item, key, type: 'menu', relevance: getRelevance(item.name, query) }); });
+                allMatches.sort((a, b) => { if (a.type !== b.type) return a.type === 'raw' ? -1 : 1; if (a.relevance.score !== b.relevance.score) return a.relevance.score - b.relevance.score; if (a.relevance.len !== b.relevance.len) return a.relevance.len - b.relevance.len; return a.name.localeCompare(b.name); });
+                let currentHeader = '';
+                allMatches.forEach(item => { const headerText = item.type === 'raw' ? 'Raw Materials' : 'Menu Items'; if (headerText !== currentHeader) { suggestions.innerHTML += `<div class="suggestion-header">${headerText}</div>`; currentHeader = headerText; } const div = document.createElement('div'); div.className = 'suggestion-item'; div.innerHTML = `<span>${item.name}</span><small>${item.category || item.type || ''}</small>`; div.dataset.key = item.key; div.dataset.name = item.name; div.dataset.type = item.type; suggestions.appendChild(div); });
+                if (allMatches.length > 0) suggestions.style.display = 'block';
+            });
+            suggestions.addEventListener('click', (e) => { const target = e.target.closest('.suggestion-item'); if (target) { input.value = target.dataset.name; suggestions.style.display = 'none'; if (onSelectCallback) onSelectCallback(target.dataset); } });
+        };
+        
+        createSearchHandler('itemName_add', 'suggestions_add', (data) => { document.getElementById('rawMaterialFields').style.display = data ? 'none' : 'block'; document.getElementById('itemUnit').disabled = !!data; document.getElementById('selectedItemKey_add').value = data ? data.key : ''; document.getElementById('selectedItemType_add').value = data ? data.type : ''; });
+        createSearchHandler('itemName_usage', 'suggestions_usage', (data) => {
+            const stockDisplay = document.getElementById('currentStockDisplay').querySelector('strong');
+            if (data) { const item = data.type === 'menu' ? menuItemsData[data.key] : rawMaterialsData[data.key]; const stats = data.type === 'menu' ? (menuStatsMap[data.key] || {added:0, used:0}) : {added:item.quantity, used:(rawUsageMap[data.key]||0)}; const remaining = stats.added - stats.used; stockDisplay.textContent = `${Number(remaining).toFixed(2)} ${item.unit || ''}`; } else { stockDisplay.textContent = 'N/A'; }
+            document.getElementById('selectedItemKey_usage').value = data ? data.key : ''; document.getElementById('selectedItemType_usage').value = data ? data.type : '';
+        });
+
+        const resetAddForm = (form) => { form.reset(); document.getElementById('rawMaterialFields').style.display = 'block'; document.getElementById('itemUnit').disabled = false; };
+
+        document.getElementById('addForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const selectedKey = document.getElementById('selectedItemKey_add').value, type = document.getElementById('selectedItemType_add').value;
+            const quantity = parseFloat(document.getElementById('itemQuantity_add').value);
+            if (!quantity || quantity <= 0) return showToast('Please enter a valid quantity.', 'warning');
+            
+            if (type === 'menu') { menuTxRef.push({ menuItemKey: selectedKey, quantity: quantity, createdAt: firebase.database.ServerValue.TIMESTAMP }).then(() => { showToast('Menu stock updated.'); resetAddForm(e.target); });
+            } else if (type === 'raw') {
+                importRef.child(selectedKey).transaction(currentItem => { if (currentItem) { currentItem.quantity += quantity; } return currentItem; }).then(() => { showToast('Raw material stock updated.'); resetAddForm(e.target); });
+            } else { importRef.push({ name: document.getElementById('itemName_add').value, type: document.getElementById('itemType').value, quantity: quantity, unit: document.getElementById('itemUnit').value, price: parseFloat(document.getElementById('totalPrice').value) || 0, createdAt: firebase.database.ServerValue.TIMESTAMP }).then(() => { showToast('New raw material added.'); resetAddForm(e.target); }); }
+        });
+
+        document.getElementById('itemUsageForm').addEventListener('submit', (e) => { e.preventDefault(); const key = document.getElementById('selectedItemKey_usage').value, type = document.getElementById('selectedItemType_usage').value; const quantityUsed = parseFloat(document.getElementById('itemQuantity_usage').value); if (!key || !type) return showToast('Please select a valid item from search.', 'warning'); if (!quantityUsed || quantityUsed <= 0) return showToast('Please enter a valid quantity used.', 'warning'); if (type === 'menu') { menuTxRef.push({ menuItemKey: key, quantity: -quantityUsed, createdAt: firebase.database.ServerValue.TIMESTAMP }).then(() => { showToast('Menu usage recorded.'); e.target.reset(); }); } else if (type === 'raw') { usageRef.push({ importKey: key, quantityUsed: quantityUsed, createdAt: firebase.database.ServerValue.TIMESTAMP }).then(() => { showToast('Raw material usage recorded.'); e.target.reset(); }); } document.getElementById('currentStockDisplay').querySelector('strong').textContent = 'N/A'; });
+        
+        const renderInventory = () => {
+            const menuListEl = document.getElementById('menuItemsList'), rawListEl = document.getElementById('rawMaterialsList');
+            menuListEl.innerHTML = '<p class="no-results-message" style="display: none;">No matching menu items found.</p>';
+            rawListEl.innerHTML = '<p class="no-results-message" style="display: none;">No matching raw materials found.</p>';
+            const sortedMenu = Object.entries(menuItemsData).sort((a,b) => a[1].name.localeCompare(b[1].name));
+            if (sortedMenu.length === 0) menuListEl.insertAdjacentHTML('afterbegin', '<p class="no-results-message">No menu items defined.</p>');
+            sortedMenu.forEach(([key, item]) => { const stats = menuStatsMap[key] || { added: 0, used: 0 }; const remaining = stats.added - stats.used; const listItem = document.createElement('li'); listItem.className = 'list-item menu-item'; listItem.innerHTML = `<div class="item-info"><div class="item-name">${item.name}</div><div class="item-sub-details">${item.category}</div></div><div class="item-stats"><div class="inventory-stat">Added<span>${stats.added.toFixed(2)}</span></div><div class="inventory-stat">Used<span>${stats.used.toFixed(2)}</span></div><div class="inventory-stat">Remaining<span class="remaining">${remaining.toFixed(2)}</span></div></div>`; menuListEl.appendChild(listItem); });
+            const sortedRaw = Object.entries(rawMaterialsData).sort((a,b) => b[1].createdAt - a[1].createdAt);
+            if (sortedRaw.length === 0) rawListEl.insertAdjacentHTML('afterbegin', '<p class="no-results-message">No raw materials imported.</p>');
+            sortedRaw.forEach(([key, item]) => { const totalUsed = rawUsageMap[key] || 0; const remaining = item.quantity - totalUsed; let costHTML = ''; if (item.price > 0 && item.quantity > 0) costHTML = `<span class="item-cost">Rs ${(item.price / item.quantity).toFixed(2)}/${item.unit}</span>`; const listItem = document.createElement('li'); listItem.className = 'list-item raw-material'; listItem.innerHTML = `<div class="item-info"><div class="item-name-line"><span class="item-name">${item.name}</span>${costHTML}</div><div class="item-sub-details">${new Date(item.createdAt).toLocaleDateString()} - ${item.type||'N/A'}</div></div><div class="item-stats"><div class="inventory-stat">Imported<span>${item.quantity} ${item.unit}</span></div><div class="inventory-stat">Used<span>${totalUsed.toFixed(2)} ${item.unit}</span></div><div class="inventory-stat">Remaining<span class="remaining">${remaining.toFixed(2)} ${item.unit}</span></div></div><button class="btn btn-danger" onclick="deleteRawMaterial('${key}')"><i class="fas fa-trash"></i></button>`; rawListEl.appendChild(listItem); });
+            document.getElementById('inventorySearch').dispatchEvent(new Event('input'));
+        };
+
+        menuRef.on('value', snapshot => { menuItemsData = snapshot.val() || {}; renderInventory(); });
+        importRef.on('value', snapshot => { rawMaterialsData = snapshot.val() || {}; renderInventory(); });
+        menuTxRef.on('value', snapshot => { menuStatsMap = {}; snapshot.forEach(child => { const tx = child.val(); if (!menuStatsMap[tx.menuItemKey]) menuStatsMap[tx.menuItemKey] = { added: 0, used: 0 }; if (tx.quantity > 0) menuStatsMap[tx.menuItemKey].added += tx.quantity; else menuStatsMap[tx.menuItemKey].used += Math.abs(tx.quantity); }); renderInventory(); });
+        usageRef.on('value', snapshot => { rawUsageMap = {}; snapshot.forEach(child => { const u = child.val(); rawUsageMap[u.importKey] = (rawUsageMap[u.importKey] || 0) + u.quantityUsed; }); renderInventory(); });
+        
+        const deleteRawMaterial = (key) => { showConfirmation('Delete Raw Material', 'This will delete the import and all usage data. Are you sure?', () => { const updates = {}; updates[`/import_items/${key}`] = null; usageRef.orderByChild('importKey').equalTo(key).once('value', s => { s.forEach(c => { updates[`/usage_records/${c.key}`] = null; }); firebase.database().ref().update(updates).then(() => showToast('Item deleted.', 'success')).catch(err => showToast('Deletion failed.', 'error')); }); }); };
+        
+        document.getElementById('inventorySearch').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const filterList = (listId, itemSelector) => {
+                const list = document.getElementById(listId); const items = list.querySelectorAll(itemSelector); let visibleCount = 0;
+                items.forEach(item => { const isVisible = item.querySelector('.item-name').textContent.toLowerCase().includes(query); item.style.display = isVisible ? 'flex' : 'none'; if (isVisible) visibleCount++; });
+                const noResultsMsg = list.querySelector('.no-results-message'); if (noResultsMsg) noResultsMsg.style.display = visibleCount === 0 && query !== '' ? 'block' : 'none';
+            };
+            filterList('rawMaterialsList', '.list-item.raw-material');
+            filterList('menuItemsList', '.list-item.menu-item');
+        });
+        document.addEventListener('click', (e) => { if (!e.target.closest('.form-group')) { document.querySelectorAll('.suggestions-container').forEach(el => el.style.display = 'none'); } });
+    </script>
+</body>
+</html>

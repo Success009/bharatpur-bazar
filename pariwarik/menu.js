@@ -362,14 +362,19 @@ function finalizeOrder() {
     }
     
     const type = localStorage.getItem('order_type');
+        const cleanedItems = cart.map(item => ({
+        name: item.name,
+        quantity: item.qty
+    }));
+
     const order = { 
         customerName: localStorage.getItem('order_name'), 
         orderType: type,
-        items: cart, 
-        totalPrice: parseFloat(document.getElementById('mainTotal').innerText), 
+        items: cleanedItems, 
         status: 'Ordered', 
         timestamp: new Date().toISOString() 
     };
+    
 
     if(type === 'hotel') {
         order.roomNumber = localStorage.getItem('hotel_room');

@@ -1,0 +1,312 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Completed Orders</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {--primary:#4361ee;--success:#38b000;--danger:#d90429;--warning:#ffaa00;--info:#4cc9f0;--secondary:#6c757d;--light:#f8f9fa;--dark:#212529;--white:#ffffff;--shadow:0 4px 6px rgba(0,0,0,0.1);--radius:8px;}
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;}
+        body{background-color:#f0f2f5;color:var(--dark);}
+        header{background:linear-gradient(135deg,#38b000,#008000);color:var(--white);padding:1.2rem;text-align:center;box-shadow:var(--shadow);position:sticky;top:0;z-index:1000;display:flex;justify-content:space-between;align-items:center;}
+        .header-title{font-weight:600;font-size:1.5rem;}
+        .header-actions{display:flex;gap:10px;}
+        .btn{padding:0.5rem 1rem;border-radius:var(--radius);border:none;cursor:pointer;font-weight:500;transition:all 0.2s;display:inline-flex;align-items:center;gap:5px;}
+        .btn-primary{background-color:var(--primary);color:var(--white);}
+        .btn-primary:hover{background-color:#3051d3;}
+        .btn-info{background-color:var(--info);color:var(--dark);}
+        .btn-info:hover{background-color:#3cb2d9;}
+        .container{max-width:1200px;margin:0 auto;padding:1rem;}
+        .stats-container{background-color:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:1rem;margin-bottom:1.5rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;}
+        .stat-card{padding:1rem;border-radius:var(--radius);text-align:center;}
+        .stat-card.total{background-color:rgba(67,97,238,0.1);color:var(--primary);}
+        .stat-card.revenue{background-color:rgba(56,176,0,0.1);color:var(--success);}
+        .stat-value{font-size:1.8rem;font-weight:700;margin:0.5rem 0;}
+        .stat-label{font-size:0.9rem;text-transform:uppercase;letter-spacing:1px;}
+        .filters{display:flex;gap:1rem;margin-bottom:1rem;flex-wrap:wrap;}
+        .filter-dropdown{padding:0.5rem;border-radius:var(--radius);border:1px solid rgba(0,0,0,0.1);background-color:var(--white);flex-grow:1;}
+        .search-box{flex-grow:2;padding:0.5rem 1rem;border-radius:var(--radius);border:1px solid rgba(0,0,0,0.1);background-color:var(--white);}
+        .orders-container{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:1.5rem;}
+        .order-card{background-color:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;transition:transform 0.2s ease-in-out;}
+        .order-card:hover{transform:translateY(-5px);box-shadow:0 8px 15px rgba(0,0,0,0.1);}
+        .card-header{padding:1rem;background-color:rgba(56,176,0,0.1);border-bottom:1px solid rgba(0,0,0,0.1);position:relative;}
+        .card-title{font-size:1.1rem;font-weight:600;color:var(--success);margin-bottom:0.5rem;display:flex;justify-content:space-between;}
+        .timestamp{font-size:0.8rem;color:var(--secondary);margin-bottom:0.5rem;}
+        .device-id{font-size:0.9rem;color:var(--info);margin-top:5px;font-weight:500;}
+        .card-body{padding:1rem;}
+        .order-items{margin-bottom:1rem;}
+        .order-items h4{font-size:1rem;margin-bottom:0.5rem;color:var(--dark);}
+        .item-list{list-style:none;margin-left:10px;}
+        .item-list li{padding:0.5rem 0;font-size:0.9rem;border-bottom:1px dashed rgba(0,0,0,0.1);}
+        .price-info{margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(0,0,0,0.1);}
+        .price-row{display:flex;justify-content:space-between;margin-bottom:0.5rem;font-size:0.9rem;}
+        .total-price{font-weight:700;color:var(--success);font-size:1.1rem;}
+        .empty-state{padding:3rem;text-align:center;color:var(--secondary);grid-column:1/-1;}
+        .empty-state i{font-size:3rem;margin-bottom:1rem;}
+        .pagination{display:flex;justify-content:center;margin-top:1.5rem;gap:0.5rem;}
+        .page-btn{padding:0.5rem 1rem;border-radius:var(--radius);border:1px solid rgba(0,0,0,0.1);background-color:var(--white);cursor:pointer;}
+        .page-btn.active{background-color:var(--primary);color:var(--white);border-color:var(--primary);}
+        .page-btn:hover:not(.active){background-color:rgba(0,0,0,0.05);}
+        @media(max-width:768px){.stats-container{grid-template-columns:1fr;}}
+        .back-to-top{position:fixed;bottom:20px;right:20px;background-color:var(--primary);color:var(--white);width:40px;height:40px;border-radius:50%;display:flex;justify-content:center;align-items:center;cursor:pointer;box-shadow:var(--shadow);opacity:0;transition:opacity 0.3s;}
+        .back-to-top.visible{opacity:1;}
+        .order-item-count{position:absolute;top:-10px;right:-10px;background-color:var(--danger);color:var(--white);font-size:0.7rem;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;}
+        .animate-pulse{animation:pulse 1.5s infinite;}
+        @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-title">Completed Orders</div>
+        <div class="header-actions">
+            <button class="btn btn-info" onclick="window.location.href='StaffOrder.html'">
+                <i class="fas fa-list-alt"></i> Active Orders
+            </button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="stats-container" id="statsContainer">
+            <div class="stat-card total">
+                <div class="stat-label">Total Orders</div>
+                <div class="stat-value" id="totalOrders">0</div>
+            </div>
+            <div class="stat-card revenue">
+                <div class="stat-label">Total Revenue</div>
+                <div class="stat-value" id="totalRevenue">Rs 0</div>
+            </div>
+        </div>
+
+        <div class="filters">
+            <input type="text" class="search-box" id="searchBox" placeholder="Search orders...">
+            <select class="filter-dropdown" id="timeFilter">
+                <option value="all">All Time</option>
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+            </select>
+            <select class="filter-dropdown" id="sortOrder">
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="highest">Highest Amount</option>
+                <option value="lowest">Lowest Amount</option>
+            </select>
+        </div>
+
+        <div class="orders-container" id="ordersContainer"></div>
+        <div class="pagination" id="pagination"></div>
+    </div>
+
+    <div class="back-to-top" id="backToTop">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    <script>
+        const firebaseConfig={apiKey:"AIzaSyA6sANvYoAkXHYG8MjbZl6Pyq23CNdBuzA",authDomain:"community-canvas-255fa.firebaseapp.com",databaseURL:"https://community-canvas-255fa-default-rtdb.firebaseio.com",projectId:"community-canvas-255fa",storageBucket:"community-canvas-255fa.appspot.com",messagingSenderId:"729445267995",appId:"1:729445267995:web:05da6756d66c58b9ccd6be",measurementId:"G-FW93CB5QL7"};
+        firebase.initializeApp(firebaseConfig);
+        const totalOrdersRef=firebase.database().ref('totalorders');
+        const menuRef=firebase.database().ref('menu');
+        const ITEMS_PER_PAGE=8;
+        let allOrders=[];
+        let filteredOrders=[];
+        let currentPage=1;
+        let totalStats={orders:0,revenue:0};
+        function fetchAllOrders(){
+            totalOrdersRef.once('value').then(snapshot=>{
+                if(!snapshot.exists()){
+                    document.getElementById('ordersContainer').innerHTML=`
+                        <div class="empty-state">
+                            <i class="fas fa-check-circle"></i>
+                            <h3>No Completed Orders</h3>
+                            <p>Completed orders will appear here.</p>
+                        </div>`;
+                    return;
+                }
+                allOrders=[];
+                totalStats={orders:0,revenue:0};
+                snapshot.forEach(childSnapshot=>{
+                    const order=childSnapshot.val();
+                    const orderId=childSnapshot.key;
+                    order.id=orderId;
+                    allOrders.push(order);
+                });
+                calculateOrderStats().then(()=>{
+                    applyFilters();
+                    updateStats();
+                });
+            });
+        }
+        function fetchMenuItemDetails(itemName){
+            return new Promise((resolve,reject)=>{
+                menuRef.once('value',snapshot=>{
+                    let menuItem=null;
+                    snapshot.forEach(childSnapshot=>{
+                        const menuEntry=childSnapshot.val();
+                        if(menuEntry.name===itemName){
+                            menuItem={price:menuEntry.price||0,startingValue:menuEntry.startingValue||1};
+                        }
+                    });
+                    resolve(menuItem||{price:0,startingValue:1});
+                },error=>{reject(error);});
+            });
+        }
+        function calculateOrderStats(){
+            const promises=allOrders.map(order=>{
+                if(!order.items)return Promise.resolve();
+                return Promise.all(order.items.map(item=>fetchMenuItemDetails(item.name)))
+                    .then(menuItems=>{
+                        let orderTotal=0;
+                        menuItems.forEach((menuItem,index)=>{
+                            if(!menuItem)return;
+                            const item=order.items[index];
+                            const pricePerUnit=menuItem.price/menuItem.startingValue;
+                            const itemTotalPrice=pricePerUnit*item.quantity;
+                            orderTotal+=itemTotalPrice;
+                        });
+                        order.calculatedTotal=orderTotal;
+                        totalStats.orders++;
+                        totalStats.revenue+=orderTotal;
+                    });
+            });
+            return Promise.all(promises);
+        }
+        function updateStats(){
+            document.getElementById('totalOrders').textContent=totalStats.orders;
+            document.getElementById('totalRevenue').textContent=`Rs ${totalStats.revenue.toFixed(2)}`;
+        }
+        function applyFilters(){
+            const searchTerm=document.getElementById('searchBox').value.toLowerCase();
+            const timeFilter=document.getElementById('timeFilter').value;
+            const sortOrder=document.getElementById('sortOrder').value;
+            const now=new Date();
+            const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+            const thisWeek=new Date(today);thisWeek.setDate(today.getDate()-today.getDay());
+            const thisMonth=new Date(now.getFullYear(),now.getMonth(),1);
+            filteredOrders=allOrders.filter(order=>{
+                const orderDate=new Date(order.timestamp);
+                let matchesTime=true;
+                if(timeFilter==='today'){matchesTime=orderDate>=today;}
+                else if(timeFilter==='week'){matchesTime=orderDate>=thisWeek;}
+                else if(timeFilter==='month'){matchesTime=orderDate>=thisMonth;}
+                let matchesSearch=true;
+                if(searchTerm){
+                    const orderIdMatch=order.id.toLowerCase().includes(searchTerm);
+                    const deviceIdMatch=order.device&&order.device.toLowerCase().includes(searchTerm);
+                    const itemMatch=order.items&&order.items.some(item=>item.name.toLowerCase().includes(searchTerm));
+                    matchesSearch=orderIdMatch||deviceIdMatch||itemMatch;
+                }
+                return matchesTime&&matchesSearch;
+            });
+            filteredOrders.sort((a,b)=>{
+                if(sortOrder==='newest'){return b.timestamp-a.timestamp;}
+                else if(sortOrder==='oldest'){return a.timestamp-b.timestamp;}
+                else if(sortOrder==='highest'){return b.calculatedTotal-a.calculatedTotal;}
+                else if(sortOrder==='lowest'){return a.calculatedTotal-b.calculatedTotal;}
+                return 0;
+            });
+            currentPage=1;
+            renderOrders();
+            renderPagination();
+        }
+        function renderOrders(){
+            const container=document.getElementById('ordersContainer');
+            container.innerHTML='';
+            if(filteredOrders.length===0){
+                container.innerHTML=`
+                    <div class="empty-state">
+                        <i class="fas fa-filter"></i>
+                        <h3>No Orders Found</h3>
+                        <p>Try changing your filters.</p>
+                    </div>`;
+                return;
+            }
+            const startIndex=(currentPage-1)*ITEMS_PER_PAGE;
+            const endIndex=Math.min(startIndex+ITEMS_PER_PAGE,filteredOrders.length);
+            const pageOrders=filteredOrders.slice(startIndex,endIndex);
+            pageOrders.forEach(order=>{
+                const orderItems=(order.items||[]).map(item=>{
+                    return `<li>${item.name} × ${item.quantity}</li>`;
+                }).join('');
+                const itemCount=(order.items||[]).reduce((sum,item)=>sum+item.quantity,0);
+                const orderCard=`
+                    <div class="order-card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <span>Order #${order.id.slice(-6)}</span>
+                                <span><i class="fas fa-check-circle"></i></span>
+                            </div>
+                            <div class="timestamp">
+                                ${new Date(order.timestamp).toLocaleString()}
+                            </div>
+                            <div class="device-id">Device ID: ${order.device||'Not available'}</div>
+                            ${itemCount>0?`<div class="order-item-count">${itemCount}</div>`:''}
+                        </div>
+                        <div class="card-body">
+                            <div class="order-items">
+                                <h4><i class="fas fa-shopping-basket"></i> Order Items</h4>
+                                <ul class="item-list">
+                                    ${orderItems}
+                                </ul>
+                            </div>
+                            <div class="price-info">
+                                <div class="price-row total-price">
+                                    <span>Total:</span>
+                                    <span>Rs ${order.calculatedTotal?order.calculatedTotal.toFixed(2):'0.00'}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+                container.insertAdjacentHTML('beforeend',orderCard);
+            });
+        }
+        function renderPagination(){
+            const pagination=document.getElementById('pagination');
+            pagination.innerHTML='';
+            const totalPages=Math.ceil(filteredOrders.length/ITEMS_PER_PAGE);
+            if(totalPages<=1)return;
+            if(currentPage>1){
+                pagination.innerHTML+=`
+                    <button class="page-btn" onclick="changePage(${currentPage-1})">
+                        <i class="fas fa-angle-left"></i>
+                    </button>`;
+            }
+            const maxButtons=5;
+            let startPage=Math.max(1,currentPage-Math.floor(maxButtons/2));
+            let endPage=Math.min(totalPages,startPage+maxButtons-1);
+            if(endPage-startPage+1<maxButtons){startPage=Math.max(1,endPage-maxButtons+1);}
+            for(let i=startPage;i<=endPage;i++){
+                pagination.innerHTML+=`
+                    <button class="page-btn ${i===currentPage?'active':''}" onclick="changePage(${i})">
+                        ${i}
+                    </button>`;
+            }
+            if(currentPage<totalPages){
+                pagination.innerHTML+=`
+                    <button class="page-btn" onclick="changePage(${currentPage+1})">
+                        <i class="fas fa-angle-right"></i>
+                    </button>`;
+            }
+        }
+        function changePage(page){
+            currentPage=page;
+            renderOrders();
+            renderPagination();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        window.addEventListener('scroll',()=>{
+            const backToTop=document.getElementById('backToTop');
+            if(window.scrollY>300){backToTop.classList.add('visible');}
+            else{backToTop.classList.remove('visible');}
+        });
+        document.getElementById('backToTop').addEventListener('click',()=>{
+            window.scrollTo({top:0,behavior:'smooth'});
+        });
+        document.getElementById('searchBox').addEventListener('input',applyFilters);
+        document.getElementById('timeFilter').addEventListener('change',applyFilters);
+        document.getElementById('sortOrder').addEventListener('change',applyFilters);
+        window.onload=fetchAllOrders;
+    </script>
+</body>
+</html>
