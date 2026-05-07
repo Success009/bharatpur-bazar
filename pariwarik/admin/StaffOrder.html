@@ -253,10 +253,42 @@
         }
 
 
+        .tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background-color: var(--white);
+            color: var(--secondary);
+            font-weight: 600;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-btn.active {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .tab-btn:hover:not(.active) {
+            background-color: #e9ecef;
+        }
+
         .empty-state {
             padding: 3rem;
             text-align: center;
             color: var(--secondary);
+            grid-column: 1 / -1;
         }
 
         .empty-state i {
@@ -355,7 +387,30 @@
     </header>
 
     <div class="container">
-        <div class="order-container" id="orderSection">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('active')"><i class="fas fa-concierge-bell"></i> Active Orders</button>
+            <button class="tab-btn" onclick="switchTab('completed')"><i class="fas fa-check-circle"></i> Completed Orders</button>
+        </div>
+        
+        <!-- Active Orders Section -->
+        <div id="activeSection" class="tab-content active">
+            <div class="order-container" id="orderSection">
+            </div>
+        </div>
+
+        <!-- Completed Orders Section -->
+        <div id="completedSection" class="tab-content" style="display: none;">
+            <div class="filters" style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                <input type="text" class="search-box" id="searchBox" placeholder="Search orders..." style="flex-grow: 2; padding: 0.5rem; border-radius: var(--radius); border: 1px solid rgba(0,0,0,0.1);">
+                <select class="filter-dropdown" id="timeFilter" style="flex-grow: 1; padding: 0.5rem; border-radius: var(--radius); border: 1px solid rgba(0,0,0,0.1);">
+                    <option value="all">All Time</option>
+                    <option value="today">Today</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                </select>
+            </div>
+            <div class="order-container" id="completedOrderSection">
+            </div>
         </div>
     </div>
 
@@ -608,10 +663,128 @@
         function archiveOrder(path, orderId) {
             firebase.database().ref(path).once('value').then(snap => {
                 if (snap.exists()) {
-                    firebase.database().ref('totalorders').child(orderId).set(snap.val())
+                    // Include completion timestamp
+                    const orderData = snap.val();
+                    orderData.completedAt = new Date().toISOString();
+                    
+                    firebase.database().ref('totalorders').child(orderId).set(orderData)
                         .then(() => firebase.database().ref(path).remove());
                 }
             });
+        }
+
+        // --- Completed Orders Logic ---
+        let allCompletedOrders =[ ];
+        const totalOrdersRef = firebase.database().ref('totalorders');
+
+        function fetchCompletedOrders() {
+            totalOrdersRef.on('value', snapshot => {
+                allCompletedOrders = [ ];
+                snapshot.forEach(childSnapshot => {
+                    const order = childSnapshot.val();
+                    order.id = childSnapshot.key;
+                    allCompletedOrders.push(order);
+                });
+                renderCompletedOrders();
+            });
+        }
+
+        function renderCompletedOrders() {
+            const container = document.getElementById('completedOrderSection');
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+            const timeFilter = document.getElementById('timeFilter').value;
+            
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const thisWeek = new Date(today); thisWeek.setDate(today.getDate() - today.getDay());
+            const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+            let filteredOrders = allCompletedOrders.filter(order => {
+                const orderDate = new Date(order.timestamp);
+                let matchesTime = true;
+                if(timeFilter === 'today') matchesTime = orderDate >= today;
+                else if(timeFilter === 'week') matchesTime = orderDate >= thisWeek;
+                else if(timeFilter === 'month') matchesTime = orderDate >= thisMonth;
+
+                let matchesSearch = true;
+                if(searchTerm) {
+                    const orderIdMatch = order.id.toLowerCase().includes(searchTerm);
+                    const nameMatch = order.customerName && order.customerName.toLowerCase().includes(searchTerm);
+                    matchesSearch = orderIdMatch || nameMatch;
+                }
+                return matchesTime && matchesSearch;
+            });
+
+            filteredOrders.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            container.innerHTML = '';
+
+            if (filteredOrders.length === 0) {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-check-circle"></i><h3>No Completed Orders Found</h3></div>';
+                return;
+            }
+
+            filteredOrders.forEach(order => {
+                const orderItems = order.items || [ ];
+                let totalItemPrice = 0;
+                let totalItemProfit = 0;
+                
+                Promise.all(orderItems.map(item => fetchMenuItemDetails(item.name))).then(menuItems => {
+                    const orderItemsHTML = orderItems.map((item, index) => {
+                        const menuItem = menuItems[index];
+                        const pricePerUnit = menuItem.price / menuItem.startingValue;
+                        const profitPerUnit = menuItem.profit / menuItem.startingValue;
+                        totalItemPrice += pricePerUnit * item.quantity;
+                        totalItemProfit += profitPerUnit * item.quantity;
+                        return `<li>${item.name} × ${item.quantity}</li>`;
+                    }).join('');
+
+                    const orderHTML = `
+                        <div class="order-card" style="opacity: 0.8;">
+                            <div class="card-header" style="background-color: rgba(56,176,0,0.1);">
+                                <div class="card-title" style="color: var(--success);">
+                                    <span>${order.customerName || 'Guest'}</span>
+                                    <span><i class="fas fa-check-circle"></i></span>
+                                </div>
+                                <div class="timestamp">${new Date(order.timestamp).toLocaleString()}</div>
+                                <div class="device-id">Status: ${order.status || 'Completed'}</div>
+                            </div>
+                            <div class="card-body">
+                                <div class="order-items">
+                                    <h4><i class="fas fa-shopping-basket"></i> Items</h4>
+                                    <ul class="item-list">${orderItemsHTML}</ul>
+                                </div>
+                                <div class="price-info">
+                                    <div class="price-row total-price" style="color: var(--success);">
+                                        <span>Total Price:</span>
+                                        <span>Rs ${totalItemPrice.toFixed(2)}</span>
+                                    </div>
+                                    <div class="price-row" style="color: var(--primary);">
+                                        <span>Profit:</span>
+                                        <span>Rs ${totalItemProfit.toFixed(2)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                    container.insertAdjacentHTML('beforeend', orderHTML);
+                });
+            });
+        }
+
+        document.getElementById('searchBox').addEventListener('input', renderCompletedOrders);
+        document.getElementById('timeFilter').addEventListener('change', renderCompletedOrders);
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            if (tabId === 'active') {
+                document.getElementById('activeSection').style.display = 'block';
+                document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
+            } else {
+                document.getElementById('completedSection').style.display = 'block';
+                document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
+                if (allCompletedOrders.length === 0) fetchCompletedOrders();
+            }
         }
     
 
