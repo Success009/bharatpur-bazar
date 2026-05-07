@@ -6,6 +6,13 @@
   <title>Staff Image Management</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
+.app-header { background: linear-gradient(135deg, var(--primary), #3a0ca3); color: white; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow); position: sticky; top: 0; z-index: 1000; height: 60px; }
+.header-title { font-size: 1.5rem; font-weight: 600; }
+.header-nav { display: flex; gap: 1rem; }
+.nav-link { color: white; text-decoration: none; padding: 8px 15px; border-radius: var(--radius); transition: background-color 0.2s; display: flex; align-items: center; gap: 8px; }
+.nav-link:hover { background-color: rgba(255, 255, 255, 0.15); }
+.nav-link.active { background-color: rgba(255, 255, 255, 0.25); font-weight: 600; }
+@media (max-width: 768px) { .header-nav { display: none; } }
     :root {
       --primary: #4361ee;
       --secondary: #3f37c9;
@@ -414,12 +421,16 @@
 
 <body>
   <div class="container">
-    <header>
-      <h1>Staff Image Management</h1>
-      <button class="nav-button" onclick="window.location.href='StaffOrder.html'">
-        <i class="fas fa-clipboard-list"></i> Receive Orders
-      </button>
-    </header>
+<header class="app-header">
+    <div class="header-title">Admin Panel</div>
+    <nav class="header-nav">
+        <a href="Dashboard.html" class="nav-link"><i class="fas fa-chart-pie"></i> Dashboard</a>
+        <a href="StaffOrder.html" class="nav-link"><i class="fas fa-concierge-bell"></i> Orders</a>
+        <a href="StaffMenu.html" class="nav-link"><i class="fas fa-book-open"></i> Menu Editor</a>
+        <a href="StaffUpload.html" class="nav-link active"><i class="fas fa-image"></i> Image Uploads</a>
+        <a href="ImportProgram.html" class="nav-link"><i class="fas fa-boxes"></i> Inventory</a>
+    </nav>
+</header>
     
     <div class="main-content">
       <div class="upload-section">
