@@ -401,6 +401,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
     <script>
+    <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDlnzH1D7D7Q663eWE086ng_1KdP46MZEs",
             authDomain: "deep-freehold-389006.firebaseapp.com",
@@ -412,79 +413,81 @@
             measurementId: "G-VZC36FJC24"
         };
         firebase.initializeApp(firebaseConfig);
-        const ordersRef = firebase.database().ref('orders');
+        
         const menuRef = firebase.database().ref('menu');
-        const firebaseConfig = {
-            apiKey: "AIzaSyDlnzH1D7D7Q663eWE086ng_1KdP46MZEs",
-            authDomain: "deep-freehold-389006.firebaseapp.com",
-            databaseURL: "https://deep-freehold-389006-default-rtdb.firebaseio.com",
-            projectId: "deep-freehold-389006",
-            storageBucket: "deep-freehold-389006.appspot.com",
-            messagingSenderId: "76562961838",
-            appId: "1:76562961838:web:4d18b2f79d7eb9fd88243f",
-            measurementId: "G-VZC36FJC24"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const menuRef = firebase.database().ref('menu');
-
         const allOrders = {};
         const menuCache = {};
 
-        // Listen to menu changes once to keep a local cache
+        // 1. Initial Menu Cache load
         menuRef.on('value', snap => {
             snap.forEach(child => {
                 const item = child.val();
                 menuCache[item.name] = item;
             });
-            // Re-render orders if menu data updates
             renderAllOrders();
         });
+
+        // 2. Main Order Fetching
+        function fetchOrders() {
+            const paths = ['orders/grocery', 'orders/hotel', 'orders/local'];
             paths.forEach(path => {
                 firebase.database().ref(path).on('value', (snapshot) => {
                     const type = path.split('/')[1];
-                    // Clear existing entries for this specific path/type to handle deletions
-                    Object.keys(allOrders).forEach(key => {
-                        if (allOrders[key].orderTypeNode === type) delete allOrders[key];
+                    // Cleanup existing for this node to handle deletions
+                    Object.keys(allOrders).forEach(id => {
+                        if (allOrders[id].nodeType === type) delete allOrders[id];
                     });
 
                     snapshot.forEach(userSnapshot => {
                         userSnapshot.forEach(orderSnapshot => {
-                            const orderId = orderSnapshot.key;
-                            allOrders[orderId] = {
+                            const id = orderSnapshot.key;
+                            allOrders[id] = {
                                 ...orderSnapshot.val(),
-                                id: orderId,
+                                id: id,
                                 type: type,
-                                orderTypeNode: type, // tracker for cleanup
+                                nodeType: type,
                                 userUid: userSnapshot.key,
-                                path: path + '/' + userSnapshot.key + '/' + orderId
+                                dbPath: path + '/' + userSnapshot.key + '/' + id
                             };
                         });
-            sortedOrders.forEach(order => {
-                const orderId = order.id;
-                const orderItems = order.items || [ ];
-                let totalItemPrice = 0;
+                    });
+                    renderAllOrders();
+                });
+            });
+        }
 
-                const orderItemsHTML = orderItems.map(item => {
-                    const menuItem = menuCache[item.name] || { price: 0, startingValue: 1 };
-                    const price = menuItem.price || 0;
-                    const startingValue = menuItem.startingValue || 1;
-                    const pricePerUnit = price / startingValue;
-                    const itemTotalPrice = pricePerUnit * item.quantity;
-                    totalItemPrice += itemTotalPrice;
+        // 3. Main Rendering Logic
+        function renderAllOrders() {
+            const orderSection = document.getElementById('orderSection');
+            if (!orderSection) return;
+            
+            orderSection.innerHTML = '';
+            const sorted = Object.values(allOrders).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-                    return `<li>${item.name} - Rs ${pricePerUnit.toFixed(2)} × ${item.quantity}</li>`;
+            if (sorted.length === 0) {
+                orderSection.innerHTML = '<div class="empty-state"><h3>No Active Orders Found</h3></div>';
+                return;
+            }
+
+            sorted.forEach(order => {
+                const items = order.items || [ ];
+                let total = 0;
+
+                const itemsHTML = items.map(i => {
+                    const m = menuCache[i.name] || { price: 0, startingValue: 1 };
+                    const pricePerUnit = (m.price || 0) / (m.startingValue || 1);
+                    total += pricePerUnit * i.quantity;
+                    return `<li>${i.name} - Rs ${pricePerUnit.toFixed(2)} × ${i.quantity}</li>`;
                 }).join('');
 
-                const orderHTML = `
-                    <div class="order-card" id="${orderId}">
+                const html = `
+                    <div class="order-card" id="${order.id}">
                         <div class="card-header">
                             <div class="card-title">
                                 <span>${order.customerName || 'Guest'}</span>
                                 <span style="font-size:0.7rem; color:var(--secondary); background:#eee; padding:2px 6px; border-radius:4px;">ONLINE ${order.type.toUpperCase()}</span>
                             </div>
-                            <div class="timestamp" data-time="${order.timestamp}">
-                                ${new Date(order.timestamp).toLocaleString()}
-                            </div>
+                            <div class="timestamp" data-time="${order.timestamp}">${new Date(order.timestamp).toLocaleString()}</div>
                             <div class="device-id">
                                 ${order.phone ? `<div><i class="fas fa-phone"></i> ${order.phone}</div>` : ''}
                                 ${order.landmark ? `<div><i class="fas fa-map-marker-alt"></i> ${order.landmark}</div>` : ''}
@@ -493,144 +496,70 @@
                         </div>
                         <div class="card-body">
                             <div class="order-items">
-                                <h4><i class="fas fa-shopping-basket"></i> Order Items</h4>
-                                <ul class="item-list">${orderItemsHTML}</ul>
+                                <h4><i class="fas fa-shopping-basket"></i> Items</h4>
+                                <ul class="item-list">${itemsHTML}</ul>
                             </div>
                             <div class="price-info">
                                 <div class="price-row total-price">
                                     <span>Total Price:</span>
-                                    <span>Rs ${totalItemPrice.toFixed(2)}</span>
+                                    <span>Rs ${total.toFixed(2)}</span>
                                 </div>
                             </div>
                         </div>
                         <div class="card-footer">
                             ${order.status === 'Ordered' ? 
-                                `<button class="btn btn-primary" onclick="updateOrderStatus('${order.type}', '${order.userUid}', '${orderId}', 'Accepted')">
-                                    <i class="fas fa-check-circle"></i> Accept Order
-                                </button>` : 
-                                `<button class="btn btn-success" onclick="updateOrderStatus('${order.type}', '${order.userUid}', '${orderId}', 'Completed')">
-                                    <i class="fas fa-flag-checkered"></i> Complete
-                                </button>`
+                                `<button class="btn btn-primary" onclick="updateOrderStatus('${order.type}', '${order.userUid}', '${order.id}', 'Accepted')">Accept</button>` : 
+                                `<button class="btn btn-success" onclick="updateOrderStatus('${order.type}', '${order.userUid}', '${order.id}', 'Completed')">Complete</button>`
                             }
-                            <button class="btn btn-danger" onclick="updateOrderStatus('${order.type}', '${order.userUid}', '${orderId}', 'Cancelled')">
-                                <i class="fas fa-times-circle"></i> Cancel
-                            </button>
+                            <button class="btn btn-danger" onclick="updateOrderStatus('${order.type}', '${order.userUid}', '${order.id}', 'Cancelled')">Cancel</button>
                         </div>
                     </div>`;
-                
-                orderSection.insertAdjacentHTML('afterbegin', orderHTML);
+                orderSection.insertAdjacentHTML('beforeend', html);
             });
         }
 
-        // Cleanup: remove the async function that is no longer needed
-        function fetchMenuItemDetails() { }
-                                        ${order.phone ? `<div><i class="fas fa-phone"></i> ${order.phone}</div>` : ''}
-                                        ${order.landmark ? `<div><i class="fas fa-map-marker-alt"></i> ${order.landmark}</div>` : ''}
-                                        ${order.roomNumber ? `<div><i class="fas fa-door-open"></i> Room: ${order.roomNumber}</div>` : ''}
-                                    </div>
-                                </div>
-                                <div class="card-body">
-                                    <div class="order-items">
-                                        <h4><i class="fas fa-shopping-basket"></i> Order Items</h4>
-                                        <ul class="item-list">${orderItemsHTML}</ul>
-                                    </div>
-                                    <div class="price-info">
-                                        <div class="price-row total-price">
-                                            <span>Total Price:</span>
-                                            <span>Rs ${totalItemPrice.toFixed(2)}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="card-footer">
-                                    ${order.status === 'Ordered' ? 
-                                        `<button class="btn btn-primary" onclick="updateOrderStatus('${order.type}', '${order.userUid}', '${orderId}', 'Accepted')">
-                                            <i class="fas fa-check-circle"></i> Accept Order
-                                        </button>` : 
-                                        `<button class="btn btn-success" onclick="updateOrderStatus('${order.type}', '${order.userUid}', '${orderId}', 'Completed')">
-                                            <i class="fas fa-flag-checkered"></i> Complete
-                                        </button>`
-                                    }
-                                    <button class="btn btn-danger" onclick="updateOrderStatus('${order.type}', '${order.userUid}', '${orderId}', 'Cancelled')">
-                                        <i class="fas fa-times-circle"></i> Cancel
-                                    </button>
-                                </div>
-                            </div>`;
-                        
-                        // Check again if order still exists in global object before appending (prevent race conditions)
-                        if (allOrders[orderId]) {
-                            orderSection.insertAdjacentHTML('afterbegin', orderHTML);
-                        }
-                    });
-            });
-        }
-
-        function fetchMenuItemDetails(itemName) {
-            return new Promise((resolve) => {
-                menuRef.once('value', (snapshot) => {
-                    let menuItem = null;
-                    snapshot.forEach(childSnapshot => {
-                        const entry = childSnapshot.val();
-                        if (entry.name === itemName) menuItem = entry;
-                    });
-                    resolve(menuItem || { price: 0, startingValue: 1 });
-                });
-            });
-        }
-
+        // 4. Status Update & Archiving
         function updateOrderStatus(type, userUid, orderId, newStatus) {
             const path = `orders/${type}/${userUid}/${orderId}`;
-            showModal(
-                'Confirm Action',
-                `Mark this order as ${newStatus}?`,
-                'fa-question-circle info', [
-                    { text: 'Yes, Confirm', class: 'modal-btn-confirm', onClick: `performStatusUpdate('${path}', '${orderId}', '${newStatus}')` },
-                    { text: 'Cancel', class: 'modal-btn-cancel', onClick: 'hideModal()' }
-                ]
-            );
+            showModal('Confirm', `Mark as ${newStatus}?`, 'fa-question-circle info', [
+                { text: 'Confirm', class: 'modal-btn-confirm', onClick: `performUpdate('${path}', '${orderId}', '${newStatus}')` },
+                { text: 'Back', class: 'modal-btn-cancel', onClick: 'hideModal()' }
+            ]);
         }
 
-        function performStatusUpdate(path, orderId, newStatus) {
-            // Optimistic UI: Remove card immediately
-            const card = document.getElementById(orderId);
-            if (card && (newStatus === 'Completed' || newStatus === 'Cancelled')) {
-                card.style.transition = 'all 0.4s ease';
-                card.style.opacity = '0';
-                card.style.transform = 'scale(0.95)';
-                setTimeout(() => card.remove(), 400);
+        function performUpdate(path, id, status) {
+            // Optimistic UI
+            const el = document.getElementById(id);
+            if (el && (status === 'Completed' || status === 'Cancelled')) {
+                el.style.opacity = '0.3';
+                el.style.pointerEvents = 'none';
             }
-            
-            delete allOrders[orderId]; // Remove from local cache to prevent re-renders
             hideModal();
 
-            firebase.database().ref(path).update({ status: newStatus }).then(() => {
-                if (newStatus === 'Completed' || newStatus === 'Cancelled') {
-                    archiveOrder(path, orderId, newStatus);
+            firebase.database().ref(path).update({ status: status }).then(() => {
+                if (status === 'Completed' || status === 'Cancelled') {
+                    const db = firebase.database();
+                    db.ref(path).once('value', s => {
+                        if (s.exists()) {
+                            const d = s.val();
+                            const target = status === 'Completed' ? 'totalorders' : 'cancelled_orders';
+                            d[status === 'Completed' ? 'completedAt' : 'cancelledAt'] = new Date().toISOString();
+                            db.ref(target).child(id).set(d).then(() => db.ref(path).remove());
+                        }
+                    });
                 }
-            }).catch(err => console.error("Update failed:", err));
+            }).catch(e => console.error(e));
         }
 
-        function archiveOrder(path, orderId, status) {
-            const db = firebase.database();
-            db.ref(path).once('value').then(snap => {
-                if (snap.exists()) {
-                    const data = snap.val();
-                    const targetNode = status === 'Completed' ? 'totalorders' : 'cancelled_orders';
-                    data[status === 'Completed' ? 'completedAt' : 'cancelledAt'] = new Date().toISOString();
-                    db.ref(targetNode).child(orderId).set(data).then(() => db.ref(path).remove());
-                }
-            });
-        }
-
-        function showModal(title, message, icon, actions) {
-            const modal = document.getElementById('customModal');
-            modal.querySelector('.modal-icon').className = `modal-icon fas ${icon}`;
-            modal.querySelector('.modal-title').textContent = title;
-            modal.querySelector('.modal-message').textContent = message;
-            modal.querySelector('.modal-actions').innerHTML = actions.map(a => 
-                `<button class="modal-btn ${a.class}" onclick="${a.onClick}">${a.text}</button>`
-            ).join('');
-            modal.style.display = 'flex';
-            setTimeout(() => modal.classList.add('active'), 10);
+        // 5. Utility & Modals
+        function showModal(title, msg, icon, actions) {
+            const m = document.getElementById('customModal');
+            m.querySelector('.modal-icon').className = 'modal-icon fas ' + icon;
+            m.querySelector('.modal-title').textContent = title;
+            m.querySelector('.modal-message').textContent = msg;
+            m.querySelector('.modal-actions').innerHTML = actions.map(a => `<button class="modal-btn ${a.class}" onclick="${a.onClick}">${a.text}</button>`).join('');
+            m.style.display = 'flex';
+            setTimeout(() => m.classList.add('active'), 10);
         }
 
         function hideModal() {
@@ -640,26 +569,17 @@
         }
 
         function calibrateIP() {
-            showModal('Calibrate IP', 'Update allowed IP to current?', 'fa-network-wired warning', [
-                { text: 'Yes, Update', class: 'modal-btn-confirm', onClick: 'performIPCalibration()' },
-                { text: 'Cancel', class: 'modal-btn-cancel', onClick: 'hideModal()' }
-            ]);
-        }
-
-        function performIPCalibration() {
-            fetch("https://api.ipify.org?format=json").then(r => r.json()).then(data => {
-                firebase.database().ref('allowed_ips').set({ current: data.ip }).then(() => {
-                    showModal('Success', 'IP updated: ' + data.ip, 'fa-check-circle success', [{ text: 'OK', class: 'modal-btn-confirm', onClick: 'hideModal()' }]);
-                });
+            fetch("https://api.ipify.org?format=json").then(r => r.json()).then(d => {
+                firebase.database().ref('allowed_ips').set({ current: d.ip }).then(() => alert("IP Updated: " + d.ip));
             });
         }
 
         setInterval(() => {
             const now = Date.now();
             document.querySelectorAll('.timestamp').forEach(el => {
-                const time = new Date(el.dataset.time).getTime();
-                const mins = Math.floor((now - time) / 60000);
-                el.innerHTML = `${new Date(time).toLocaleString()} <span style="color:#6c757d">(${mins}m ago)</span>`;
+                const t = new Date(el.dataset.time).getTime();
+                const m = Math.floor((now - t) / 60000);
+                el.innerHTML = `${new Date(t).toLocaleString()} <span style="color:#6c757d">(${m}m ago)</span>`;
             });
         }, 60000);
 
