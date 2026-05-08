@@ -434,6 +434,7 @@
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
     <script>
         const firebaseConfig = {
@@ -888,22 +889,6 @@
             }
 
         // function processOrder removed
-                'Accept Order',
-                'Are you sure you want to accept this order?',
-                'fa-question-circle warning',
-                [
-                    {
-                        text: 'Yes, Accept',
-                        class: 'modal-btn-confirm',
-                        onClick: `acceptOrder('${orderId}')`
-                    },
-                    {
-                        text: 'Cancel',
-                        class: 'modal-btn-cancel',
-                        onClick: 'hideModal()'
-                    }
-                ]
-            );
         }
 
         function acceptOrder(orderId) {
