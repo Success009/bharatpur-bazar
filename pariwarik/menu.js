@@ -1,5 +1,5 @@
 const fConfig = {
-  apiKey: "AIzaSyDlnzH1D7D7Q663eWE086ng_1KdP46MZEs",
+  apiKey: "AIzaSyAHOiriisWOpuVLAdcYun_mCkOhbYfB5y4",
   authDomain: "deep-freehold-389006.firebaseapp.com",
   databaseURL: "https://deep-freehold-389006-default-rtdb.firebaseio.com",
   projectId: "deep-freehold-389006",
@@ -121,10 +121,11 @@ function renderItems() {
 
         categories[cName].forEach(item => {
             const isOut = item.status === 'out_of_stock';
-            // Simplified price logic ignoring profit concept
-            let price = item.price || 0; 
+            // Simple price logic, ignoring complex grocery profit models if needed, or keeping compatibility
+            let price = item.price + (item.profit || 0); 
+            // If discount exists
             if(item.discountPercent && new Date(item.discountExpiry) > new Date()) {
-                price = (item.price * (1 - item.discountPercent / 100));
+                price = (item.price * (1 - item.discountPercent / 100)) + (item.profit || 0);
             }
 
             const cartItem = cart.find(ci => ci.id === item.id);
@@ -183,9 +184,9 @@ function renderItems() {
 
 function addToCart(id) {
     const item = allItems.find(i => i.id === id);
-    let p = item.price || 0;
+    let p = item.price + (item.profit || 0);
     if(item.discountPercent && new Date(item.discountExpiry) > new Date()) {
-        p = (item.price * (1 - item.discountPercent / 100));
+        p = (item.price * (1 - item.discountPercent / 100)) + (item.profit || 0);
     }
     
     cart.push({ id, name: item.name, price: p, qty: 1 });
@@ -361,19 +362,14 @@ function finalizeOrder() {
     }
     
     const type = localStorage.getItem('order_type');
-        const cleanedItems = cart.map(item => ({
-        name: item.name,
-        quantity: item.qty
-    }));
-
     const order = { 
         customerName: localStorage.getItem('order_name'), 
         orderType: type,
-        items: cleanedItems, 
+        items: cart, 
+        totalPrice: parseFloat(document.getElementById('mainTotal').innerText), 
         status: 'Ordered', 
         timestamp: new Date().toISOString() 
     };
-    
 
     if(type === 'hotel') {
         order.roomNumber = localStorage.getItem('hotel_room');

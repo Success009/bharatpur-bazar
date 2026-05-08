@@ -104,27 +104,18 @@
         .btn-warning {
             background-color: var(--warning);
             color: var(--dark);
-    <nav class="header-nav">
-        <a href="StaffOrder.html" class="nav-link active"><i class="fas fa-concierge-bell"></i> Orders</a>
-        <a href="StaffMenu.html" class="nav-link"><i class="fas fa-book-open"></i> Menu Editor</a>
-        <a href="StaffUpload.html" class="nav-link"><i class="fas fa-image"></i> Image Uploads</a>
-        <a href="ImportProgram.html" class="nav-link"><i class="fas fa-boxes"></i> Inventory</a>
-        <a href="#" onclick="logout()" class="nav-link" style="background-color: var(--danger);"><i class="fas fa-sign-out-alt"></i> Logout</a>
-    </nav>
+        }
+
+        .btn-info {
             background-color: var(--info);
             color: var(--dark);
         }
-    <div class="container">
-        <div id="activeSection" class="tab-content active">
-            <div class="order-container" id="orderSection">
-                <!-- Active orders will appear here -->
-            </div>
-        </div>
-    </div>
+
+        .order-container {
+            display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 1.5rem;
         }
-
         .order-card {
             background-color: var(--white);
             border-radius: var(--radius);
@@ -401,7 +392,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
     <script>
-    <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDlnzH1D7D7Q663eWE086ng_1KdP46MZEs",
             authDomain: "deep-freehold-389006.firebaseapp.com",
@@ -474,10 +464,10 @@
                 let total = 0;
 
                 const itemsHTML = items.map(i => {
-                    const m = menuCache[i.name] || { price: 0, startingValue: 1 };
-                    const pricePerUnit = (m.price || 0) / (m.startingValue || 1);
-                    total += pricePerUnit * i.quantity;
-                    return `<li>${i.name} - Rs ${pricePerUnit.toFixed(2)} × ${i.quantity}</li>`;
+                    const pricePerUnit = i.price !== undefined ? i.price : ((menuCache[i.name] || {}).price || 0) / ((menuCache[i.name] || {}).startingValue || 1);
+                    const qty = i.qty || i.quantity || 1;
+                    total += pricePerUnit * qty;
+                    return `<li>${i.name} - Rs ${pricePerUnit.toFixed(2)} &times; ${qty}</li>`;
                 }).join('');
 
                 const html = `
@@ -582,5 +572,8 @@
                 el.innerHTML = `${new Date(t).toLocaleString()} <span style="color:#6c757d">(${m}m ago)</span>`;
             });
         }, 60000);
-
         window.onload = fetchOrders;
+    </script>
+    <script src="auth.js"></script>
+</body>
+</html>
