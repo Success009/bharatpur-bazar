@@ -104,38 +104,23 @@
         .btn-warning {
             background-color: var(--warning);
             color: var(--dark);
-        }
-
-        .btn-warning:hover {
-            background-color: #e69900;
-        }
-
-        .btn-info {
+    <nav class="header-nav">
+        <a href="StaffOrder.html" class="nav-link active"><i class="fas fa-concierge-bell"></i> Orders</a>
+        <a href="StaffMenu.html" class="nav-link"><i class="fas fa-book-open"></i> Menu Editor</a>
+        <a href="StaffUpload.html" class="nav-link"><i class="fas fa-image"></i> Image Uploads</a>
+        <a href="ImportProgram.html" class="nav-link"><i class="fas fa-boxes"></i> Inventory</a>
+        <a href="#" onclick="logout()" class="nav-link" style="background-color: var(--danger);"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </nav>
             background-color: var(--info);
             color: var(--dark);
         }
-
-        .btn-info:hover {
-            background-color: #3cb2d9;
-        }
-
-        .btn-secondary {
-            background-color: var(--secondary);
-            color: var(--white);
-        }
-
-        .btn-secondary:hover {
-            background-color: #5a6268;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 1rem;
-        }
-
-        .order-container {
-            display: grid;
+    <div class="container">
+        <div id="activeSection" class="tab-content active">
+            <div class="order-container" id="orderSection">
+                <!-- Active orders will appear here -->
+            </div>
+        </div>
+    </div>
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 1.5rem;
         }
@@ -650,28 +635,28 @@
                 .then(() => {
                     if (newStatus === 'Completed' || newStatus === 'Cancelled') {
                         archiveOrder(path, orderId);
+        function performStatusUpdate(path, orderId, newStatus) {
+            // Optimistic UI: Hide and remove the card immediately for a smooth experience
+            const card = document.getElementById(orderId);
+            if (card && (newStatus === 'Completed' || newStatus === 'Cancelled')) {
+                card.style.transition = 'all 0.4s ease';
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.95)';
+                setTimeout(() => card.remove(), 400);
+            }
+            
+            hideModal();
+            firebase.database().ref(path).update({ status: newStatus })
+                .then(() => {
+                    if (newStatus === 'Completed' || newStatus === 'Cancelled') {
+                        archiveOrder(path, orderId);
                     }
                 })
                 .catch(err => {
-                    console.error("Background update failed:", err);
-                    // Optionally alert the user or re-fetch orders here
+                    console.error("Firebase Update Failed:", err);
+                    // In a production app, we would revert the UI here
                 });
         }
-
-        function archiveOrder(path, orderId) {
-            firebase.database().ref(path).once('value').then(snap => {
-                if (snap.exists()) {
-                    const orderData = snap.val();
-                    const now = new Date().toISOString();
-                    
-                    if (orderData.status === 'Completed') {
-                        orderData.completedAt = now;
-                        firebase.database().ref('totalorders').child(orderId).set(orderData)
-                            .then(() => firebase.database().ref(path).remove());
-                    } else if (orderData.status === 'Cancelled') {
-                        orderData.cancelledAt = now;
-                        firebase.database().ref('cancelled_orders').child(orderId).set(orderData)
-                            .then(() => firebase.database().ref(path).remove());
                     }
                 }
             });
@@ -684,130 +669,7 @@
         function fetchCompletedOrders() {
             totalOrdersRef.on('value', snapshot => {
                 allCompletedOrders = [ ];
-                snapshot.forEach(childSnapshot => {
-                    const order = childSnapshot.val();
-                    order.id = childSnapshot.key;
-                    allCompletedOrders.push(order);
-                });
-                renderCompletedOrders();
-            });
-        }
-
-        function renderCompletedOrders() {
-            const container = document.getElementById('completedOrderSection');
-            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
-            const timeFilter = document.getElementById('timeFilter').value;
-            
-            const now = new Date();
-            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            const thisWeek = new Date(today); thisWeek.setDate(today.getDate() - today.getDay());
-            const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
-            let filteredOrders = allCompletedOrders.filter(order => {
-                const orderDate = new Date(order.timestamp);
-                let matchesTime = true;
-                if(timeFilter === 'today') matchesTime = orderDate >= today;
-                else if(timeFilter === 'week') matchesTime = orderDate >= thisWeek;
-                else if(timeFilter === 'month') matchesTime = orderDate >= thisMonth;
-
-                let matchesSearch = true;
-                if(searchTerm) {
-                    const orderIdMatch = order.id.toLowerCase().includes(searchTerm);
-                    const nameMatch = order.customerName && order.customerName.toLowerCase().includes(searchTerm);
-                    matchesSearch = orderIdMatch || nameMatch;
-                }
-                return matchesTime && matchesSearch;
-            });
-
-            filteredOrders.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            container.innerHTML = '';
-
-            if (filteredOrders.length === 0) {
-                container.innerHTML = '<div class="empty-state"><i class="fas fa-check-circle"></i><h3>No Completed Orders Found</h3></div>';
-                return;
-            }
-
-            filteredOrders.forEach(order => {
-                const orderItems = order.items || [ ];
-                let totalItemPrice = 0;
-                let totalItemProfit = 0;
-                
-                Promise.all(orderItems.map(item => fetchMenuItemDetails(item.name))).then(menuItems => {
-                    const orderItemsHTML = orderItems.map((item, index) => {
-                        const menuItem = menuItems[index];
-                        const pricePerUnit = menuItem.price / menuItem.startingValue;
-                        const profitPerUnit = menuItem.profit / menuItem.startingValue;
-                        totalItemPrice += pricePerUnit * item.quantity;
-                        totalItemProfit += profitPerUnit * item.quantity;
-                        return `<li>${item.name} × ${item.quantity}</li>`;
-                    }).join('');
-
-                    const orderHTML = `
-                        <div class="order-card" style="opacity: 0.8;">
-                            <div class="card-header" style="background-color: rgba(56,176,0,0.1);">
-                                <div class="card-title" style="color: var(--success);">
-                                    <span>${order.customerName || 'Guest'}</span>
-                                    <span><i class="fas fa-check-circle"></i></span>
-                                </div>
-                                <div class="timestamp">${new Date(order.timestamp).toLocaleString()}</div>
-                                <div class="device-id">Status: ${order.status || 'Completed'}</div>
-                            </div>
-                            <div class="card-body">
-                                <div class="order-items">
-                                    <h4><i class="fas fa-shopping-basket"></i> Items</h4>
-                                    <ul class="item-list">${orderItemsHTML}</ul>
-                                </div>
-                                <div class="price-info">
-                                    <div class="price-row total-price" style="color: var(--success);">
-                                        <span>Total Price:</span>
-                                        <span>Rs ${totalItemPrice.toFixed(2)}</span>
-                                    </div>
-                                    <div class="price-row" style="color: var(--primary);">
-                                        <span>Profit:</span>
-                                        <span>Rs ${totalItemProfit.toFixed(2)}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>`;
-                    container.insertAdjacentHTML('beforeend', orderHTML);
-                });
-            });
-        }
-
-        document.getElementById('searchBox').addEventListener('input', renderCompletedOrders);
-        document.getElementById('timeFilter').addEventListener('change', renderCompletedOrders);
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            
-            if (tabId === 'active') {
-                document.getElementById('activeSection').style.display = 'block';
-                document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
-            } else {
-                document.getElementById('completedSection').style.display = 'block';
-                document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
-                if (allCompletedOrders.length === 0) fetchCompletedOrders();
-            }
-        }
-    
-
-        function showModal(title, message, icon, actions) {
-            const modal = document.getElementById('customModal');
-            const modalIcon = modal.querySelector('.modal-icon');
-            const modalTitle = modal.querySelector('.modal-title');
-            const modalMessage = modal.querySelector('.modal-message');
-            const modalActions = modal.querySelector('.modal-actions');
-
-            modalIcon.className = `modal-icon fas ${icon}`;
-            modalTitle.textContent = title;
-            modalMessage.textContent = message;
-            modalActions.innerHTML = actions.map(action => `
-                <button class="modal-btn ${action.class}" onclick="${action.onClick}">
-                    ${action.text}
-                </button>
-            `).join('');
-
+        // --- End of Active Orders Logic ---
             modal.style.display = 'flex';
             setTimeout(() => modal.classList.add('active'), 10);
         }
@@ -815,137 +677,7 @@
         function hideModal() {
             const modal = document.getElementById('customModal');
             modal.classList.remove('active');
-            setTimeout(() => modal.style.display = 'none', 300);
-        }
-
-        function calibrateIP() {
-            showModal(
-                'Calibrate IP',
-                'Are you sure you want to update the allowed IP to your current IP?',
-                'fa-network-wired warning',
-                [
-                    {
-                        text: 'Yes, Update IP',
-                        class: 'modal-btn-confirm',
-                        onClick: 'performIPCalibration()'
-                    },
-                    {
-                        text: 'Cancel',
-                        class: 'modal-btn-cancel',
-                        onClick: 'hideModal()'
-                    }
-                ]
-            );
-        }
-
-        function performIPCalibration() {
-            fetch("https://api.ipify.org?format=json")
-                    .then(res => res.json())
-                    .then(data => {
-                        const ipRef = firebase.database().ref('allowed_ips');
-                        ipRef.set({
-                            current: data.ip
-                        }).then(() => {
-                            showModal(
-                                'Success',
-                                'IP successfully updated to: ' + data.ip,
-                                'fa-check-circle success',
-                                [{
-                                    text: 'OK',
-                                    class: 'modal-btn-confirm',
-                                    onClick: 'hideModal()'
-                                }]
-                            );
-                        }).catch(error => {
-                            showModal(
-                                'Error',
-                                'Error updating IP: ' + error.message,
-                                'fa-exclamation-circle error',
-                                [{
-                                    text: 'OK',
-                                    class: 'modal-btn-confirm',
-                                    onClick: 'hideModal()'
-                                }]
-                            );
-                        });
-                    })
-                    .catch(error => {
-                        showModal(
-                            'Error',
-                            'Error fetching IP: ' + error.message,
-                            'fa-exclamation-circle error',
-                            [{
-                                text: 'OK',
-                                class: 'modal-btn-confirm',
-                                onClick: 'hideModal()'
-                            }]
-                        );
-                    });
-            }
-
-        // function processOrder removed
-
-        function acceptOrder(orderId) {
-            hideModal();
-            ordersRef.child(orderId).update({ accepted: true })
-                .then(() => fetchOrders());
-        }
-
-        function completeOrder(orderId) {
-            showModal(
-                'Complete Order',
-                'Are you sure this order is completed?',
-                'fa-check-circle warning',
-                [
-                    {
-                        text: 'Yes, Complete',
-                        class: 'modal-btn-confirm',
-                        onClick: `finishOrder('${orderId}')`
-                    },
-                    {
-                        text: 'Cancel',
-                        class: 'modal-btn-cancel',
-                        onClick: 'hideModal()'
-                    }
-                ]
-            );
-        }
-
-        function finishOrder(orderId) {
-            hideModal();
-            ordersRef.child(orderId).once('value').then(snapshot => {
-                const order = snapshot.val();
-                const totalOrdersRef = firebase.database().ref('totalorders');
-                totalOrdersRef.child(orderId).set(order)
-                    .then(() => {
-                        ordersRef.child(orderId).remove()
-                            .then(() => {
-                                const orderElement = document.getElementById(orderId);
-                                if (orderElement) orderElement.remove();
-                            });
-                    });
-            });
-        }
-
-        function cancelOrder(orderId) {
-            showModal(
-                'Cancel Order',
-                'Are you sure you want to cancel this order?',
-                'fa-times-circle warning',
-                [
-                    {
-                        text: 'Yes, Cancel Order',
-                        class: 'modal-btn-confirm',
-                        onClick: `removeOrder('${orderId}')`
-                    },
-                    {
-                        text: 'No, Keep Order',
-                        class: 'modal-btn-cancel',
-                        onClick: 'hideModal()'
-                    }
-                ]
-            );
-        }
+        // --- End of Active Orders Logic ---
 
         function removeOrder(orderId) {
             hideModal();
