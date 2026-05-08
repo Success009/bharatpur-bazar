@@ -36,7 +36,7 @@ function injectHeader(activePage) {
     <header class="app-header">
         <div class="header-title">Admin Panel</div>
         <nav class="header-nav">
-            <a href="Dashboard.html" class="nav-link ${activePage === 'Dashboard.html' ? 'active' : ''}"><i class="fas fa-chart-pie"></i> Dashboard</a>
+            ${activePage === 'Dashboard.html' ? `<a href="Dashboard.html" class="nav-link active"><i class="fas fa-chart-pie"></i> Dashboard</a>` : ''}
             <a href="StaffOrder.html" class="nav-link ${activePage === 'StaffOrder.html' ? 'active' : ''}"><i class="fas fa-concierge-bell"></i> Orders</a>
             <a href="StaffMenu.html" class="nav-link ${activePage === 'StaffMenu.html' ? 'active' : ''}"><i class="fas fa-book-open"></i> Menu</a>
             <a href="StaffUpload.html" class="nav-link ${activePage === 'StaffUpload.html' ? 'active' : ''}"><i class="fas fa-image"></i> Images</a>
@@ -46,6 +46,7 @@ function injectHeader(activePage) {
     </header>`;
     document.body.insertAdjacentHTML('afterbegin', headerHTML);
 }
+    
 
 /**
  * Global toast notification system.
