@@ -599,7 +599,7 @@
             });
         }
 
-                function updateOrderStatus(type, userUid, orderId, newStatus) {
+        function updateOrderStatus(type, userUid, orderId, newStatus) {
             const path = `orders/${type}/${userUid}/${orderId}`;
             
             showModal(
@@ -621,22 +621,7 @@
         }
 
         function performStatusUpdate(path, orderId, newStatus) {
-            // Optimistic UI: Hide the card immediately
-            const card = document.getElementById(orderId);
-            if (card) {
-                card.style.transition = 'all 0.4s ease';
-                card.style.opacity = '0';
-                card.style.transform = 'scale(0.9)';
-                setTimeout(() => card.remove(), 400);
-            }
-            hideModal();
-
-            firebase.database().ref(path).update({ status: newStatus })
-                .then(() => {
-                    if (newStatus === 'Completed' || newStatus === 'Cancelled') {
-                        archiveOrder(path, orderId);
-        function performStatusUpdate(path, orderId, newStatus) {
-            // Optimistic UI: Hide and remove the card immediately for a smooth experience
+            // Optimistic UI: Hide and remove the card immediately
             const card = document.getElementById(orderId);
             if (card && (newStatus === 'Completed' || newStatus === 'Cancelled')) {
                 card.style.transition = 'all 0.4s ease';
@@ -654,22 +639,44 @@
                 })
                 .catch(err => {
                     console.error("Firebase Update Failed:", err);
-                    // In a production app, we would revert the UI here
                 });
         }
+
+        function archiveOrder(path, orderId) {
+            firebase.database().ref(path).once('value').then(snap => {
+                if (snap.exists()) {
+                    const orderData = snap.val();
+                    const now = new Date().toISOString();
+                    
+                    if (orderData.status === 'Completed') {
+                        orderData.completedAt = now;
+                        firebase.database().ref('totalorders').child(orderId).set(orderData)
+                            .then(() => firebase.database().ref(path).remove());
+                    } else if (orderData.status === 'Cancelled') {
+                        orderData.cancelledAt = now;
+                        firebase.database().ref('cancelled_orders').child(orderId).set(orderData)
+                            .then(() => firebase.database().ref(path).remove());
                     }
                 }
             });
         }
 
-        // --- Completed Orders Logic ---
-        let allCompletedOrders =[ ];
-        const totalOrdersRef = firebase.database().ref('totalorders');
+        function showModal(title, message, icon, actions) {
+            const modal = document.getElementById('customModal');
+            const modalIcon = modal.querySelector('.modal-icon');
+            const modalTitle = modal.querySelector('.modal-title');
+            const modalMessage = modal.querySelector('.modal-message');
+            const modalActions = modal.querySelector('.modal-actions');
 
-        function fetchCompletedOrders() {
-            totalOrdersRef.on('value', snapshot => {
-                allCompletedOrders = [ ];
-        // --- End of Active Orders Logic ---
+            modalIcon.className = `modal-icon fas ${icon}`;
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            modalActions.innerHTML = actions.map(action => `
+                <button class="modal-btn ${action.class}" onclick="${action.onClick}">
+                    ${action.text}
+                </button>
+            `).join('');
+
             modal.style.display = 'flex';
             setTimeout(() => modal.classList.add('active'), 10);
         }
@@ -677,19 +684,46 @@
         function hideModal() {
             const modal = document.getElementById('customModal');
             modal.classList.remove('active');
-        // --- End of Active Orders Logic ---
-
-        function removeOrder(orderId) {
-            hideModal();
-            ordersRef.child(orderId).remove()
-                .then(() => {
-                    const orderElement = document.getElementById(orderId);
-                    if (orderElement) orderElement.remove();
-                });
+            setTimeout(() => modal.style.display = 'none', 300);
         }
 
+        function calibrateIP() {
+            showModal(
+                'Calibrate IP',
+                'Are you sure you want to update the allowed IP to your current IP?',
+                'fa-network-wired warning',
+                [
+                    {
+                        text: 'Yes, Update IP',
+                        class: 'modal-btn-confirm',
+                        onClick: 'performIPCalibration()'
+                    },
+                    {
+                        text: 'Cancel',
+                        class: 'modal-btn-cancel',
+                        onClick: 'hideModal()'
+                    }
+                ]
+            );
+        }
+
+        function performIPCalibration() {
+            fetch("https://api.ipify.org?format=json")
+                    .then(res => res.json())
+                    .then(data => {
+                        const ipRef = firebase.database().ref('allowed_ips');
+                        ipRef.set({ current: data.ip }).then(() => {
+                            showModal('Success', 'IP successfully updated to: ' + data.ip, 'fa-check-circle success', [{ text: 'OK', class: 'modal-btn-confirm', onClick: 'hideModal()' }]);
+                        }).catch(error => {
+                            showModal('Error', 'Error updating IP: ' + error.message, 'fa-exclamation-circle error', [{ text: 'OK', class: 'modal-btn-confirm', onClick: 'hideModal()' }]);
+                        });
+                    })
+                    .catch(error => {
+                        showModal('Error', 'Error fetching IP: ' + error.message, 'fa-exclamation-circle error', [{ text: 'OK', class: 'modal-btn-confirm', onClick: 'hideModal()' }]);
+                    });
+            }
+
         window.onload = fetchOrders;
-    </script>
 <script src="auth.js"></script>
 </body>
 </html>
