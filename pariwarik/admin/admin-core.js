@@ -1,4 +1,4 @@
-// Shared Admin Logic and Firebase Configuration
+// Admin Core - Shared logic and Firebase Initialization
 
 const firebaseConfig = {
     apiKey: "AIzaSyDlnzH1D7D7Q663eWE086ng_1KdP46MZEs",
@@ -11,13 +11,25 @@ const firebaseConfig = {
     measurementId: "G-VZC36FJC24"
 };
 
-// Initialize Firebase only if no app exists yet
+// Initialize Firebase immediately
 if (!firebase.apps || firebase.apps.length === 0) {
     firebase.initializeApp(firebaseConfig);
 }
+
+// Define global refs using 'var' to ensure availability across scripts
+var commonDB = firebase.database();
+var commonRefs = {
+    menu: commonDB.ref('menu'),
+    orders: commonDB.ref('orders'),
+    totalOrders: commonDB.ref('totalorders'),
+    cancelledOrders: commonDB.ref('cancelled_orders'),
+    importItems: commonDB.ref('import_items'),
+    usageRecords: commonDB.ref('usage_records'),
+    menuTransactions: commonDB.ref('menu_item_transactions')
+};
+
 /**
  * Injects the standard admin header into the page.
- * @param {string} activePage - The filename of the active page to highlight in nav.
  */
 function injectHeader(activePage) {
     const headerHTML = `
@@ -63,15 +75,3 @@ function showToast(msg, type = 'success') {
         setTimeout(() => toast.remove(), 300);
     }, 3000);
 }
-
-// Ensure Firebase is available for common refs
-const commonDB = firebase.database();
-const commonRefs = {
-    menu: commonDB.ref('menu'),
-    orders: commonDB.ref('orders'),
-    totalOrders: commonDB.ref('totalorders'),
-    cancelledOrders: commonDB.ref('cancelled_orders'),
-    importItems: commonDB.ref('import_items'),
-    usageRecords: commonDB.ref('usage_records'),
-    menuTransactions: commonDB.ref('menu_item_transactions')
-};
