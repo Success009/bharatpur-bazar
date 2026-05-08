@@ -420,8 +420,10 @@
                 categories = new Set();
                 snapshot.forEach(child => {
                     const item = child.val();
-                    allItems.push({ id: child.key, ...item });
-                    if(item.category) categories.add(item.category);
+                    if (item.type === 'Hotel') {
+                        allItems.push({ id: child.key, ...item });
+                        if(item.category) categories.add(item.category);
+                    }
                 });
                 renderMenu();
                 updateCategoryDropdown();
