@@ -16,7 +16,7 @@
         const isLogin = window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('/admin/');
         
         if (user) {
-            if (isLogin) window.location.replace('Dashboard.html');
+            if (isLogin) window.location.replace('StaffOrder.html');
         } else {
             if (!isLogin) window.location.replace('index.html');
         }
