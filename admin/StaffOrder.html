@@ -3,57 +3,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Staff Order Management</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="admin-shared.css">
     <style>
         :root { 
-            --primary: #4361ee;
-            --success: #38b000;
-            --danger: #d90429;
-            --warning: #ffaa00;
-            --info: #4cc9f0;
-            --secondary: #6c757d;
-            --light: #f8f9fa;
-            --dark: #212529;
             --white: #ffffff;
             --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             --radius: 8px;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: #f0f2f5;
-            color: var(--dark);
-        }
-
-        header {
-            background: linear-gradient(135deg, var(--primary), #3a0ca3);
-            color: var(--white);
-            padding: 1.2rem;
-            text-align: center;
-            box-shadow: var(--shadow);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header-title {
-            font-weight: 600;
-            font-size: 1.5rem;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 10px;
-        }
+    
 
         .btn {
             padding: 0.5rem 1rem;
@@ -274,18 +232,6 @@
     </style>
 </head>
 <body>
-    <header>
-        <div class="header-title">Staff Order Management</div>
-        <button class="nav-button" onclick="signOut()" style="background-color: var(--danger);">
-            <i class="fas fa-sign-out-alt"></i> Logout
-        </button>
-        <div class="header-actions">
-            <button class="btn btn-info" onclick="window.location.href='StaffMenu.html'">
-                <i class="fas fa-edit"></i> Edit Menu
-            </button>
-        </div>
-    </header>
-
     <div class="container">
         <div class="order-container" id="orderSection">
             <!-- Orders will be dynamically generated here -->
@@ -295,21 +241,10 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="admin-shared.js"></script>
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDlnzH1D7D7Q663eWE086ng_1KdP46MZEs",
-            authDomain: "deep-freehold-389006.firebaseapp.com",
-            databaseURL: "https://deep-freehold-389006-default-rtdb.firebaseio.com",
-            projectId: "deep-freehold-389006",
-            storageBucket: "deep-freehold-389006.appspot.com",
-            messagingSenderId: "76562961838",
-            appId: "1:76562961838:web:4d18b2f79d7eb9fd88243f",
-            measurementId: "G-VZC36FJC24"
-        };
-        firebase.initializeApp(firebaseConfig);
         const ordersRef = firebase.database().ref('orders');
         const menuRef = firebase.database().ref('menu');
-        const auth = firebase.auth();
         const notificationsRef = firebase.database().ref('notifications');
 
         function calculateTotalProfit(orderItems) {
@@ -538,72 +473,13 @@
             }).catch(error => console.error('Error sending admin message:', error));
         }
         function initializeApp() {
-    // This function will call the correct startup function based on which page is loaded.
-    if (typeof fetchOrders === 'function') {
-        console.log("Admin verified. Initializing Order View...");
-        fetchOrders();
-    }
-    if (typeof fetchMenuItems === 'function') {
-        console.log("Admin verified. Initializing Menu Editor...");
-        fetchMenuItems();
-        populateCategoryDropdown();
-    }
+    console.log("Admin verified. Initializing Order View...");
+    injectAdminHeader('Staff Order Management');
+    fetchOrders();
 }
 
-// This function will be called to check if the current user is a valid admin.
-function handleAdminVerification(user) {
-    const adminRef = firebase.database().ref('admins/' + user.uid);
-    
-    adminRef.once('value', snapshot => {
-        if (snapshot.exists() && snapshot.val() === true) {
-            // Success! The user is a verified admin.
-            console.log("Admin access granted for:", user.email);
-            initializeApp(); 
-        } else {
-            // The user logged in, but they are not in the admins list.
-            console.warn("Access Denied: User is not a verified admin.", user.email);
-            // Log out the unauthorized user, which will trigger the login prompt again.
-            auth.signOut();
-        }
-    });
-}
-
-// This is the main listener that controls access to the page.
-auth.onAuthStateChanged(user => {
-    if (user && !user.isAnonymous) {
-        // A non-anonymous user is signed in. Let's verify if they are an admin.
-        handleAdminVerification(user);
-    } else {
-        // EITHER no user is signed in, OR an anonymous user is signed in.
-        // In both cases, we must force a fresh admin login.
-        
-        // If it's an anonymous user, sign them out first.
-        if (user && user.isAnonymous) {
-            auth.signOut(); // This will re-trigger onAuthStateChanged with user=null.
-            return; // Stop execution here and wait for the re-trigger.
-        }
-        
-        // Now we know for sure user is null. Prompt for admin login.
-        const password = prompt("Admin Access Required. Please enter the password:");
-        if (password) {
-            const email = "bharatpurbazar@gmail.com";
-            auth.signInWithEmailAndPassword(email, password)
-                .catch(error => {
-                    console.error("Login failed:", error.message);
-                    alert(`Login Failed: Incorrect password or user not found.`);
-                    // After a failed attempt, reload the page to restart the process cleanly.
-                    window.location.reload();
-                });
-        } else {
-             document.body.innerHTML = '<h1>Login Canceled</h1><p>You canceled the login prompt. Please refresh to try again.</p>';
-        }
-    }
-});
-    function signOut() {
-        if (confirm("Are you sure you want to log out?")) {
-            auth.signOut();
-        }
-    }
+initAdminAuth(initializeApp);
     </script>
+    
 </body>
 </html>

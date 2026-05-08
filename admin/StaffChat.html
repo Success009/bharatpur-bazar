@@ -5,69 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Staff Chat Management</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="admin-shared.css">
     <style>
-        :root {
-            --primary: #4361ee;
-            --secondary: #6c757d;
-            --success: #38b000;
-            --danger: #dc3545;
-            --warning: #ffc107;
-            --info: #17a2b8;
-            --light: #f8f9fa;
-            --dark: #343a40;
-            --white: #ffffff;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --radius: 8px;
-            --transition: all 0.3s ease;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', sans-serif;
-        }
-
         body {
-            background: #f0f2f5;
             height: 100vh;
             display: flex;
             flex-direction: column;
         }
-
-        header {
-            background: linear-gradient(135deg, var(--primary), #3a0ca3);
-            color: white;
-            padding: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: var(--shadow);
-            z-index: 100;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .nav-button {
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: var(--radius);
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .nav-button:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
+    
 
         .main-container {
             flex: 1;
@@ -303,18 +249,6 @@
     </style>
 </head>
 <body>
-    <header>
-        <h1>Staff Chat Management</h1>
-        <div class="header-actions">
-            <button class="nav-button" onclick="window.location.href='StaffOrder.html'">
-                <i class="fas fa-clipboard-list"></i> Orders
-            </button>
-            <button class="nav-button" onclick="window.location.href='StaffMenu.html'">
-                <i class="fas fa-utensils"></i> Menu
-            </button>
-        </div>
-    </header>
-
     <div class="main-container">
         <div class="users-panel">
             <div class="search-box">
@@ -361,21 +295,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>     
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="admin-shared.js"></script>
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDlnzH1D7D7Q663eWE086ng_1KdP46MZEs",
-            authDomain: "deep-freehold-389006.firebaseapp.com",
-            databaseURL: "https://deep-freehold-389006-default-rtdb.firebaseio.com",
-            projectId: "deep-freehold-389006",
-            storageBucket: "deep-freehold-389006.appspot.com",
-            messagingSenderId: "76562961838",
-            appId: "1:76562961838:web:4d18b2f79d7eb9fd88243f",
-            measurementId: "G-VZC36FJC24"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        
         let selectedUserId = null;
         let lastMessageTime = null;
         let userTypingTimeout = null;
@@ -606,46 +527,14 @@
         // Search functionality
         searchInput.addEventListener('input', () => searchUsers(searchInput.value));
 
-        function initializeApp() {
+                function initializeApp() {
             console.log("Admin verified. Initializing Chat Application...");
-            loadUsers(); // This is the original startup function
+            injectAdminHeader('Staff Chat Management');
+            loadUsers(); 
         }
-        function handleAdminVerification(user) {
-            const adminRef = firebase.database().ref('admins/' + user.uid);
-            
-            adminRef.once('value', snapshot => {
-                if (snapshot.exists() && snapshot.val() === true) {
-                    console.log("Admin access granted for:", user.email);
-                    initializeApp(); 
-                } else {
-                    auth.signOut();
-                    document.body.innerHTML = '<h1>Access Denied</h1><p>You do not have permission to view this page.</p>';
-                }
-            });
-        }
-
-        // This is the main listener that controls access to the page.
-        auth.onAuthStateChanged(user => {
-            if (user && !user.isAnonymous) {
-                handleAdminVerification(user);
-            } else {
-                if (user && user.isAnonymous) {
-                    auth.signOut();
-                    return;
-                }
-                const password = prompt("Admin Access Required. Please enter the password:");
-                if (password) {
-                    const email = "bharatpurbazar@gmail.com";
-                    auth.signInWithEmailAndPassword(email, password)
-                        .catch(error => {
-                            alert(`Login Failed: Incorrect password or user not found.`);
-                            window.location.reload();
-                        });
-                } else {
-                     document.body.innerHTML = '<h1>Login Canceled</h1>';
-                }
-            }
-        });
+        
+        initAdminAuth(initializeApp);
     </script>
+    
 </body>
 </html>
