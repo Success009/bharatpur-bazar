@@ -121,11 +121,10 @@ function renderItems() {
 
         categories[cName].forEach(item => {
             const isOut = item.status === 'out_of_stock';
-            // Simple price logic, ignoring complex grocery profit models if needed, or keeping compatibility
-            let price = item.price + (item.profit || 0); 
-            // If discount exists
+            // Simplified price logic ignoring profit concept
+            let price = item.price || 0; 
             if(item.discountPercent && new Date(item.discountExpiry) > new Date()) {
-                price = (item.price * (1 - item.discountPercent / 100)) + (item.profit || 0);
+                price = (item.price * (1 - item.discountPercent / 100));
             }
 
             const cartItem = cart.find(ci => ci.id === item.id);
@@ -184,9 +183,9 @@ function renderItems() {
 
 function addToCart(id) {
     const item = allItems.find(i => i.id === id);
-    let p = item.price + (item.profit || 0);
+    let p = item.price || 0;
     if(item.discountPercent && new Date(item.discountExpiry) > new Date()) {
-        p = (item.price * (1 - item.discountPercent / 100)) + (item.profit || 0);
+        p = (item.price * (1 - item.discountPercent / 100));
     }
     
     cart.push({ id, name: item.name, price: p, qty: 1 });

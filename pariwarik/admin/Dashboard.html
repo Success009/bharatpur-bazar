@@ -72,7 +72,6 @@
         <div class="stats-container" id="statsContainer">
             <div class="stat-card revenue"><div class="stat-label">Total Revenue</div><div class="stat-value" id="totalRevenue">Rs 0</div></div>
             <div class="stat-card cost"><div class="stat-label">Cost of Goods Used</div><div class="stat-value" id="costOfUsed">Rs 0</div></div>
-            <div class="stat-card profit"><div class="stat-label">Online Net Profit</div><div class="stat-value" id="netProfit">Rs 0</div></div>
             <div class="stat-card cancelled"><div class="stat-label">Cancelled Online</div><div class="stat-value" id="cancelledCount">0 Orders</div></div>
             <div class="stat-card inventory"><div class="stat-label">Value of Inventory</div><div class="stat-value" id="inventoryValue">Rs 0</div></div>
         </div>
@@ -179,19 +178,17 @@
             }
             
             const inventoryValue = totalImportValue - costOfUsed;
-            const netProfit = totalRevenue - costOfUsed;
 
-            updateStats({ totalRevenue, costOfUsed, netProfit, inventoryValue });
+            updateStats({ totalRevenue, costOfUsed, inventoryValue });
             applyFilters();
         };
         
         const updateStats = (stats) => {
+        const updateStats = (stats) => {
             document.getElementById('totalRevenue').textContent = `Rs ${stats.totalRevenue.toFixed(2)}`;
             document.getElementById('costOfUsed').textContent = `Rs ${stats.costOfUsed.toFixed(2)}`;
-            document.getElementById('netProfit').textContent = `Rs ${stats.netProfit.toFixed(2)}`;
             document.getElementById('inventoryValue').textContent = `Rs ${stats.inventoryValue.toFixed(2)}`;
         };
-
         const applyFilters = () => {
             const searchTerm = document.getElementById('searchBox').value.toLowerCase();
             const timeFilter = document.getElementById('timeFilter').value;

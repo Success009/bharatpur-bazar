@@ -455,36 +455,19 @@
                 const sortedOrders = Object.values(allOrders).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
                 if (sortedOrders.length === 0) {
-                    orderSection.innerHTML = '<div class="empty-state"><h3>No Orders Found</h3></div>';
-                    return;
-                }
-
-                sortedOrders.forEach(order => {
-                    const orderId = order.id;
-                    const orderItems = order.items || [];
-                    let totalItemPrice = 0;
-                    let totalItemProfit = 0;
-                    Promise.all(orderItems.map(item => fetchMenuItemDetails(item.name)))
-                        .then(menuItems => {
-                            const orderItemsHTML = orderItems.map((item, index) => {
+        function fetchOrders() {
                                 const menuItem = menuItems[index];
                                 const price = menuItem.price || 0;
-                                const profit = menuItem.profit || 0;
                                 const startingValue = menuItem.startingValue || 1;
 
                                 const pricePerUnit = price / startingValue;
-                                const profitPerUnit = profit / startingValue;
-
                                 const itemTotalPrice = pricePerUnit * item.quantity;
-                                const itemTotalProfit = profitPerUnit * item.quantity;
 
                                 totalItemPrice += itemTotalPrice;
-                                totalItemProfit += itemTotalProfit;
 
-                                return `<li>${item.name} - Rs ${(pricePerUnit).toFixed(2)} × ${item.quantity} (Profit: Rs ${(profitPerUnit).toFixed(2)})</li>`;
+                                return `<li>${item.name} - Rs ${(pricePerUnit).toFixed(2)} × ${item.quantity}</li>`;
                             }).join('');
 
-                            const totalProfit = totalItemProfit;
                             const finalPrice = totalItemPrice;
                             const orderHTML = `
                                 <div class="order-card" id="${orderId}">
@@ -511,49 +494,33 @@
                                         </div>
 
                                         <div class="price-info">
-                                            <div class="price-row">
-                                                <span>Item Total:</span>
-                                                <span>Rs ${totalItemPrice.toFixed(2)}</span>
-                                            </div>
-                                            <div class="price-row">
-                                                <span>Total Profit:</span>
-                                                <span>Rs ${totalProfit.toFixed(2)}</span>
-                                            </div>
                                             <div class="price-row total-price">
                                                 <span>Total Price:</span>
                                                 <span>Rs ${finalPrice.toFixed(2)}</span>
                                             </div>
                                         </div>
-                                    </div>
+                    let totalItemPrice = 0;
+                    Promise.all(orderItems.map(item => fetchMenuItemDetails(item.name)))
+                        .then(menuItems => {
+                            const orderItemsHTML = orderItems.map((item, index) => {
+                                const menuItem = menuItems[index];
+                                const price = menuItem.price || 0;
+                                const startingValue = menuItem.startingValue || 1;
 
-                                                                        <div class="card-footer">
-                                        ${order.status === 'Ordered' ? 
-                                            `<button class="btn btn-primary" onclick="updateOrderStatus('${order.type}', '${order.userUid}', '${orderId}', 'Accepted')">
-                                                <i class="fas fa-check-circle"></i> Accept Order
-                                            </button>` : 
-                                            `<button class="btn btn-success" onclick="updateOrderStatus('${order.type}', '${order.userUid}', '${orderId}', 'Completed')">
-                                                <i class="fas fa-flag-checkered"></i> Complete
-                                            </button>`
-                                        }
+                                const pricePerUnit = price / startingValue;
+                                const itemTotalPrice = pricePerUnit * item.quantity;
 
-                                        <button class="btn btn-danger" onclick="updateOrderStatus('${order.type}', '${order.userUid}', '${orderId}', 'Cancelled')">
-                                            <i class="fas fa-times-circle"></i> Cancel
-                                        </button>
-                                    </div>
-    
+                                totalItemPrice += itemTotalPrice;
 
-                                </div>
-                            `;
+                                return `<li>${item.name} - Rs ${(pricePerUnit).toFixed(2)} × ${item.quantity}</li>`;
+                            }).join('');
 
-                            orderSection.insertAdjacentHTML('afterbegin', orderHTML);
-                        });
-                });
+                            const finalPrice = totalItemPrice;
 
                 setInterval(updateTimeSinceOrder, 60000);
                 updateTimeSinceOrder();
             }
-        }
-
+                            const finalPrice = totalItemPrice;
         function fetchMenuItemDetails(itemName) {
             return new Promise((resolve, reject) => {
                 menuRef.once('value', (snapshot) => {
@@ -584,10 +551,6 @@
                 const days = Math.floor(diff / (24 * 3600));
                 const hours = Math.floor((diff % (24 * 3600)) / 3600);
                 const minutes = Math.floor((diff % 3600) / 60);
-
-                let timeAgo = '';
-
-                if (days > 0) {
                     timeAgo = `${days}d ${hours}h ago`;
                 } else if (hours > 0) {
                     timeAgo = `${hours}h ${minutes}m ago`;
