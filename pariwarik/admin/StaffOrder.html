@@ -414,177 +414,155 @@
         firebase.initializeApp(firebaseConfig);
         const ordersRef = firebase.database().ref('orders');
         const menuRef = firebase.database().ref('menu');
-        const notificationsRef = firebase.database().ref('notifications');
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlnzH1D7D7Q663eWE086ng_1KdP46MZEs",
+            authDomain: "deep-freehold-389006.firebaseapp.com",
+            databaseURL: "https://deep-freehold-389006-default-rtdb.firebaseio.com",
+            projectId: "deep-freehold-389006",
+            storageBucket: "deep-freehold-389006.appspot.com",
+            messagingSenderId: "76562961838",
+            appId: "1:76562961838:web:4d18b2f79d7eb9fd88243f",
+            measurementId: "G-VZC36FJC24"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const ordersRef = firebase.database().ref('orders');
+        const menuRef = firebase.database().ref('menu');
 
-        function calculateTotalProfit(orderItems) {
-            let totalProfit = 0;
-            return Promise.all(orderItems.map(item => fetchMenuItemDetails(item.name)))
-                .then(menuItems => {
-                    menuItems.forEach((menuItem, index) => {
-                        const profitPerUnit = menuItem.profit / menuItem.startingValue;
-                        totalProfit += profitPerUnit * orderItems[index].quantity;
-                    });
-                    return totalProfit;
-                });
-        }
+        const allOrders = {};
+
         function fetchOrders() {
             const orderSection = document.getElementById('orderSection');
-            
-            // Listen to all order paths
             const paths = ['orders/grocery', 'orders/hotel', 'orders/local'];
-            const allOrders = {};
 
             paths.forEach(path => {
                 firebase.database().ref(path).on('value', (snapshot) => {
+                    // Clear existing entries for this specific path to handle deletions
+                    Object.keys(allOrders).forEach(key => {
+                        if (allOrders[key].path === path) delete allOrders[key];
+                    });
+
                     snapshot.forEach(userSnapshot => {
                         userSnapshot.forEach(orderSnapshot => {
                             allOrders[orderSnapshot.key] = {
                                 ...orderSnapshot.val(),
                                 id: orderSnapshot.key,
                                 type: path.split('/')[1],
-                                userUid: userSnapshot.key
+                                userUid: userSnapshot.key,
+                                path: path + '/' + userSnapshot.key + '/' + orderSnapshot.key
                             };
                         });
                     });
                     renderAllOrders();
                 });
             });
+        }
 
-            function renderAllOrders() {
-                orderSection.innerHTML = '';
-                const sortedOrders = Object.values(allOrders).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        function renderAllOrders() {
+            const orderSection = document.getElementById('orderSection');
+            orderSection.innerHTML = '';
+            const sortedOrders = Object.values(allOrders).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-                if (sortedOrders.length === 0) {
-        function fetchOrders() {
-                                const menuItem = menuItems[index];
-                                const price = menuItem.price || 0;
-                                const startingValue = menuItem.startingValue || 1;
+            if (sortedOrders.length === 0) {
+                orderSection.innerHTML = '<div class="empty-state"><h3>No Orders Found</h3></div>';
+                return;
+            }
 
-                                const pricePerUnit = price / startingValue;
-                                const itemTotalPrice = pricePerUnit * item.quantity;
+            sortedOrders.forEach(order => {
+                const orderId = order.id;
+                const orderItems = order.items || [ ];
+                
+                Promise.all(orderItems.map(item => fetchMenuItemDetails(item.name)))
+                    .then(menuItems => {
+                        let totalItemPrice = 0;
+                        const orderItemsHTML = orderItems.map((item, index) => {
+                            const menuItem = menuItems[index];
+                            const price = menuItem.price || 0;
+                            const startingValue = menuItem.startingValue || 1;
+                            const pricePerUnit = price / startingValue;
+                            const itemTotalPrice = pricePerUnit * item.quantity;
+                            totalItemPrice += itemTotalPrice;
 
-                                totalItemPrice += itemTotalPrice;
+                            return `<li>${item.name} - Rs ${pricePerUnit.toFixed(2)} × ${item.quantity}</li>`;
+                        }).join('');
 
-                                return `<li>${item.name} - Rs ${(pricePerUnit).toFixed(2)} × ${item.quantity}</li>`;
-                            }).join('');
-
-                            const finalPrice = totalItemPrice;
-                            const orderHTML = `
-                                <div class="order-card" id="${orderId}">
-                                    <div class="card-header">
-                                        <div class="card-title">
-                                            <span>${order.customerName || 'Guest'}</span>
-                                            <span style="font-size:0.7rem; color:var(--secondary); background:#eee; padding:2px 6px; border-radius:4px;">ONLINE ${order.type.toUpperCase()}</span>
-                                        </div>
-                                        <div class="timestamp" data-time="${order.timestamp}">
-                                            ${new Date(order.timestamp).toLocaleString()}
-                                        </div>
-                                        <div class="device-id">
-                                            ${order.phone ? `<div><i class="fas fa-phone"></i> ${order.phone}</div>` : ''}
-                                            ${order.landmark ? `<div><i class="fas fa-map-marker-alt"></i> ${order.landmark}</div>` : ''}
-                                            ${order.roomNumber ? `<div><i class="fas fa-door-open"></i> Room: ${order.roomNumber}</div>` : ''}
+                        const orderHTML = `
+                            <div class="order-card" id="${orderId}">
+                                <div class="card-header">
+                                    <div class="card-title">
+                                        <span>${order.customerName || 'Guest'}</span>
+                                        <span style="font-size:0.7rem; color:var(--secondary); background:#eee; padding:2px 6px; border-radius:4px;">ONLINE ${order.type.toUpperCase()}</span>
+                                    </div>
+                                    <div class="timestamp" data-time="${order.timestamp}">
+                                        ${new Date(order.timestamp).toLocaleString()}
+                                    </div>
+                                    <div class="device-id">
+                                        ${order.phone ? `<div><i class="fas fa-phone"></i> ${order.phone}</div>` : ''}
+                                        ${order.landmark ? `<div><i class="fas fa-map-marker-alt"></i> ${order.landmark}</div>` : ''}
+                                        ${order.roomNumber ? `<div><i class="fas fa-door-open"></i> Room: ${order.roomNumber}</div>` : ''}
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="order-items">
+                                        <h4><i class="fas fa-shopping-basket"></i> Order Items</h4>
+                                        <ul class="item-list">${orderItemsHTML}</ul>
+                                    </div>
+                                    <div class="price-info">
+                                        <div class="price-row total-price">
+                                            <span>Total Price:</span>
+                                            <span>Rs ${totalItemPrice.toFixed(2)}</span>
                                         </div>
                                     </div>
-                                    <div class="card-body">
-                                        <div class="order-items">
-                                            <h4><i class="fas fa-shopping-basket"></i> Order Items</h4>
-                                            <ul class="item-list">
-                                                ${orderItemsHTML}
-                                            </ul>
-                                        </div>
+                                </div>
+                                <div class="card-footer">
+                                    ${order.status === 'Ordered' ? 
+                                        `<button class="btn btn-primary" onclick="updateOrderStatus('${order.type}', '${order.userUid}', '${orderId}', 'Accepted')">
+                                            <i class="fas fa-check-circle"></i> Accept Order
+                                        </button>` : 
+                                        `<button class="btn btn-success" onclick="updateOrderStatus('${order.type}', '${order.userUid}', '${orderId}', 'Completed')">
+                                            <i class="fas fa-flag-checkered"></i> Complete
+                                        </button>`
+                                    }
+                                    <button class="btn btn-danger" onclick="updateOrderStatus('${order.type}', '${order.userUid}', '${orderId}', 'Cancelled')">
+                                        <i class="fas fa-times-circle"></i> Cancel
+                                    </button>
+                                </div>
+                            </div>`;
+                        
+                        // Check again if order still exists in global object before appending (prevent race conditions)
+                        if (allOrders[orderId]) {
+                            orderSection.insertAdjacentHTML('afterbegin', orderHTML);
+                        }
+                    });
+            });
+        }
 
-                                        <div class="price-info">
-                                            <div class="price-row total-price">
-                                                <span>Total Price:</span>
-                                                <span>Rs ${finalPrice.toFixed(2)}</span>
-                                            </div>
-                                        </div>
-                    let totalItemPrice = 0;
-                    Promise.all(orderItems.map(item => fetchMenuItemDetails(item.name)))
-                        .then(menuItems => {
-                            const orderItemsHTML = orderItems.map((item, index) => {
-                                const menuItem = menuItems[index];
-                                const price = menuItem.price || 0;
-                                const startingValue = menuItem.startingValue || 1;
-
-                                const pricePerUnit = price / startingValue;
-                                const itemTotalPrice = pricePerUnit * item.quantity;
-
-                                totalItemPrice += itemTotalPrice;
-
-                                return `<li>${item.name} - Rs ${(pricePerUnit).toFixed(2)} × ${item.quantity}</li>`;
-                            }).join('');
-
-                            const finalPrice = totalItemPrice;
-
-                setInterval(updateTimeSinceOrder, 60000);
-                updateTimeSinceOrder();
-            }
-                            const finalPrice = totalItemPrice;
         function fetchMenuItemDetails(itemName) {
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve) => {
                 menuRef.once('value', (snapshot) => {
                     let menuItem = null;
                     snapshot.forEach(childSnapshot => {
-                        const menuEntry = childSnapshot.val();
-                        if (menuEntry.name === itemName) {
-                            menuItem = { 
-                                price: menuEntry.price || 0, 
-                                startingValue: menuEntry.startingValue || 1,
-                                profit: menuEntry.profit || 0
-                            };
-                        }
+                        const entry = childSnapshot.val();
+                        if (entry.name === itemName) menuItem = entry;
                     });
-                    resolve(menuItem || { price: 0, startingValue: 1, profit: 0 });
-                }, (error) => {
-                    reject(error);
+                    resolve(menuItem || { price: 0, startingValue: 1 });
                 });
-            });
-        }
-        function updateTimeSinceOrder() {
-            const timestamps = document.querySelectorAll('.timestamp');
-            timestamps.forEach(element => {
-                const timestamp = new Date(element.dataset.time).getTime();
-                const now = Date.now();
-                const diff = Math.floor((now - timestamp) / 1000);
-
-                const days = Math.floor(diff / (24 * 3600));
-                const hours = Math.floor((diff % (24 * 3600)) / 3600);
-                const minutes = Math.floor((diff % 3600) / 60);
-                    timeAgo = `${days}d ${hours}h ago`;
-                } else if (hours > 0) {
-                    timeAgo = `${hours}h ${minutes}m ago`;
-                } else {
-                    timeAgo = `${minutes}m ago`;
-                }
-
-                element.innerHTML = `${new Date(timestamp).toLocaleString()} <span style="color:#6c757d">(${timeAgo})</span>`;
             });
         }
 
         function updateOrderStatus(type, userUid, orderId, newStatus) {
             const path = `orders/${type}/${userUid}/${orderId}`;
-            
             showModal(
                 'Confirm Action',
-                `Are you sure you want to mark this order as ${newStatus}?`,
-                'fa-question-circle info',[
-                    {
-                        text: 'Yes, Confirm',
-                        class: 'modal-btn-confirm',
-                        onClick: `performStatusUpdate('${path}', '${orderId}', '${newStatus}')`
-                    },
-                    {
-                        text: 'Cancel',
-                        class: 'modal-btn-cancel',
-                        onClick: 'hideModal()'
-                    }
+                `Mark this order as ${newStatus}?`,
+                'fa-question-circle info', [
+                    { text: 'Yes, Confirm', class: 'modal-btn-confirm', onClick: `performStatusUpdate('${path}', '${orderId}', '${newStatus}')` },
+                    { text: 'Cancel', class: 'modal-btn-cancel', onClick: 'hideModal()' }
                 ]
             );
         }
 
         function performStatusUpdate(path, orderId, newStatus) {
-            // Optimistic UI: Hide and remove the card immediately
+            // Optimistic UI: Remove card immediately
             const card = document.getElementById(orderId);
             if (card && (newStatus === 'Completed' || newStatus === 'Cancelled')) {
                 card.style.transition = 'all 0.4s ease';
@@ -593,101 +571,68 @@
                 setTimeout(() => card.remove(), 400);
             }
             
+            delete allOrders[orderId]; // Remove from local cache to prevent re-renders
             hideModal();
-            firebase.database().ref(path).update({ status: newStatus })
-                .then(() => {
-                    if (newStatus === 'Completed' || newStatus === 'Cancelled') {
-                        archiveOrder(path, orderId);
-                    }
-                })
-                .catch(err => {
-                    console.error("Firebase Update Failed:", err);
-                });
+
+            firebase.database().ref(path).update({ status: newStatus }).then(() => {
+                if (newStatus === 'Completed' || newStatus === 'Cancelled') {
+                    archiveOrder(path, orderId, newStatus);
+                }
+            }).catch(err => console.error("Update failed:", err));
         }
 
-        function archiveOrder(path, orderId) {
-            firebase.database().ref(path).once('value').then(snap => {
+        function archiveOrder(path, orderId, status) {
+            const db = firebase.database();
+            db.ref(path).once('value').then(snap => {
                 if (snap.exists()) {
-                    const orderData = snap.val();
-                    const now = new Date().toISOString();
-                    
-                    if (orderData.status === 'Completed') {
-                        orderData.completedAt = now;
-                        firebase.database().ref('totalorders').child(orderId).set(orderData)
-                            .then(() => firebase.database().ref(path).remove());
-                    } else if (orderData.status === 'Cancelled') {
-                        orderData.cancelledAt = now;
-                        firebase.database().ref('cancelled_orders').child(orderId).set(orderData)
-                            .then(() => firebase.database().ref(path).remove());
-                    }
+                    const data = snap.val();
+                    const targetNode = status === 'Completed' ? 'totalorders' : 'cancelled_orders';
+                    data[status === 'Completed' ? 'completedAt' : 'cancelledAt'] = new Date().toISOString();
+                    db.ref(targetNode).child(orderId).set(data).then(() => db.ref(path).remove());
                 }
             });
         }
 
         function showModal(title, message, icon, actions) {
             const modal = document.getElementById('customModal');
-            const modalIcon = modal.querySelector('.modal-icon');
-            const modalTitle = modal.querySelector('.modal-title');
-            const modalMessage = modal.querySelector('.modal-message');
-            const modalActions = modal.querySelector('.modal-actions');
-
-            modalIcon.className = `modal-icon fas ${icon}`;
-            modalTitle.textContent = title;
-            modalMessage.textContent = message;
-            modalActions.innerHTML = actions.map(action => `
-                <button class="modal-btn ${action.class}" onclick="${action.onClick}">
-                    ${action.text}
-                </button>
-            `).join('');
-
+            modal.querySelector('.modal-icon').className = `modal-icon fas ${icon}`;
+            modal.querySelector('.modal-title').textContent = title;
+            modal.querySelector('.modal-message').textContent = message;
+            modal.querySelector('.modal-actions').innerHTML = actions.map(a => 
+                `<button class="modal-btn ${a.class}" onclick="${a.onClick}">${a.text}</button>`
+            ).join('');
             modal.style.display = 'flex';
             setTimeout(() => modal.classList.add('active'), 10);
         }
 
         function hideModal() {
-            const modal = document.getElementById('customModal');
-            modal.classList.remove('active');
-            setTimeout(() => modal.style.display = 'none', 300);
+            const m = document.getElementById('customModal');
+            m.classList.remove('active');
+            setTimeout(() => m.style.display = 'none', 300);
         }
 
         function calibrateIP() {
-            showModal(
-                'Calibrate IP',
-                'Are you sure you want to update the allowed IP to your current IP?',
-                'fa-network-wired warning',
-                [
-                    {
-                        text: 'Yes, Update IP',
-                        class: 'modal-btn-confirm',
-                        onClick: 'performIPCalibration()'
-                    },
-                    {
-                        text: 'Cancel',
-                        class: 'modal-btn-cancel',
-                        onClick: 'hideModal()'
-                    }
-                ]
-            );
+            showModal('Calibrate IP', 'Update allowed IP to current?', 'fa-network-wired warning', [
+                { text: 'Yes, Update', class: 'modal-btn-confirm', onClick: 'performIPCalibration()' },
+                { text: 'Cancel', class: 'modal-btn-cancel', onClick: 'hideModal()' }
+            ]);
         }
 
         function performIPCalibration() {
-            fetch("https://api.ipify.org?format=json")
-                    .then(res => res.json())
-                    .then(data => {
-                        const ipRef = firebase.database().ref('allowed_ips');
-                        ipRef.set({ current: data.ip }).then(() => {
-                            showModal('Success', 'IP successfully updated to: ' + data.ip, 'fa-check-circle success', [{ text: 'OK', class: 'modal-btn-confirm', onClick: 'hideModal()' }]);
-                        }).catch(error => {
-                            showModal('Error', 'Error updating IP: ' + error.message, 'fa-exclamation-circle error', [{ text: 'OK', class: 'modal-btn-confirm', onClick: 'hideModal()' }]);
-                        });
-                    })
-                    .catch(error => {
-                        showModal('Error', 'Error fetching IP: ' + error.message, 'fa-exclamation-circle error', [{ text: 'OK', class: 'modal-btn-confirm', onClick: 'hideModal()' }]);
-                    });
-            }
+            fetch("https://api.ipify.org?format=json").then(r => r.json()).then(data => {
+                firebase.database().ref('allowed_ips').set({ current: data.ip }).then(() => {
+                    showModal('Success', 'IP updated: ' + data.ip, 'fa-check-circle success', [{ text: 'OK', class: 'modal-btn-confirm', onClick: 'hideModal()' }]);
+                });
+            });
+        }
+
+        setInterval(() => {
+            const now = Date.now();
+            document.querySelectorAll('.timestamp').forEach(el => {
+                const time = new Date(el.dataset.time).getTime();
+                const mins = Math.floor((now - time) / 60000);
+                el.innerHTML = `${new Date(time).toLocaleString()} <span style="color:#6c757d">(${mins}m ago)</span>`;
+            });
+        }, 60000);
 
         window.onload = fetchOrders;
-    </script>
-<script src="auth.js"></script>
-</body>
-</html>
