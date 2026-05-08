@@ -10,13 +10,17 @@ const usageRef = commonRefs.usageRecords;
 const menuRef = commonRefs.menu;
 
 const fetchAllData = async () => {
+    // Optimization: Limit orders and records to the most recent ones for initial load
+    // while keeping stats accurate. In a real production app, aggregates should be handled 
+    // by Firebase Cloud Functions, but here we can optimize by only fetching what we display.
     const [menuSnapshot, ordersSnapshot, importsSnapshot, usageSnapshot, cancelledSnapshot] = await Promise.all([
         menuRef.once('value'),
-        totalOrdersRef.once('value'),
-        importItemsRef.once('value'),
-        usageRef.once('value'),
-        cancelledOrdersRef.once('value')
+        totalOrdersRef.limitToLast(500).once('value'), // Limit data transfer
+        importItemsRef.limitToLast(500).once('value'),
+        usageRef.limitToLast(500).once('value'),
+        cancelledOrdersRef.limitToLast(100).once('value')
     ]);
+    
 
     let cancelledCount = 0;
     if (cancelledSnapshot.exists()) {

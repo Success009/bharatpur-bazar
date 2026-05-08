@@ -4,22 +4,29 @@ let allItems = [ ];
 let categories = new Set();
 
 // Load Data
+let renderTimeout;
 function loadMenu() {
+    // Optimization: Use a single listener but debounce the render 
+    // to prevent UI freezing during rapid multiple updates
     menuRef.on('value', snapshot => {
         allItems = [ ];
         categories = new Set();
         snapshot.forEach(child => {
             const item = child.val();
-            // Note: The original code had a filter for 'Hotel' type
             if (item.type === 'Hotel') {
                 allItems.push({ id: child.key, ...item });
                 if(item.category) categories.add(item.category);
             }
         });
-        renderMenu();
-        updateCategoryDropdown();
+        
+        clearTimeout(renderTimeout);
+        renderTimeout = setTimeout(() => {
+            renderMenu();
+            updateCategoryDropdown();
+        }, 100); 
     });
 }
+    
 
 function renderMenu() {
     const container = document.getElementById('menuContainer');
