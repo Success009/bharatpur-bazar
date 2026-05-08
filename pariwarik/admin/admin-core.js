@@ -14,8 +14,6 @@ const firebaseConfig = {
 // Initialize Firebase immediately
 if (!firebase.apps || firebase.apps.length === 0) {
     firebase.initializeApp(firebaseConfig);
-    // Enable local data persistence for faster subsequent loads (standard RTDB feature)
-    firebase.database().ref().keepSynced(true);
 }
 
 // Define global refs using 'var' to ensure availability across scripts
