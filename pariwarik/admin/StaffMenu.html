@@ -193,11 +193,22 @@
             padding-top: 1rem; 
             border-top: 1px solid #f0f2f5; 
         }
-        .card-actions .btn { flex: 1; padding: 10px 8px; font-size: 0.8rem; }
-        .card-actions .btn i { font-size: 0.9rem; }
-        @media (max-width: 480px) {
-            .card-actions .btn span { display: none; }
-            .card-actions .btn { padding: 10px; }
+        .card-actions .btn { flex: 1; padding: 10px 12px; font-size: 0.85rem; }
+        .card-actions .btn i { font-size: 0.95rem; }
+
+        @media (max-width: 600px) {
+            .card-actions {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .card-actions .btn {
+                width: 100%;
+                justify-content: center;
+                padding: 14px;
+                font-size: 1rem;
+                border-radius: var(--radius-md);
+            }
+            .card-actions .btn i { font-size: 1.1rem; }
         }
 
         /* Modal */
@@ -481,15 +492,15 @@
                     </div>
                     <div class="card-actions">
                         <button class="btn btn-warning" onclick="editItem('${item.id}')" title="Edit Item">
-                            <i class="fas fa-pen"></i> <span>Edit</span>
+                            <i class="fas fa-edit"></i> <span>Edit</span>
                         </button>
                         <button class="btn ${isOut ? 'btn-success' : 'btn-warning'}" 
                                 onclick="toggleStatus('${item.id}', '${item.status}')" 
                                 title="${isOut ? 'Mark as Available' : 'Mark as Out of Stock'}">
-                            <i class="fas ${isOut ? 'fa-check-circle' : 'fa-times-circle'}"></i> <span>${isOut ? 'Enable' : 'Disable'}</span>
+                            <i class="fas ${isOut ? 'fa-toggle-on' : 'fa-toggle-off'}"></i> <span>${isOut ? 'Restock' : 'Out of Stock'}</span>
                         </button>
                         <button class="btn btn-danger" onclick="deleteItem('${item.id}')" title="Delete Item">
-                            <i class="fas fa-trash"></i>
+                            <i class="fas fa-trash-alt"></i> <span>Delete</span>
                         </button>
                     </div>
                 </div>
