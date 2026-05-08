@@ -384,7 +384,6 @@
     <header class="app-header">
     <div class="header-title">Admin Panel</div>
     <nav class="header-nav">
-        <a href="Dashboard.html" class="nav-link"><i class="fas fa-chart-pie"></i> Dashboard</a>
         <a href="StaffOrder.html" class="nav-link active"><i class="fas fa-concierge-bell"></i> Orders</a>
         <a href="StaffMenu.html" class="nav-link"><i class="fas fa-book-open"></i> Menu Editor</a>
         <a href="StaffUpload.html" class="nav-link"><i class="fas fa-image"></i> Image Uploads</a>
@@ -395,29 +394,9 @@
     
 
     <div class="container">
-        <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('active')"><i class="fas fa-concierge-bell"></i> Active Orders</button>
-            <button class="tab-btn" onclick="switchTab('completed')"><i class="fas fa-check-circle"></i> Completed Orders</button>
-        </div>
-        
-        <!-- Active Orders Section -->
         <div id="activeSection" class="tab-content active">
             <div class="order-container" id="orderSection">
-            </div>
-        </div>
-
-        <!-- Completed Orders Section -->
-        <div id="completedSection" class="tab-content" style="display: none;">
-            <div class="filters" style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
-                <input type="text" class="search-box" id="searchBox" placeholder="Search orders..." style="flex-grow: 2; padding: 0.5rem; border-radius: var(--radius); border: 1px solid rgba(0,0,0,0.1);">
-                <select class="filter-dropdown" id="timeFilter" style="flex-grow: 1; padding: 0.5rem; border-radius: var(--radius); border: 1px solid rgba(0,0,0,0.1);">
-                    <option value="all">All Time</option>
-                    <option value="today">Today</option>
-                    <option value="week">This Week</option>
-                    <option value="month">This Month</option>
-                </select>
-            </div>
-            <div class="order-container" id="completedOrderSection">
+                <!-- Orders will appear here -->
             </div>
         </div>
     </div>
@@ -657,15 +636,25 @@
         }
 
         function performStatusUpdate(path, orderId, newStatus) {
+            // Optimistic UI: Hide the card immediately
+            const card = document.getElementById(orderId);
+            if (card) {
+                card.style.transition = 'all 0.4s ease';
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.9)';
+                setTimeout(() => card.remove(), 400);
+            }
+            hideModal();
+
             firebase.database().ref(path).update({ status: newStatus })
                 .then(() => {
-                    hideModal();
                     if (newStatus === 'Completed' || newStatus === 'Cancelled') {
                         archiveOrder(path, orderId);
                     }
                 })
                 .catch(err => {
-                    showModal('Error', err.message, 'fa-exclamation-circle error',[{ text: 'OK', class: 'modal-btn-confirm', onClick: 'hideModal()' }]);
+                    console.error("Background update failed:", err);
+                    // Optionally alert the user or re-fetch orders here
                 });
         }
 
