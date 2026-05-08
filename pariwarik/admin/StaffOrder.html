@@ -527,7 +527,7 @@
                                     <div class="card-header">
                                         <div class="card-title">
                                             <span>${order.customerName || 'Guest'}</span>
-                                            <span style="font-size:0.7rem; color:var(--secondary); background:#eee; padding:2px 6px; border-radius:4px;">${order.type.toUpperCase()}</span>
+                                            <span style="font-size:0.7rem; color:var(--secondary); background:#eee; padding:2px 6px; border-radius:4px;">ONLINE ${order.type.toUpperCase()}</span>
                                         </div>
                                         <div class="timestamp" data-time="${order.timestamp}">
                                             ${new Date(order.timestamp).toLocaleString()}
@@ -672,12 +672,18 @@
         function archiveOrder(path, orderId) {
             firebase.database().ref(path).once('value').then(snap => {
                 if (snap.exists()) {
-                    // Include completion timestamp
                     const orderData = snap.val();
-                    orderData.completedAt = new Date().toISOString();
+                    const now = new Date().toISOString();
                     
-                    firebase.database().ref('totalorders').child(orderId).set(orderData)
-                        .then(() => firebase.database().ref(path).remove());
+                    if (orderData.status === 'Completed') {
+                        orderData.completedAt = now;
+                        firebase.database().ref('totalorders').child(orderId).set(orderData)
+                            .then(() => firebase.database().ref(path).remove());
+                    } else if (orderData.status === 'Cancelled') {
+                        orderData.cancelledAt = now;
+                        firebase.database().ref('cancelled_orders').child(orderId).set(orderData)
+                            .then(() => firebase.database().ref(path).remove());
+                    }
                 }
             });
         }
