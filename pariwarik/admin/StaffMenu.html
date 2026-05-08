@@ -3,499 +3,360 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Staff Menu Management</title>
+    <title>Menu Editor | Admin Panel</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-.app-header { background: linear-gradient(135deg, var(--primary), #3a0ca3); color: white; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow); position: sticky; top: 0; z-index: 1000; height: 60px; }
-.header-title { font-size: 1.5rem; font-weight: 600; }
-    <nav class="header-nav">
-.nav-link { color: white; text-decoration: none; padding: 8px 15px; border-radius: var(--radius); transition: background-color 0.2s; display: flex; align-items: center; gap: 8px; }
-.nav-link:hover { background-color: rgba(255, 255, 255, 0.15); }
-.nav-link.active { background-color: rgba(255, 255, 255, 0.25); font-weight: 600; }
-@media (max-width: 768px) { .header-nav { display: none; } }
         :root {
             --primary: #4361ee;
-            --secondary: #3f37c9;
-            --success: #4cc9f0;
-            --danger: #f72585;
-            --warning: #f8961e;
-            --info: #4895ef;
+            --primary-dark: #3a0ca3;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --warning: #f1c40f;
             --light: #f8f9fa;
-            --dark: #212529;
-            --gray: #6c757d;
-            --border-radius: 10px;
-            --box-shadow: 0 6px 18px rgba(0,0,0,0.1);
-            --transition: all 0.3s ease;
+            --dark: #2c3e50;
+            --gray: #95a5a6;
+            --white: #ffffff;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --shadow: 0 10px 25px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
+        body { background-color: #f4f7fe; color: var(--dark); line-height: 1.6; }
 
-        body {
-            background-color: #f0f2f5;
-            color: var(--dark);
-            transition: var(--transition);
+        /* Header */
+        .app-header { 
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark)); 
+            color: white; 
+            padding: 0 2rem; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+            position: sticky; 
+            top: 0; 
+            z-index: 1000; 
+            height: 70px; 
         }
-
-        header {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            padding: 20px;
-            text-align: center;
-            font-size: 1.5rem;
-            box-shadow: var(--box-shadow);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 15px;
-        }
-
-        .btn {
-            border: none;
-            border-radius: var(--border-radius);
-            padding: 10px 15px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: var(--transition);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-        }
-
-        .btn-primary {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--secondary);
-            transform: translateY(-2px);
-        }
-
-        .btn-success {
-            background-color: var(--success);
-            color: white;
-        }
-
-        .btn-success:hover {
-            background-color: #3aa5d9;
-            transform: translateY(-2px);
-        }
-
-        .btn-danger {
-            background-color: var(--danger);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background-color: #e01e79;
-            transform: translateY(-2px);
-        }
-
-        .btn-warning {
-            background-color: var(--warning);
-            color: white;
-        }
-
-        .btn-warning:hover {
-            background-color: #e78817;
-            transform: translateY(-2px);
-        }
-
-        .top-nav {
-            display: flex;
-            justify-content: flex-end;
-            padding: 10px 0;
-        }
-
-        .menu-category {
-            background-color: white;
-            border-radius: var(--border-radius);
-            margin-bottom: 25px;
-            box-shadow: var(--box-shadow);
-            overflow: hidden;
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .category-header {
-            background-color: var(--light);
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(0,0,0,0.1);
-        }
-
-        .category-header h2 {
-            margin: 0;
-            font-size: 1.3rem;
-            color: var(--dark);
-        }
-
-        .menu-items {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-            gap: 15px;
-            padding: 15px;
-        }
-
-        .menu-item {
-            background-color: white;
-            border-radius: var(--border-radius);
-            padding: 15px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            transition: var(--transition);
-            position: relative;
-            border: 1px solid rgba(0,0,0,0.08);
-        }
-
-        .menu-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
-        }
-
-        .item-rarity {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 0.8rem;
-            padding: 3px 8px;
-            border-radius: 20px;
-            font-weight: bold;
-        }
-
-        .rarity-Basic {
-            background-color: #e9ecef;
-            color: var(--dark);
-        }
-
-        .rarity-Premium {
-            background-color: #ffd700;
-            color: #856404;
-        }
-
-        .rarity-Limited {
-            background-color: #6f42c1;
-            color: white;
-        }
-
-        .item--name {
-            font-size: 1.1rem;
-            margin: 10px 0;
-            color: var(--dark);
-        }
-
-        .item-price, .item-profit {
+        .header-title { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.5px; }
+        .header-nav { display: flex; gap: 0.5rem; }
+        .nav-link { 
+            color: rgba(255,255,255,0.8); 
+            text-decoration: none; 
+            padding: 8px 16px; 
+            border-radius: 10px; 
+            transition: var(--transition); 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
             font-size: 0.9rem;
-            margin: 5px 0;
+            font-weight: 500;
+        }
+        .nav-link:hover { color: white; background: rgba(255,255,255,0.1); }
+        .nav-link.active { color: white; background: rgba(255,255,255,0.2); }
+        
+        .logout-btn { background: var(--danger) !important; color: white !important; }
+
+        @media (max-width: 992px) {
+            .header-nav { display: none; }
+            /* Mobile Nav could be added here */
+        }
+
+        /* Main Container */
+        .container { max-width: 1300px; margin: 2rem auto; padding: 0 1.5rem; }
+
+        /* Toolbar */
+        .toolbar { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 2rem; 
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .search-wrapper { position: relative; flex: 1; max-width: 400px; }
+        .search-wrapper i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--gray); }
+        .search-input { 
+            width: 100%; 
+            padding: 12px 12px 12px 45px; 
+            border: 2px solid transparent; 
+            border-radius: var(--radius-md); 
+            background: var(--white); 
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        .search-input:focus { border-color: var(--primary); outline: none; }
+
+        .action-btns { display: flex; gap: 10px; }
+
+        /* Button Styles */
+        .btn { 
+            padding: 12px 20px; 
+            border-radius: var(--radius-md); 
+            border: none; 
+            cursor: pointer; 
+            font-weight: 600; 
+            transition: var(--transition); 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+        .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-warning { background: var(--warning); color: var(--dark); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-icon { padding: 10px; border-radius: 10px; }
+
+        /* Menu Grid */
+        .category-section { margin-bottom: 3rem; }
+        .category-header { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e0e6ed;
+        }
+        .category-title { font-size: 1.5rem; font-weight: 800; color: var(--dark); display: flex; align-items: center; gap: 12px; }
+        .category-title::before { content: ''; width: 4px; height: 24px; background: var(--primary); border-radius: 4px; }
+
+        .menu-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 1.5rem; 
+        }
+
+        /* Card Design */
+        .menu-card { 
+            background: var(--white); 
+            border-radius: var(--radius-lg); 
+            overflow: hidden; 
+            box-shadow: var(--shadow); 
+            transition: var(--transition);
+            border: 1px solid rgba(0,0,0,0.02);
+            position: relative;
+        }
+        .menu-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+
+        .card-status {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            z-index: 10;
+        }
+        .status-in { background: #d4f8e2; color: #1e7e34; }
+        .status-out { background: #fde2e2; color: #c82333; }
+
+        .card-body { padding: 1.5rem; }
+        .item-name { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--dark); }
+        .item-price { font-size: 1.25rem; font-weight: 800; color: var(--primary); margin-bottom: 1rem; }
+        .item-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1.5rem; }
+        .badge { 
+            padding: 4px 10px; 
+            border-radius: 8px; 
+            font-size: 0.75rem; 
+            font-weight: 600; 
+            background: #f0f2f5; 
             color: var(--gray);
         }
+        .badge-rarity { background: #fff4e5; color: #ff9f43; }
 
-        .item-actions {
+        .card-actions { 
+            display: flex; 
+            gap: 8px; 
+            padding-top: 1rem; 
+            border-top: 1px solid #f0f2f5; 
+        }
+        .card-actions .btn { flex: 1; padding: 10px; }
+
+        /* Modal */
+        .modal { 
+            display: none; 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(0,0,0,0.5); 
+            z-index: 2000; 
+            justify-content: center; 
+            align-items: center; 
+            backdrop-filter: blur(4px);
+        }
+        .modal-content { 
+            background: var(--white); 
+            width: 90%; 
+            max-width: 500px; 
+            border-radius: var(--radius-lg); 
+            padding: 2rem; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            animation: modalSlide 0.3s ease-out;
+        }
+        @keyframes modalSlide { from { transform: translateY(20px); opacity: 0; } }
+
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .modal-header h2 { font-size: 1.5rem; font-weight: 800; }
+        .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray); }
+
+        .form-group { margin-bottom: 1.25rem; }
+        .form-label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.85rem; color: var(--gray); text-transform: uppercase; }
+        .form-control { 
+            width: 100%; 
+            padding: 12px; 
+            border: 2px solid #e0e6ed; 
+            border-radius: var(--radius-md); 
+            transition: var(--transition);
+        }
+        .form-control:focus { border-color: var(--primary); outline: none; }
+
+        /* Toast Notifications */
+        .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 3000; }
+        .toast { 
+            background: white; 
+            padding: 16px 24px; 
+            border-radius: var(--radius-md); 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             margin-top: 10px;
             display: flex;
-            justify-content: space-between;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            z-index: 1000;
-            justify-content: center;
             align-items: center;
-            animation: fadeIn 0.3s ease;
+            gap: 12px;
+            border-left: 4px solid var(--primary);
+            animation: toastIn 0.3s ease-out forwards;
         }
+        @keyframes toastIn { from { transform: translateX(100%); opacity: 0; } }
 
-        .modal-content {
-            background-color: white;
-            border-radius: var(--border-radius);
-            padding: 25px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: var(--box-shadow);
-            animation: zoomIn 0.3s ease;
-        }
+        /* Utilities */
+        .hidden { display: none !important; }
 
-        @keyframes zoomIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-header h2 {
-            margin: 0;
-            font-size: 1.5rem;
-            color: var(--dark);
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--gray);
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-            color: var(--dark);
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ced4da;
-            border-radius: var(--border-radius);
-            font-size: 1rem;
-            transition: var(--transition);
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.3);
-        }
-
-        .form-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: white;
-            color: var(--dark);
-            padding: 15px 20px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            z-index: 1000;
-            animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
-            max-width: 300px;
-        }
-
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-
-        .toast-success {
-            border-left: 4px solid var(--success);
-        }
-
-        .toast-error {
-            border-left: 4px solid var(--danger);
-        }
-
-        .toast-warning {
-            border-left: 4px solid var(--warning);
-        }
-
-        .confirmation-dialog {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .confirmation-content {
-            background-color: white;
-            border-radius: var(--border-radius);
-            padding: 25px;
-            width: 300px;
-            text-align: center;
-            box-shadow: var(--box-shadow);
-            animation: zoomIn 0.3s ease;
-        }
-
-        .confirmation-actions {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        @media (max-width: 768px) {
-            .menu-items {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            }
-            
-            .category-header {
-                flex-direction: column;
-                gap: 10px;
-            }
-            
-            .modal-content {
-                width: 95%;
-                padding: 15px;
-            }
+        @media (max-width: 600px) {
+            .container { padding: 0 1rem; }
+            .toolbar { flex-direction: column; align-items: stretch; }
+            .menu-grid { grid-template-columns: 1fr; }
+            .app-header { padding: 0 1rem; }
         }
     </style>
 </head>
-
 <body>
+
     <header class="app-header">
-    <div class="header-title">Admin Panel</div>
-    <nav class="header-nav">
-        <a href="Dashboard.html" class="nav-link"><i class="fas fa-chart-pie"></i> Dashboard</a>
-        <a href="StaffOrder.html" class="nav-link"><i class="fas fa-concierge-bell"></i> Orders</a>
-        <a href="StaffMenu.html" class="nav-link active"><i class="fas fa-book-open"></i> Menu Editor</a>
-        <a href="StaffUpload.html" class="nav-link"><i class="fas fa-image"></i> Image Uploads</a>
-        <a href="ImportProgram.html" class="nav-link"><i class="fas fa-boxes"></i> Inventory</a>
-        <a href="#" onclick="logout()" class="nav-link" style="background-color: var(--danger);"><i class="fas fa-sign-out-alt"></i> Logout</a>
-    </nav>
-</header>
-    
+        <div class="header-title">Menu Manager</div>
+        <nav class="header-nav">
+            <a href="StaffOrder.html" class="nav-link"><i class="fas fa-concierge-bell"></i> Orders</a>
+            <a href="StaffMenu.html" class="nav-link active"><i class="fas fa-book-open"></i> Menu</a>
+            <a href="StaffUpload.html" class="nav-link"><i class="fas fa-image"></i> Images</a>
+            <a href="ImportProgram.html" class="nav-link"><i class="fas fa-boxes"></i> Inventory</a>
+            <a href="#" onclick="logout()" class="nav-link logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </nav>
+    </header>
 
-    <div class="container">
-        <div class="top-nav">
-            <button class="btn btn-primary" onclick="navigateToUpload()">
-                <i class="fas fa-image"></i> Change Images
-            </button>
-            <button class="btn btn-success" onclick="openAddItemModal()" style="margin-left:10px;">
-                <i class="fas fa-plus"></i> Add Item
-            </button>
-        </div>
-
-        <div id="menuSection">
-            <!-- Menu items will be dynamically generated here -->
-        </div>
-    </div>
-
-    <!-- Add Item Modal -->
-    <div id="addItemModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Add New Menu Item</h2>
-                <button class="modal-close" onclick="closeModal('addItemModal')">&times;</button>
+    <main class="container">
+        <div class="toolbar">
+            <div class="search-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search menu items..." oninput="filterItems()">
             </div>
-            <div class="form-group">
-                <label class="form-label" for="itemName">Item Name</label>
-                <input type="text" id="itemName" class="form-control" placeholder="Enter item name">
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="itemPrice">Price from the seller (Rs)</label>
-                <input type="number" id="itemPrice" class="form-control" placeholder="Enter price">
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="startingValue">Starting Value</label>
-                <input type="number" id="startingValue" class="form-control" placeholder="e.g. 0.5 for 0.5 kg" value="1">
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="itemCategory">Category</label>
-                <select id="itemCategory" class="form-control">
-                    <!-- Categories will be dynamically loaded here -->
-                </select>
-            </div>
-            <div class="form-group" id="customCategoryGroup" style="display:none;">
-                <label class="form-label" for="customCategory">Custom Category Name</label>
-                <input type="text" id="customCategory" class="form-control" placeholder="Enter custom category">
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="itemRarity">Rarity</label>
-                <select id="itemRarity" class="form-control">
-                    <option value="Basic" selected>Basic</option>
-                    <option value="Premium">Premium</option>
-                    <option value="Limited Edition">Limited Edition</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="itemUnit">Unit</label>
-                <select id="itemUnit" class="form-control">
-                    <option value="Amount">Amount</option>
-                    <option value="KG">KG</option>
-                    <option value="Liter">Liter</option>
-                </select>
-            </div>
-            <div class="form-actions">
-                <button class="btn btn-primary" onclick="addMenuItem()">
-                    <i class="fas fa-save"></i> Save Item
+            <div class="action-btns">
+                <button class="btn btn-primary" onclick="openModal('itemModal')">
+                    <i class="fas fa-plus"></i> Add New Item
                 </button>
             </div>
         </div>
-    </div>
 
-    <!-- Edit Category Modal -->
-    <div id="editCategoryModal" class="modal">
+        <div id="menuContainer">
+            <!-- Dynamic Content -->
+            <div style="text-align: center; padding: 5rem; opacity: 0.5;">
+                <i class="fas fa-circle-notch fa-spin fa-3x"></i>
+                <p style="margin-top: 1rem;">Loading your menu...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Item Modal (Add/Edit) -->
+    <div id="itemModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Edit Category</h2>
-                <button class="modal-close" onclick="closeModal('editCategoryModal')">&times;</button>
+                <h2 id="modalTitle">Add Menu Item</h2>
+                <button class="close-btn" onclick="closeModal('itemModal')">&times;</button>
+            </div>
+            <form id="itemForm" onsubmit="saveItem(event)">
+                <input type="hidden" id="itemId">
+                <div class="form-group">
+                    <label class="form-label">Item Name</label>
+                    <input type="text" id="itemName" class="form-control" required placeholder="e.g. Chicken Momo">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label class="form-label">Price (Rs)</label>
+                        <input type="number" id="itemPrice" class="form-control" required step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Base Quantity</label>
+                        <input type="number" id="itemStartingValue" class="form-control" required value="1" step="0.1">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <div style="display: flex; gap: 10px;">
+                        <select id="itemCategory" class="form-control" onchange="toggleCustomCategory(this.value)">
+                            <!-- Loaded Dynamically -->
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group hidden" id="customCategoryGroup">
+                    <label class="form-label">New Category Name</label>
+                    <input type="text" id="customCategory" class="form-control" placeholder="Enter new category name">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label class="form-label">Rarity</label>
+                        <select id="itemRarity" class="form-control">
+                            <option value="Basic">Basic</option>
+                            <option value="Premium">Premium</option>
+                            <option value="Limited Edition">Limited Edition</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Unit</label>
+                        <select id="itemUnit" class="form-control">
+                            <option value="">None (Piece/Plate)</option>
+                            <option value="KG">Kilogram (KG)</option>
+                            <option value="Liter">Liter</option>
+                            <option value="Portion">Portion</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-actions" style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 1rem;">
+                    <button type="button" class="btn" style="background: #eee;" onclick="closeModal('itemModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Category Edit Modal -->
+    <div id="categoryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Rename Category</h2>
+                <button class="close-btn" onclick="closeModal('categoryModal')">&times;</button>
             </div>
             <div class="form-group">
-                <label class="form-label" for="newCategoryName">New Category Name</label>
-                <input type="text" id="newCategoryName" class="form-control" placeholder="Enter new category name">
-                <input type="hidden" id="currentCategoryName">
+                <label class="form-label">Current Category: <span id="currentCatLabel" style="color: var(--primary);"></span></label>
+                <input type="text" id="newCategoryName" class="form-control" placeholder="New category name">
             </div>
-            <div class="form-actions">
-                <button class="btn btn-primary" onclick="updateCategoryName()">
-                    <i class="fas fa-save"></i> Update
-                </button>
+            <div class="form-actions" style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button class="btn" style="background: #eee;" onclick="closeModal('categoryModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="performCategoryRename()">Update All Items</button>
             </div>
         </div>
     </div>
 
-    <!-- Delete Confirmation Dialog -->
-    <div id="deleteConfirmation" class="confirmation-dialog">
-        <div class="confirmation-content">
-            <h3>Confirm Deletion</h3>
-            <p>Are you sure you want to delete this item?</p>
-            <input type="hidden" id="deleteItemId">
-            <div class="confirmation-actions">
-                <button class="btn btn-danger" onclick="confirmDelete()">Delete</button>
-                <button class="btn" onclick="closeConfirmation()">Cancel</button>
-            </div>
-        </div>
-    </div>
+    <div id="toastContainer" class="toast-container"></div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
@@ -512,264 +373,243 @@
             measurementId: "G-VZC36FJC24"
         };
         firebase.initializeApp(firebaseConfig);
-        const menuRef = firebase.database().ref('menu');
+        const db = firebase.database();
+        const menuRef = db.ref('menu');
 
-        // Show toast notification
-        function showToast(message, type = 'success') {
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            
-            let icon = '<i class="fas fa-check-circle"></i>';
-            if (type === 'error') icon = '<i class="fas fa-exclamation-circle"></i>';
-            if (type === 'warning') icon = '<i class="fas fa-exclamation-triangle"></i>';
-            
-            toast.innerHTML = `${icon} <span>${message}</span>`;
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                document.body.removeChild(toast);
-            }, 3000);
-        }
+        let allItems = [ ];
+        let categories = new Set();
 
-        // Modal handling
-        function openModal(modalId) {
-            document.getElementById(modalId).style.display = 'flex';
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
-        function openAddItemModal() {
-            populateCategoryDropdown();
-            openModal('addItemModal');
-        }
-
-        function openEditCategoryModal(category) {
-            document.getElementById('newCategoryName').value = category;
-            document.getElementById('currentCategoryName').value = category;
-            openModal('editCategoryModal');
-        }
-
-        // Confirmation dialog
-        function openDeleteConfirmation(itemId) {
-            document.getElementById('deleteItemId').value = itemId;
-            document.getElementById('deleteConfirmation').style.display = 'flex';
-        }
-
-        function closeConfirmation() {
-            document.getElementById('deleteConfirmation').style.display = 'none';
-        }
-
-        function confirmDelete() {
-            const itemId = document.getElementById('deleteItemId').value;
-            menuRef.child(itemId).remove()
-                .then(() => {
-                    showToast('Item deleted successfully');
-                    fetchMenuItems();
-                })
-                .catch((error) => {
-                    showToast('Error deleting item', 'error');
-                    console.error("Error deleting menu item: ", error);
+        // Load Data
+        function loadMenu() {
+            menuRef.on('value', snapshot => {
+                allItems = [ ];
+                categories = new Set();
+                snapshot.forEach(child => {
+                    const item = child.val();
+                    allItems.push({ id: child.key, ...item });
+                    if(item.category) categories.add(item.category);
                 });
-            closeConfirmation();
-        }
-
-        // Navigate to upload page
-        function navigateToUpload() {
-            window.location.href = 'StaffUpload.html';
-        }
-
-        function populateCategoryDropdown() {
-            const itemCategorySelect = document.getElementById('itemCategory');
-            itemCategorySelect.innerHTML = '';
-            const categories = new Set();
-            
-            menuRef.once('value', (snapshot) => {
-                snapshot.forEach((childSnapshot) => {
-                    const menuItem = childSnapshot.val();
-                    categories.add(menuItem.category);
-                });
-                
-                const sortedCategories = Array.from(categories).sort();
-                sortedCategories.forEach((category) => {
-                    const option = document.createElement('option');
-                    option.value = category;
-                    option.textContent = category;
-                    itemCategorySelect.appendChild(option);
-                });
-                
-                const customOption = document.createElement('option');
-                customOption.value = 'Custom';
-                customOption.textContent = '+ Add New Category';
-                itemCategorySelect.appendChild(customOption);
+                renderMenu();
+                updateCategoryDropdown();
             });
         }
 
-        document.getElementById('itemCategory').addEventListener('change', function() {
-            const customCategoryGroup = document.getElementById('customCategoryGroup');
-            if (this.value === 'Custom') {
-                customCategoryGroup.style.display = 'block';
-            } else {
-                customCategoryGroup.style.display = 'none';
-            }
-        });
-
-        function addMenuItem() {
-            const itemName = document.getElementById('itemName').value;
-            const itemPrice = parseFloat(document.getElementById('itemPrice').value);
-            const itemProfit = parseFloat(document.getElementById('itemProfit').value) || 0;
-            const itemCategorySelect = document.getElementById('itemCategory');
-            const customCategory = document.getElementById('customCategory').value;
-            const itemUnit = document.getElementById('itemUnit').value;
-            const itemCategory = itemCategorySelect.value === 'Custom' ? customCategory : itemCategorySelect.value;
-            const itemRarity = document.getElementById('itemRarity').value;
+        function renderMenu() {
+            const container = document.getElementById('menuContainer');
+            const search = document.getElementById('searchInput').value.toLowerCase();
             
-            if (itemName && itemPrice && itemCategory) {
-                const newItemRef = menuRef.push();
-                const menuItem = {
-                    name: itemName,
-                                    price: itemPrice,
-                category: itemCategory,
-                    startingValue: startingValue,
-                    rarity: itemRarity
-                };
-                
-                if (itemUnit !== 'Amount') {
-                    menuItem.unit = itemUnit;
+            if (allItems.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:5rem; opacity:0.5;"><h3>No items in menu yet.</h3></div>`;
+                return;
+            }
+
+            const filtered = allItems.filter(i => 
+                i.name.toLowerCase().includes(search) || 
+                i.category.toLowerCase().includes(search)
+            );
+
+            const grouped = { };
+            filtered.forEach(item => {
+                if(!grouped[item.category]) grouped[item.category] = [ ];
+                grouped[item.category].push(item);
+            });
+
+            let html = '';
+            const sortedCats = Object.keys(grouped).sort();
+
+            if (sortedCats.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:5rem; opacity:0.5;"><h3>No items matching your search.</h3></div>`;
+                return;
+            }
+
+            sortedCats.forEach(cat => {
+                html += `
+                <div class="category-section">
+                    <div class="category-header">
+                        <h2 class="category-title">${cat}</h2>
+                        <button class="btn btn-warning btn-icon" onclick="openCategoryEdit('${cat}')" title="Rename Category">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                    <div class="menu-grid">
+                        ${grouped[cat].map(item => renderItemCard(item)).join('')}
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function renderItemCard(item) {
+            const isOut = item.status === 'out_of_stock';
+            const price = item.price || 0;
+            const unit = item.unit ? ` per ${item.startingValue || 1} ${item.unit}` : '';
+            
+            return `
+            <div class="menu-card" data-id="${item.id}">
+                <span class="card-status ${isOut ? 'status-out' : 'status-in'}">
+                    ${isOut ? 'Out of Stock' : 'In Stock'}
+                </span>
+                <div class="card-body">
+                    <h3 class="item-name">${item.name}</h3>
+                    <div class="item-price">Rs ${price.toFixed(2)}<span style="font-size:0.8rem; color:var(--gray); font-weight:500;">${unit}</span></div>
+                    <div class="item-meta">
+                        <span class="badge">${item.category}</span>
+                        <span class="badge badge-rarity">${item.rarity || 'Basic'}</span>
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn btn-warning btn-icon" onclick="editItem('${item.id}')" title="Edit Item">
+                            <i class="fas fa-pen"></i>
+                        </button>
+                        <button class="btn ${isOut ? 'btn-success' : 'btn-warning'} btn-icon" 
+                                onclick="toggleStatus('${item.id}', '${item.status}')" 
+                                title="${isOut ? 'Mark as Available' : 'Mark as Out of Stock'}">
+                            <i class="fas ${isOut ? 'fa-check-circle' : 'fa-times-circle'}"></i>
+                        </button>
+                        <button class="btn btn-danger btn-icon" onclick="deleteItem('${item.id}')" title="Delete Item">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        // Search
+        function filterItems() {
+            renderMenu();
+        }
+
+        // Modals
+        function openModal(id) {
+            document.getElementById(id).style.display = 'flex';
+            if(id === 'itemModal') {
+                document.getElementById('itemForm').reset();
+                document.getElementById('itemId').value = '';
+                document.getElementById('modalTitle').innerText = 'Add Menu Item';
+                toggleCustomCategory('');
+            }
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        function toggleCustomCategory(val) {
+            const group = document.getElementById('customCategoryGroup');
+            if(val === 'NEW') group.classList.remove('hidden');
+            else group.classList.add('hidden');
+        }
+
+        function updateCategoryDropdown() {
+            const select = document.getElementById('itemCategory');
+            let html = '<option value="">Select Category</option>';
+            Array.from(categories).sort().forEach(c => {
+                html += `<option value="${c}">${c}</option>`;
+            });
+            html += `<option value="NEW" style="color:var(--primary); font-weight:bold;">+ Create New Category</option>`;
+            select.innerHTML = html;
+        }
+
+        // Actions
+        function saveItem(e) {
+            e.preventDefault();
+            const id = document.getElementById('itemId').value;
+            const name = document.getElementById('itemName').value;
+            const price = parseFloat(document.getElementById('itemPrice').value);
+            const startingValue = parseFloat(document.getElementById('itemStartingValue').value);
+            const rarity = document.getElementById('itemRarity').value;
+            const unit = document.getElementById('itemUnit').value;
+            let category = document.getElementById('itemCategory').value;
+
+            if(category === 'NEW') category = document.getElementById('customCategory').value;
+            if(!category) return showToast('Please select or enter a category', 'error');
+
+            const data = {
+                name, price, category, startingValue, rarity, 
+                type: 'Hotel', // Hardcoded as per project requirement
+                status: 'in_stock'
+            };
+            if(unit) data.unit = unit;
+
+            const promise = id ? menuRef.child(id).update(data) : menuRef.push(data);
+            
+            promise.then(() => {
+                showToast(id ? 'Item updated' : 'Item added');
+                closeModal('itemModal');
+            }).catch(err => showToast(err.message, 'error'));
+        }
+
+        function editItem(id) {
+            const item = allItems.find(i => i.id === id);
+            if(!item) return;
+
+            openModal('itemModal');
+            document.getElementById('modalTitle').innerText = 'Edit Item';
+            document.getElementById('itemId').value = item.id;
+            document.getElementById('itemName').value = item.name;
+            document.getElementById('itemPrice').value = item.price;
+            document.getElementById('itemStartingValue').value = item.startingValue || 1;
+            document.getElementById('itemCategory').value = item.category;
+            document.getElementById('itemRarity').value = item.rarity || 'Basic';
+            document.getElementById('itemUnit').value = item.unit || '';
+            
+            toggleCustomCategory(item.category);
+        }
+
+        function toggleStatus(id, current) {
+            const newStatus = current === 'out_of_stock' ? 'in_stock' : 'out_of_stock';
+            menuRef.child(id).update({ status: newStatus })
+                .then(() => showToast('Status updated'))
+                .catch(err => showToast(err.message, 'error'));
+        }
+
+        function deleteItem(id) {
+            if(confirm('Are you sure you want to delete this item permanently?')) {
+                menuRef.child(id).remove()
+                    .then(() => showToast('Item deleted'))
+                    .catch(err => showToast(err.message, 'error'));
+            }
+        }
+
+        // Category Management
+        let catToRename = '';
+        function openCategoryEdit(cat) {
+            catToRename = cat;
+            document.getElementById('currentCatLabel').innerText = cat;
+            document.getElementById('newCategoryName').value = cat;
+            openModal('categoryModal');
+        }
+
+        function performCategoryRename() {
+            const newName = document.getElementById('newCategoryName').value.trim();
+            if(!newName || newName === catToRename) return closeModal('categoryModal');
+
+            const updates = { };
+            allItems.forEach(item => {
+                if(item.category === catToRename) {
+                    updates[`${item.id}/category`] = newName;
                 }
-                
-                newItemRef.set(menuItem)
-                    .then(() => {
-                        showToast('Item added successfully');
-                        closeModal('addItemModal');
-                        clearForm();
-                        fetchMenuItems();
-                        populateCategoryDropdown();
-                    })
-                    .catch((error) => {
-                        showToast('Error adding item', 'error');
-                        console.error("Error adding menu item: ", error);
-                    });
-            } else {
-                showToast('Please fill in all required fields', 'warning');
-            }
-        }
-
-        function clearForm() {
-            document.getElementById('itemName').value = '';
-            document.getElementById('itemPrice').value = '';
-            document.getElementById('itemProfit').value = '';
-            document.getElementById('startingValue').value = '1';
-            document.getElementById('customCategory').value = '';
-        }
-
-        function updateCategoryName() {
-            const currentCategory = document.getElementById('currentCategoryName').value;
-            const newCategoryName = document.getElementById('newCategoryName').value;
-            
-            if (newCategoryName && newCategoryName !== currentCategory) {
-                menuRef.once('value', (snapshot) => {
-                    let updates = {};
-                    snapshot.forEach((childSnapshot) => {
-                        const menuItem = childSnapshot.val();
-                        if (menuItem.category === currentCategory) {
-                            updates[`${childSnapshot.key}/category`] = newCategoryName;
-                        }
-                    });
-                    
-                    menuRef.update(updates)
-                        .then(() => {
-                            showToast('Category updated successfully');
-                            closeModal('editCategoryModal');
-                            fetchMenuItems();
-                            populateCategoryDropdown();
-                        })
-                        .catch((error) => {
-                            showToast('Error updating category', 'error');
-                            console.error("Error updating category: ", error);
-                        });
-                });
-            } else {
-                showToast('Please enter a new category name', 'warning');
-            }
-        }
-
-        function fetchMenuItems() {
-            menuRef.once('value', (snapshot) => {
-                const menuSection = document.getElementById('menuSection');
-                menuSection.innerHTML = '';
-                const categories = {};
-                
-                snapshot.forEach((childSnapshot) => {
-                    const menuItem = childSnapshot.val();
-                    const menuItemId = childSnapshot.key;
-                    
-                    if (!categories[menuItem.category]) {
-                        categories[menuItem.category] = [];
-                    }
-                    
-                    let priceDisplay = `Rs ${menuItem.price.toFixed(2)}`;
-                    if (menuItem.unit) {
-                        const displayValue = menuItem.startingValue && menuItem.startingValue !== 1
-                            ? `${menuItem.startingValue} ${menuItem.unit}`
-                            : `${menuItem.unit}`;
-                        priceDisplay += ` per ${displayValue}`;
-                    }
-                    
-                    let rarityClass = menuItem.rarity ? menuItem.rarity.replace(' Edition', '') : 'Basic';
-                    
-                    categories[menuItem.category].push(`
-                        <div class="menu-item">
-                            <span class="item-rarity rarity-${rarityClass}">${menuItem.rarity || 'Basic'}</span>
-                            <h3 class="item--name">${menuItem.name}</h3>
-                            <p class="item-price">${priceDisplay}</p>
-                            ${menuItem.profit !== undefined ? `<p class="item-profit">Profit: Rs ${menuItem.profit.toFixed(2)}</p>` : ''}
-                            <div class="item-actions">
-                                <button class="btn btn-danger" onclick="openDeleteConfirmation('${menuItemId}')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                        </div>
-                    `);
-                });
-                
-                const sortedCategories = Object.keys(categories).sort();
-                
-                sortedCategories.forEach((category, index) => {
-                    const delay = index * 100;
-                    const menuItemHTML = `
-                        <div class="menu-category" style="animation-delay: ${delay}ms">
-                            <div class="category-header">
-                                <h2>${category}</h2>
-                                <button class="btn btn-warning" onclick="openEditCategoryModal('${category}')">
-                                    <i class="fas fa-edit"></i> Edit Category
-                                </button>
-                            </div>
-                            <div class="menu-items">
-                                ${categories[category].join('')}
-                            </div>
-                        </div>
-                    `;
-                    menuSection.innerHTML += menuItemHTML;
-                });
             });
+
+            menuRef.update(updates)
+                .then(() => {
+                    showToast('Category renamed successfully');
+                    closeModal('categoryModal');
+                })
+                .catch(err => showToast(err.message, 'error'));
         }
 
-        window.onload = function() {
-            fetchMenuItems();
-            populateCategoryDropdown();
-        };
+        function showToast(msg, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast`;
+            if(type === 'error') toast.style.borderColor = 'var(--danger)';
+            toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> <span>${msg}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
 
-        // Close modals when clicking outside
-        window.onclick = function(event) {
-            if (event.target.className === 'modal') {
-                event.target.style.display = 'none';
-            }
-            if (event.target.className === 'confirmation-dialog') {
-                event.target.style.display = 'none';
-            }
-        };
+        window.onload = loadMenu;
     </script>
-<script src="auth.js"></script>
+    <script src="auth.js"></script>
 </body>
 </html>
