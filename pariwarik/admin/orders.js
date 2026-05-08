@@ -94,10 +94,10 @@ function renderAllOrders() {
                 </div>
                 <div class="card-footer">
                     ${order.status === 'Ordered' ? 
-                        `<button class="btn btn-primary" onclick="updateOrderStatus('${order.type}', '${order.userUid}', '${order.id}', 'Accepted')">Accept</button>` : 
-                        `<button class="btn btn-success" onclick="updateOrderStatus('${order.type}', '${order.userUid}', '${order.id}', 'Completed')">Complete</button>`
+                        `<button class="btn btn-primary" onclick="updateOrderStatus('${order.type}', '${order.userUid}', '${order.id}', 'Accepted')"><i class="fas fa-check"></i> Accept</button>` : 
+                        `<button class="btn btn-success" onclick="updateOrderStatus('${order.type}', '${order.userUid}', '${order.id}', 'Completed')"><i class="fas fa-flag-checkered"></i> Complete</button>`
                     }
-                    <button class="btn btn-danger" onclick="updateOrderStatus('${order.type}', '${order.userUid}', '${order.id}', 'Cancelled')">Cancel</button>
+                    <button class="btn btn-danger" onclick="updateOrderStatus('${order.type}', '${order.userUid}', '${order.id}', 'Cancelled')"><i class="fas fa-times-circle"></i> Cancel</button>
                 </div>
             </div>`;
         orderSection.insertAdjacentHTML('beforeend', html);
@@ -107,11 +107,17 @@ function renderAllOrders() {
 // 4. Status Update & Archiving
 function updateOrderStatus(type, userUid, orderId, newStatus) {
     const path = `orders/${type}/${userUid}/${orderId}`;
-    showModal('Confirm', `Mark as ${newStatus}?`, 'fa-question-circle', [
+    let icon = 'fa-question-circle';
+    if (newStatus === 'Accepted') icon = 'fa-check-circle';
+    if (newStatus === 'Completed') icon = 'fa-flag-checkered';
+    if (newStatus === 'Cancelled') icon = 'fa-times-circle';
+
+    showModal('Confirm', `Mark as ${newStatus}?`, icon, [
         { text: 'Confirm', class: 'modal-btn-confirm', onClick: `performUpdate('${path}', '${orderId}', '${newStatus}')` },
         { text: 'Back', class: 'modal-btn-cancel', onClick: 'hideModal()' }
     ]);
 }
+    
 
 function performUpdate(path, id, status) {
     // Optimistic UI

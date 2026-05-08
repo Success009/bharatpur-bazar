@@ -32,6 +32,7 @@
         .data-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.08); }
         .card-header { padding: 1.25rem; border-bottom: 1px solid #f0f2f5; }
         .card-header.sales { background-color: rgba(46, 204, 113, 0.05); color: var(--success); }
+        .card-header.cancelled { background-color: rgba(231, 76, 60, 0.05); color: var(--danger); }
         .card-header.imports { background-color: rgba(52, 152, 219, 0.05); color: #2980b9; }
         .card-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; }
         .timestamp { font-size: 0.8rem; color: var(--gray); }
@@ -42,6 +43,7 @@
         .price-info { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 2px solid #f0f2f5; }
         .total-price { font-weight: 800; font-size: 1.2rem; display: flex; justify-content: space-between; }
         .total-price.sales { color: var(--success); }
+        .total-price.cancelled { color: var(--danger); }
         .total-price.imports { color: #2980b9; }
         .empty-state { padding: 5rem; text-align: center; color: var(--gray); grid-column: 1/-1; opacity: 0.6; }
         .empty-state i { font-size: 4rem; margin-bottom: 1.5rem; }
@@ -60,10 +62,12 @@
             <div class="stat-card inventory"><div class="stat-label">Inventory Value</div><div class="stat-value" id="inventoryValue">Rs 0</div></div>
         </div>
 
-        <div class="view-toggle">
+                <div class="view-toggle">
             <button class="btn view-btn active" id="viewSalesBtn" onclick="setView('sales')"><i class="fas fa-chart-line"></i> Sales History</button>
+            <button class="btn view-btn" id="viewCancelledBtn" onclick="setView('cancelled')"><i class="fas fa-times-circle"></i> Cancelled Orders</button>
             <button class="btn view-btn" id="viewImportsBtn" onclick="setView('imports')"><i class="fas fa-boxes"></i> Import History</button>
         </div>
+    
 
         <div class="filters">
             <input type="text" class="search-box" id="searchBox" placeholder="Search sales...">

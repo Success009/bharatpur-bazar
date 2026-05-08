@@ -1,5 +1,5 @@
 // Dashboard Logic
-let allOrders = [ ], allImports = [ ], filteredItems = [ ];
+let allOrders = [ ], allCancelled = [ ], allImports = [ ], filteredItems = [ ];
 let currentView = 'sales';
 let usageMap = { }, menuCache = { };
 
@@ -23,8 +23,23 @@ const fetchAllData = async () => {
     
 
     let cancelledCount = 0;
+    allCancelled = [ ];
     if (cancelledSnapshot.exists()) {
-        cancelledCount = Object.keys(cancelledSnapshot.val()).length;
+        cancelledSnapshot.forEach(child => {
+            const order = child.val();
+            order.id = child.key;
+            let orderTotal = 0;
+            if(order.items) {
+                order.items.forEach(item => {
+                    const pricePerUnit = item.price !== undefined ? item.price : ((menuCache[item.name] || { }).price || 0) / ((menuCache[item.name] || { }).startingValue || 1);
+                    const qty = item.qty || item.quantity || 1;
+                    orderTotal += pricePerUnit * qty;
+                });
+            }
+            order.calculatedTotal = orderTotal;
+            allCancelled.push(order);
+        });
+        cancelledCount = allCancelled.length;
     }
     document.getElementById('cancelledCount').textContent = `${cancelledCount} Orders`;
     
@@ -95,9 +110,20 @@ const applyFilters = () => {
     const timeFilter = document.getElementById('timeFilter').value;
     const sortOrder = document.getElementById('sortOrder').value;
     
-    const sourceData = currentView === 'sales' ? allOrders : allImports;
-    const timestampField = currentView === 'sales' ? 'timestamp' : 'createdAt';
-    const amountField = currentView === 'sales' ? 'calculatedTotal' : 'price';
+    let sourceData = [ ];
+    let timestampField = 'timestamp';
+    let amountField = 'calculatedTotal';
+
+    if (currentView === 'sales') {
+        sourceData = allOrders;
+    } else if (currentView === 'cancelled') {
+        sourceData = allCancelled;
+        timestampField = 'cancelledAt' || 'timestamp';
+    } else {
+        sourceData = allImports;
+        timestampField = 'createdAt';
+        amountField = 'price';
+    }
 
     const now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const thisWeek = new Date(today); thisWeek.setDate(today.getDate() - today.getDay());
@@ -129,9 +155,30 @@ const applyFilters = () => {
 
 const renderContent = () => {
     const container = document.getElementById('dataContainer');
-    container.innerHTML = filteredItems.length === 0 
-        ? `<div class="empty-state"><i class="fas fa-filter"></i><h3>No Items Found</h3><p>Try changing your filters or view.</p></div>`
-        : filteredItems.map(item => currentView === 'sales' ? createSaleCard(item) : createImportCard(item)).join('');
+    if (filteredItems.length === 0) {
+        container.innerHTML = `<div class="empty-state"><i class="fas fa-filter"></i><h3>No Items Found</h3><p>Try changing your filters or view.</p></div>`;
+        return;
+    }
+
+    let html = '';
+    filteredItems.forEach(item => {
+        if (currentView === 'sales') html += createSaleCard(item);
+        else if (currentView === 'cancelled') html += createCancelledCard(item);
+        else html += createImportCard(item);
+    });
+    container.innerHTML = html;
+};
+
+const createCancelledCard = (order) => {
+    const orderItems = (order.items || [ ]).map(item => `<li><span>${item.name}</span><span>&times; ${item.qty || item.quantity || 1}</span></li>`).join('');
+    return `
+        <div class="data-card">
+            <div class="card-header cancelled"><div class="card-title"><span>Order #${order.id.slice(-6)}</span><i class="fas fa-ban"></i></div><div class="timestamp">Cancelled: ${new Date(order.cancelledAt || order.timestamp).toLocaleString()}</div></div>
+            <div class="card-body">
+                <ul class="item-list">${orderItems || '<li>No items in this order</li>'}</ul>
+                <div class="price-info"><div class="total-price cancelled"><span>Lost Value:</span><span>Rs ${order.calculatedTotal.toFixed(2)}</span></div></div>
+            </div>
+        </div>`;
 };
 
 const createSaleCard = (order) => {
@@ -166,8 +213,14 @@ const createImportCard = (item) => {
 const setView = (view) => {
     currentView = view;
     document.getElementById('viewSalesBtn').classList.toggle('active', view === 'sales');
+    document.getElementById('viewCancelledBtn').classList.toggle('active', view === 'cancelled');
     document.getElementById('viewImportsBtn').classList.toggle('active', view === 'imports');
-    document.getElementById('searchBox').placeholder = view === 'sales' ? 'Search sales...' : 'Search inventory...';
+    
+    let placeholder = 'Search sales...';
+    if (view === 'cancelled') placeholder = 'Search cancelled orders...';
+    else if (view === 'imports') placeholder = 'Search inventory...';
+    
+    document.getElementById('searchBox').placeholder = placeholder;
     applyFilters();
 };
 
