@@ -1,19 +1,6 @@
 (function() {
     // Unique local config name to avoid any chance of collision with global scope
-    const _internalAuthConfig = {
-        apiKey: "AIzaSyDlnzH1D7D7Q663eWE086ng_1KdP46MZEs",
-        authDomain: "deep-freehold-389006.firebaseapp.com",
-        databaseURL: "https://deep-freehold-389006-default-rtdb.firebaseio.com",
-        projectId: "deep-freehold-389006",
-        storageBucket: "deep-freehold-389006.appspot.com",
-        messagingSenderId: "76562961838",
-        appId: "1:76562961838:web:4d18b2f79d7eb9fd88243f"
-    };
-
-    // Initialize Firebase only if no app exists yet
-    if (!firebase.apps || firebase.apps.length === 0) {
-        firebase.initializeApp(_internalAuthConfig);
-    }
+    // Firebase is now initialized in admin-common.js
     
     const auth = firebase.auth();
 

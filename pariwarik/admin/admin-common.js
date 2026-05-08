@@ -1,5 +1,20 @@
-// Shared Admin Logic
+// Shared Admin Logic and Firebase Configuration
 
+const firebaseConfig = {
+    apiKey: "AIzaSyDlnzH1D7D7Q663eWE086ng_1KdP46MZEs",
+    authDomain: "deep-freehold-389006.firebaseapp.com",
+    databaseURL: "https://deep-freehold-389006-default-rtdb.firebaseio.com",
+    projectId: "deep-freehold-389006",
+    storageBucket: "deep-freehold-389006.appspot.com",
+    messagingSenderId: "76562961838",
+    appId: "1:76562961838:web:4d18b2f79d7eb9fd88243f",
+    measurementId: "G-VZC36FJC24"
+};
+
+// Initialize Firebase only if no app exists yet
+if (!firebase.apps || firebase.apps.length === 0) {
+    firebase.initializeApp(firebaseConfig);
+}
 /**
  * Injects the standard admin header into the page.
  * @param {string} activePage - The filename of the active page to highlight in nav.
