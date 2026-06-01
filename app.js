@@ -37,8 +37,10 @@ function initApp() {
     const qrTarget = document.getElementById('qrTarget');
     if(qrTarget) {
         const qrPlaceholder = new Image(); 
-        qrPlaceholder.src = 'qr-code.png';
-        qrPlaceholder.onload = () => qrTarget.innerHTML = `<img src="qr-code.png" style="width:200px; display:block; margin:0 auto;">`;
+        qrPlaceholder.src = 'qr-payment.jpg';
+        qrPlaceholder.onload = () => {
+            qrTarget.innerHTML = `<img src="qr-payment.jpg" style="width:200px; display:block; margin:0 auto; border-radius:12px;">`;
+        };
     }
 }
 
@@ -294,15 +296,32 @@ function saveReg() {
 }
 
 function finalizeOrder(method) {
-    const user = firebase.auth().currentUser;
-    if(!user) return;
+    const auth = firebase.auth();
+    let user = auth.currentUser;
+    if(!user) {
+        alert("Reconnecting to secure database. Please try clicking order again in a moment...");
+        auth.signInAnonymously().catch(console.error);
+        return;
+    }
+    const username = localStorage.getItem('username') || 'Customer';
+    const phone = localStorage.getItem('phone') || 'N/A';
+    const address = localStorage.getItem('address') || 'N/A';
+    
+    // Add quantity property to cart items for full StaffOrder compatibility
+    const orderItems = cart.map(i => ({
+        ...i,
+        quantity: i.qty || 1
+    }));
+
     const order = { 
-        username: localStorage.getItem('username'), 
-        phone: localStorage.getItem('phone'), 
-        address: localStorage.getItem('address'), 
-        items: cart, 
+        username: username, 
+        phone: phone, 
+        address: address,
+        location: address, // Map address to location for StaffOrder view compatibility
+        items: orderItems, 
         totalPrice: parseFloat(document.getElementById('mainTotal').innerText), 
-        method, 
+        method: method,
+        paymentMethod: method, // Map method to paymentMethod for StaffOrder view compatibility
         status: 'Pending', 
         timestamp: new Date().toISOString() 
     };
@@ -317,12 +336,15 @@ function finalizeOrder(method) {
             timestamp: Date.now()
         }).catch(console.error);
 
-        alert("Order Placed!"); 
+        alert("Order Placed Successfully!"); 
         cart = []; 
         updateCartUI(); 
         renderItems(); 
         closeAll();
-    }).catch(console.error);
+    }).catch(err => {
+        console.error("Order submission failed:", err);
+        alert("Could not place order: " + err.message);
+    });
 }
 
 function sendMsg() {
@@ -346,5 +368,18 @@ function renderChat(m, type) {
         if(dot) dot.style.display = 'flex';
     }
 }
+
+// Explicitly attach all interactive functions to the window object to guarantee global availability
+window.initApp = initApp;
+window.toggleDrawer = toggleDrawer;
+window.closeAll = closeAll;
+window.switchType = switchType;
+window.addToCart = addToCart;
+window.updateQty = updateQty;
+window.checkRegistration = checkRegistration;
+window.saveReg = saveReg;
+window.finalizeOrder = finalizeOrder;
+window.sendMsg = sendMsg;
+window.renderChat = renderChat;
 
 window.onload = initApp;
