@@ -344,7 +344,7 @@
         }
 
         async function loadUsers() {
-            const usersRef = firebase.database().ref('users');
+            const usersRef = firebase.database().ref('bb_users');
             const usersList = document.getElementById('usersList');
             
             usersRef.on('value', async (usersSnapshot) => {
@@ -360,8 +360,8 @@
 
                 // Asynchronously fetch the last message time for each user
                 for (const user of userProfiles) {
-                    const userMsgRef = firebase.database().ref(`userMessages/${user.uid}`).orderByChild('timestamp').limitToLast(1);
-                    const adminMsgRef = firebase.database().ref(`adminMessages/${user.uid}`).orderByChild('timestamp').limitToLast(1);
+                    const userMsgRef = firebase.database().ref(`bb_userMessages/${user.uid}`).orderByChild('timestamp').limitToLast(1);
+                    const adminMsgRef = firebase.database().ref(`bb_adminMessages/${user.uid}`).orderByChild('timestamp').limitToLast(1);
 
                     const [userMsgSnap, adminMsgSnap] = await Promise.all([userMsgRef.once('value'), adminMsgRef.once('value')]);
 
@@ -421,8 +421,8 @@
             const chatMessages = document.getElementById('chatMessages');
             chatMessages.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading conversation...</div>';
 
-            const userMessagesRef = firebase.database().ref(`userMessages/${userId}`);
-            const adminMessagesRef = firebase.database().ref(`adminMessages/${userId}`);
+            const userMessagesRef = firebase.database().ref(`bb_userMessages/${userId}`);
+            const adminMessagesRef = firebase.database().ref(`bb_adminMessages/${userId}`);
 
             let allMessages = [];
             // Detach any previous listeners to prevent duplicates when switching users
@@ -477,7 +477,7 @@
             messageInput.style.height = 'auto';
 
             // NEW: Reference the admin's message thread for this user
-            const adminMessagesRef = firebase.database().ref(`adminMessages/${selectedUserId}`);
+            const adminMessagesRef = firebase.database().ref(`bb_adminMessages/${selectedUserId}`);
             
             const newMessage = {
                 message: messageText,

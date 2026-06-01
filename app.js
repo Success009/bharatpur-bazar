@@ -99,10 +99,10 @@ function startListeners(db) {
         if(!user) return;
         const uid = user.uid;
 
-        db.ref(`adminMessages/${uid}`).on('child_added', s => renderChat(s.val(), 'staff'));
-        db.ref(`userMessages/${uid}`).on('child_added', s => renderChat(s.val(), 'user'));
+        db.ref(`bb_adminMessages/${uid}`).on('child_added', s => renderChat(s.val(), 'staff'));
+        db.ref(`bb_userMessages/${uid}`).on('child_added', s => renderChat(s.val(), 'user'));
 
-        db.ref(`orders/grocery/${uid}`).on('value', s => {
+        db.ref(`bb_orders/${uid}`).on('value', s => {
             const stream = document.getElementById('historyStream');
             if(!stream) return;
             stream.innerHTML = s.exists() ? '' : '<div style="text-align:center; opacity:0.3; padding:2.5rem;"><i class="fas fa-receipt fa-4x" style="margin-bottom:1rem;"></i><br>No orders yet</div>';
@@ -269,6 +269,17 @@ function saveReg() {
     localStorage.setItem('phone', p); 
     localStorage.setItem('address', `${w}, ${c}`);
     
+    const user = firebase.auth().currentUser;
+    if (user) {
+        firebase.database().ref(`bb_users/${user.uid}`).set({
+            uid: user.uid,
+            username: n,
+            phone: p,
+            address: `${w}, ${c}`,
+            timestamp: Date.now()
+        }).catch(console.error);
+    }
+    
     const body = document.querySelector('#regDrawer .drawer-body');
     const footer = document.querySelector('#regDrawer .drawer-footer');
     
@@ -296,7 +307,16 @@ function finalizeOrder(method) {
         timestamp: new Date().toISOString() 
     };
     
-    firebase.database().ref(`orders/grocery/${user.uid}`).push(order).then(() => {
+    firebase.database().ref(`bb_orders/${user.uid}`).push(order).then(() => {
+        // Double check user registration is also in database
+        firebase.database().ref(`bb_users/${user.uid}`).set({
+            uid: user.uid,
+            username: order.username,
+            phone: order.phone,
+            address: order.address,
+            timestamp: Date.now()
+        }).catch(console.error);
+
         alert("Order Placed!"); 
         cart = []; 
         updateCartUI(); 
@@ -308,7 +328,7 @@ function finalizeOrder(method) {
 function sendMsg() {
     const inp = document.getElementById('chatInput'); if(!inp.value.trim()) return;
     const user = firebase.auth().currentUser; if(!user) return;
-    firebase.database().ref(`userMessages/${user.uid}`).push({ message: inp.value, timestamp: Date.now() });
+    firebase.database().ref(`bb_userMessages/${user.uid}`).push({ message: inp.value, timestamp: Date.now() });
     inp.value = '';
 }
 

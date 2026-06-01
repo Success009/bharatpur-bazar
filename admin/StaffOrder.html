@@ -243,7 +243,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
     <script src="admin-shared.js"></script>
     <script>
-        const ordersRef = firebase.database().ref('orders');
+        const ordersRef = firebase.database().ref('bb_orders');
         const menuRef = firebase.database().ref('menu');
         const notificationsRef = firebase.database().ref('notifications');
 
@@ -424,7 +424,7 @@
                 orderRef.once('value').then(snapshot => {
                     const order = snapshot.val();
                     if (order) {
-                        const totalOrdersRef = firebase.database().ref('totalorders');
+                        const totalOrdersRef = firebase.database().ref('bb_totalorders');
                         totalOrdersRef.child(orderId).set(order).then(() => {
                             orderRef.remove().then(() => {
                                 sendAdminMessage(userUid, `Your order #${orderId.slice(-6)} has been delivered. Thank you for choosing Bharatpur Bazar!`);
@@ -465,7 +465,7 @@
                 console.error('User UID or message is missing.');
                 return;
             }
-            const adminMessagesRef = firebase.database().ref(`adminMessages/${userUid}`);
+            const adminMessagesRef = firebase.database().ref(`bb_adminMessages/${userUid}`);
             adminMessagesRef.push({
                 message: message,
                 timestamp: firebase.database.ServerValue.TIMESTAMP,
